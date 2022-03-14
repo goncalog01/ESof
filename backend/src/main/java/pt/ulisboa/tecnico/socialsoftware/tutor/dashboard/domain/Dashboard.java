@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 
@@ -8,6 +10,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -29,6 +33,9 @@ public class Dashboard implements DomainEntity {
 
     @ManyToOne
     private Student student;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+    private Set<WeeklyScore> weeklyScores = new HashSet<>();
 
     public Dashboard() {
     }
@@ -93,6 +100,17 @@ public class Dashboard implements DomainEntity {
     }
 
     public void accept(Visitor visitor) {
+    }
+
+    public Set<WeeklyScore> getWeeklyScores() {
+        return weeklyScores;
+    }
+
+    public void addWeeklyScore(WeeklyScore weeklyScore) {
+        if (weeklyScores.stream().anyMatch(weeklyScore1 -> weeklyScore1.getWeek().isEqual(weeklyScore.getWeek()))) {
+            throw new TutorException(ErrorMessage.WEEKLY_SCORE_ALREADY_CREATED);
+        }
+        weeklyScores.add(weeklyScore);
     }
 
     @Override
