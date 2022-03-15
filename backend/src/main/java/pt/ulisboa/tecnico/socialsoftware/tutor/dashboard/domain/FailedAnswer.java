@@ -52,6 +52,15 @@ public class FailedAnswer implements DomainEntity {
         setDashboard(dashboard);
     }
 
+    public void remove() {
+        if (collected.isAfter(DateHandler.now().minusDays(5))) {
+            throw new TutorException(ErrorMessage.CANNOT_REMOVE_FAILED_ANSWER);
+        }
+
+        dashboard.getFailedAnswers().remove(this);
+        dashboard = null;
+    }
+    
     public Integer getId() {
         return id;
     }
