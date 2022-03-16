@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 
@@ -8,6 +10,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.persistence.*;
 
@@ -26,6 +30,9 @@ public class Dashboard implements DomainEntity {
 
     @ManyToOne
     private CourseExecution courseExecution;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+    private final List<FailedAnswer> failedAnswers = new ArrayList<>();
 
     @ManyToOne
     private Student student;
@@ -87,9 +94,20 @@ public class Dashboard implements DomainEntity {
         this.student.addDashboard(this);
     }
 
+    public List<FailedAnswer> getFailedAnswers() {
+        return failedAnswers;
+    }
+
     public void remove() {
         student.getDashboards().remove(this);
         student = null;
+    }
+
+    public void addFailedAnswer(FailedAnswer failedAnswer) {
+        if (failedAnswers.stream().anyMatch(failedAnswer1 -> failedAnswer1.getQuestionAnswer() == failedAnswer.getQuestionAnswer())) {
+            throw new TutorException(ErrorMessage.FAILED_ANSWER_ALREADY_CREATED);
+        }
+        failedAnswers.add(failedAnswer);
     }
 
     public void accept(Visitor visitor) {
