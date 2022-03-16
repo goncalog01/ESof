@@ -157,7 +157,7 @@ public enum ErrorMessage {
     DIFFICULT_QUESTION_ALREADY_CREATED("Difficult question already created"),
     CANNOT_CREATE_DIFFICULT_QUESTION("Cannot create difficult question"),
     CANNOT_REMOVE_DIFFICULT_QUESTION("Cannot remove difficult question");
-    
+
     public final String label;
     
     ErrorMessage(String label) {

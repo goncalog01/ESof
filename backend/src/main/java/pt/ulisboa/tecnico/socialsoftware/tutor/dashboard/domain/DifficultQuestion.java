@@ -3,9 +3,11 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameDifficulty;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
+
 
 import java.time.LocalDateTime;
 
@@ -30,6 +32,9 @@ public class DifficultQuestion implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
+    @OneToOne
+    private SameDifficulty sameDifficulty;
+
     public DifficultQuestion(){
     }
 
@@ -46,6 +51,22 @@ public class DifficultQuestion implements DomainEntity {
         setRemoved(false);
         setQuestion(question);
         setDashboard(dashboard);
+    }
+
+    public DifficultQuestion(Dashboard dashboard, Question question, int percentage, SameDifficulty sameDifficulty){
+        if (percentage < 0 || percentage > 24)
+            throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+
+        if (question.getCourse() != dashboard.getCourseExecution().getCourse()) {
+            throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+        }
+
+        setPercentage(percentage);
+        setRemovedDate(null);
+        setRemoved(false);
+        setQuestion(question);
+        setDashboard(dashboard);
+        setSameDifficulty(sameDifficulty);
     }
 
     public void remove() {
@@ -66,6 +87,10 @@ public class DifficultQuestion implements DomainEntity {
     public void setDashboard(Dashboard dashboard) {
         this.dashboard = dashboard;
         this.dashboard.addDifficultQuestion(this);
+    }
+
+    public void setSameDifficulty(SameDifficulty sameDifficulty) {
+        this.sameDifficulty = sameDifficulty;
     }
 
     public Integer getId() {

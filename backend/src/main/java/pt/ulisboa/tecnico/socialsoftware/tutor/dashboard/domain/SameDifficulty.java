@@ -1,0 +1,52 @@
+package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
+
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
+import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
+
+import java.util.Set;
+
+import javax.persistence.*;
+
+@Entity
+public class SameDifficulty implements DomainEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @OneToMany
+    private Set<DifficultQuestion> sameDifficultyQuestions;
+
+    @OneToOne
+    private DifficultQuestion difficultQuestion;
+
+    public SameDifficulty() {
+    }
+
+    public SameDifficulty(DifficultQuestion difficultQuestion, Set<DifficultQuestion> sameDifficultyQuestions) {
+        /* add verifications */
+        setDifficultQuestion(difficultQuestion);
+        setSameDifficultyQuestions(sameDifficultyQuestions);
+    }
+
+    public void setDifficultQuestion(DifficultQuestion difficultQuestion) {
+        this.difficultQuestion = difficultQuestion;
+    }
+
+    public void setSameDifficultyQuestions(Set<DifficultQuestion> sameDifficultyQuestions) {
+        this.sameDifficultyQuestions = sameDifficultyQuestions;
+    }
+
+
+    @Override
+    public void accept(Visitor visitor) {
+        // TODO Auto-generated method stub
+    }
+
+    /* add a toString */
+
+}
+
