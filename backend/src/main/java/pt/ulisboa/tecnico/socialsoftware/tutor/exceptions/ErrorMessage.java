@@ -151,9 +151,10 @@ public enum ErrorMessage {
     WRONG_FORMAT_ON_CSV_LINE("Csv File has a wrong format on line: %d"),
     
     FRAUD_SERVICE_NOT_AVAILABLE("Fraud service not available"),
-    FRAUD_SERVICE_QUIZ_TYPE_NOT_SUPPORTED("Fraud service only supports timed, one way, in class quizzes");
+    FRAUD_SERVICE_QUIZ_TYPE_NOT_SUPPORTED("Fraud service only supports timed, one way, in class quizzes"),
 
-    
+    FAILED_ANSWER_ALREADY_CREATED("Failed answer already created");
+        
     public final String label;
     
     ErrorMessage(String label) {
