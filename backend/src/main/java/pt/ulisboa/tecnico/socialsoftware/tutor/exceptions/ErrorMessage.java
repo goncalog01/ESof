@@ -153,8 +153,11 @@ public enum ErrorMessage {
     FRAUD_SERVICE_NOT_AVAILABLE("Fraud service not available"),
     FRAUD_SERVICE_QUIZ_TYPE_NOT_SUPPORTED("Fraud service only supports timed, one way, in class quizzes"),
 
-    FAILED_ANSWER_ALREADY_CREATED("Failed answer already created");
-        
+    FAILED_ANSWER_ALREADY_CREATED("Failed answer already created"),
+    FAILED_ANSWER_NOT_FOUND("Failed answer not found"),
+    CANNOT_CREATE_FAILED_ANSWER("Cannot create failed answer"),
+    CANNOT_REMOVE_FAILED_ANSWER("Cannot remove failed answer");
+    
     public final String label;
     
     ErrorMessage(String label) {

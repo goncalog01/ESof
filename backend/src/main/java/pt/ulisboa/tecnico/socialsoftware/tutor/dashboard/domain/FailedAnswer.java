@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -29,6 +30,9 @@ public class FailedAnswer implements DomainEntity {
 
     @ManyToOne
     private Dashboard dashboard;
+
+    @OneToMany
+    private SameQuestion sameQuestions;
 
     public FailedAnswer(){
     }
