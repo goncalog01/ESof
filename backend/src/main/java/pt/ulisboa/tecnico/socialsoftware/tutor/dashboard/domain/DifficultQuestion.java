@@ -35,7 +35,7 @@ public class DifficultQuestion implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne
+    @OneToOne(cascade=CascadeType.ALL, mappedBy="difficultQuestion", orphanRemoval=true)
     private SameDifficulty sameDifficulty;
 
     public DifficultQuestion(){
@@ -89,6 +89,8 @@ public class DifficultQuestion implements DomainEntity {
     public void setSameDifficulty(SameDifficulty sameDifficulty) {
         this.sameDifficulty = sameDifficulty;
     }
+
+    public SameDifficulty getSameDifficulty() { return sameDifficulty; }
 
     public Integer getId() {
         return id;

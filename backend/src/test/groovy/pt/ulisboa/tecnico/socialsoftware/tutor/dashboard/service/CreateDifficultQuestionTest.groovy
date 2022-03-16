@@ -62,6 +62,8 @@ class CreateDifficultQuestionTest extends SpockTest {
         result.isRemoved() == false
         result.getRemovedDate() == null
         result.getPercentage() == percentage
+        result.getSameDifficulty() != null
+        result.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
         and:
         def dashboard = dashboardRepository.getById(dashboard.getId())
         dashboard.getDifficultQuestions().contains(result)
