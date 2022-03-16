@@ -17,7 +17,7 @@ public class SameQuestion implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "failedAnswer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sameQuestions", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<FailedAnswer> sameQuestions;
 
     @OneToOne
