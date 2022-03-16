@@ -18,7 +18,7 @@ public class SameQuestion implements DomainEntity {
     private Integer id;
 
     @OneToMany(mappedBy = "sameQuestions", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<FailedAnswer> sameQuestions;
+    private Set<FailedAnswer> sameQuestions = new HashSet<>();
 
     @OneToOne
     private FailedAnswer failedAnswer;
