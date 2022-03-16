@@ -40,13 +40,22 @@ public class SameDifficulty implements DomainEntity {
         this.sameDifficultyQuestions = sameDifficultyQuestions;
     }
 
+    public void addSameDifficultyQuestion(DifficultQuestion difficultQuestion){
+        this.sameDifficultyQuestions.add(difficultQuestion);
+    }
 
     @Override
     public void accept(Visitor visitor) {
         // TODO Auto-generated method stub
     }
 
-    /* add a toString */
-
+    @Override
+    public String toString() {
+        return "SameDifficulty{" +
+                "id=" + id +
+                ", sameDifficultyQuestions=" + sameDifficultyQuestions +
+                ", difficultQuestion=" + difficultQuestion +
+                '}';
+    }
 }
 

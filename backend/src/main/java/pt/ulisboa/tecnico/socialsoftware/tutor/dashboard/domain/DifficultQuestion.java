@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
+import org.apache.commons.lang3.builder.Diff;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
@@ -10,6 +11,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -46,27 +49,21 @@ public class DifficultQuestion implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
         }
 
-        setPercentage(percentage);
-        setRemovedDate(null);
-        setRemoved(false);
-        setQuestion(question);
-        setDashboard(dashboard);
-    }
-
-    public DifficultQuestion(Dashboard dashboard, Question question, int percentage, SameDifficulty sameDifficulty){
-        if (percentage < 0 || percentage > 24)
-            throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
-
-        if (question.getCourse() != dashboard.getCourseExecution().getCourse()) {
-            throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+        Set<DifficultQuestion> sameDifficultyQuestions = new HashSet<>();
+        for (DifficultQuestion dq : dashboard.getDifficultQuestions()){
+            if (dq.getPercentage() == question.getDifficulty()){
+                sameDifficultyQuestions.add(dq);
+                dq.sameDifficulty.addSameDifficultyQuestion(this);
+            }
         }
 
+        setSameDifficulty(new SameDifficulty(this, sameDifficultyQuestions));
+
         setPercentage(percentage);
         setRemovedDate(null);
         setRemoved(false);
         setQuestion(question);
         setDashboard(dashboard);
-        setSameDifficulty(sameDifficulty);
     }
 
     public void remove() {
