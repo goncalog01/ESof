@@ -51,7 +51,7 @@ public class DifficultQuestion implements DomainEntity {
 
         Set<DifficultQuestion> sameDifficultyQuestions = new HashSet<>();
         for (DifficultQuestion dq : dashboard.getDifficultQuestions()){
-            if (dq.getPercentage() == question.getDifficulty()){
+            if (dq.getPercentage() == percentage){
                 sameDifficultyQuestions.add(dq);
                 dq.sameDifficulty.addSameDifficultyQuestion(this);
             }

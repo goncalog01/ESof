@@ -226,7 +226,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         }
 
         where:
-        numQuestions << [2, 5, 10, 20]
+        numQuestions << [2,10]
 
     }
 
