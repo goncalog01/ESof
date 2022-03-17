@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameDifficulty
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
@@ -72,6 +73,7 @@ class RemoveDifficultQuestionTest extends SpockTest {
         difficultQuestion.setPercentage(24)
         difficultQuestion.setRemovedDate(DateHandler.now().minusDays(daysSince))
         difficultQuestion.setRemoved(true)
+        difficultQuestion.setSameDifficulty(new SameDifficulty(difficultQuestion))
         difficultQuestionRepository.save(difficultQuestion)
 
         when:
@@ -96,6 +98,7 @@ class RemoveDifficultQuestionTest extends SpockTest {
         difficultQuestion.setPercentage(24)
         difficultQuestion.setRemovedDate(DateHandler.now().minusDays(daysSince))
         difficultQuestion.setRemoved(removed)
+        difficultQuestion.setSameDifficulty(new SameDifficulty(difficultQuestion))
         difficultQuestionRepository.save(difficultQuestion)
 
         when:
