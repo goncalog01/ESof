@@ -36,6 +36,10 @@ public class SameDifficulty implements DomainEntity {
         this.difficultQuestion = difficultQuestion;
     }
 
+    public DifficultQuestion getDifficultQuestion() {
+        return difficultQuestion;
+    }
+
     public void setSameDifficultyQuestions(Set<DifficultQuestion> sameDifficultyQuestions) {
         this.sameDifficultyQuestions = sameDifficultyQuestions;
     }

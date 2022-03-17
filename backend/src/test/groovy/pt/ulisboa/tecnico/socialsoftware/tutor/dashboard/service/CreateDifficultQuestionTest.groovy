@@ -64,6 +64,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         result.getPercentage() == percentage
         result.getSameDifficulty() != null
         result.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
+        result.getSameDifficulty().getDifficultQuestion().getId() == question.getId()
         and:
         def dashboard = dashboardRepository.getById(dashboard.getId())
         dashboard.getDifficultQuestions().contains(result)
@@ -225,7 +226,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         }
 
         where:
-        numQuestions << [2, 5, 10, 10000]
+        numQuestions << [2, 5, 10, 20]
 
     }
 
