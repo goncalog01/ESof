@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SamePercentage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.WeeklyScoreDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
@@ -47,6 +48,7 @@ public class WeeklyScoreService {
         LocalDate week = DateHandler.now().with(weekSunday).toLocalDate();
 
         WeeklyScore weeklyScore = new WeeklyScore(dashboard, week);
+
         weeklyScoreRepository.save(weeklyScore);
 
         return new WeeklyScoreDto(weeklyScore);
