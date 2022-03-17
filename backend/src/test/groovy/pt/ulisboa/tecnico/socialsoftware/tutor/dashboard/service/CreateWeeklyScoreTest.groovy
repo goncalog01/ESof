@@ -5,10 +5,15 @@ import org.springframework.boot.test.context.TestConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.BeanConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
+import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 import spock.lang.Unroll
+
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.DASHBOARD_NOT_FOUND
 
@@ -72,6 +77,28 @@ class CreateWeeklyScoreTest extends SpockTest {
         dashboardId || errorMessage
         null        || DASHBOARD_NOT_FOUND
         100         || DASHBOARD_NOT_FOUND
+    }
+
+    def "create two weekly scores with same percentageCorrect"() {
+        given:
+        def weeklyScore1 = new WeeklyScore()
+        weeklyScore1.setPercentageCorrect(50)
+        weeklyScore1.setDashboard(dashboard)
+        weeklyScore1.setWeek(DateHandler.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toLocalDate())
+        def weeklyScore2 = new WeeklyScore()
+        weeklyScore2.setPercentageCorrect(50)
+        weeklyScore2.setDashboard(dashboard)
+        weeklyScore2.setWeek(DateHandler.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toLocalDate())
+
+        when:
+        weeklyScoreRepository.save(weeklyScore1)
+        weeklyScoreRepository.save(weeklyScore2)
+
+        then:
+        def result1 = weeklyScoreRepository.findAll().get(0)
+        def result2 = weeklyScoreRepository.findAll().get(1)
+        result1.getSamePercentage().getSameWeeklyScores().isEmpty() == false
+        result2.getSamePercentage().getSameWeeklyScores().isEmpty() == false
     }
 
     @TestConfiguration

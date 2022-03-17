@@ -5,6 +5,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -25,7 +27,7 @@ public class WeeklyScore implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne
+    @OneToOne(cascade=CascadeType.ALL)
     private SamePercentage samePercentage;
 
     public WeeklyScore() {
@@ -34,9 +36,15 @@ public class WeeklyScore implements DomainEntity {
     public WeeklyScore(Dashboard dashboard, LocalDate week) {
         setWeek(week);
         setDashboard(dashboard);
-        setSamePercentage(new SamePercentage(this, dashboard.getWeeklyScores().
-                stream().filter(wScore -> wScore != this && wScore.getPercentageCorrect() == this.getPercentageCorrect())
-                .collect(Collectors.toSet())));
+        Set<WeeklyScore> sameWeeklyScores = new HashSet<>();
+        for (WeeklyScore ws : dashboard.getWeeklyScores()){
+            if (ws != this && ws.getPercentageCorrect() == this.getPercentageCorrect()){
+                sameWeeklyScores.add(ws);
+                ws.getSamePercentage().addSameWeeklyScore(this);
+            }
+        }
+
+        setSamePercentage(new SamePercentage(this, sameWeeklyScores));
     }
 
     public Integer getId() {

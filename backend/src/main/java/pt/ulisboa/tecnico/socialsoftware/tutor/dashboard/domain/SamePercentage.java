@@ -14,7 +14,8 @@ public class SamePercentage implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "same_percentage_id")
     private Set<WeeklyScore> sameWeeklyScores;
 
     @OneToOne
@@ -46,6 +47,10 @@ public class SamePercentage implements DomainEntity {
 
     public void setWeeklyScore(WeeklyScore weeklyScore) {
         this.weeklyScore = weeklyScore;
+    }
+
+    public void addSameWeeklyScore(WeeklyScore weeklyScore){
+        this.sameWeeklyScores.add(weeklyScore);
     }
 
     public void accept(Visitor visitor) {
