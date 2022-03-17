@@ -130,7 +130,7 @@ public class FailedAnswer implements DomainEntity {
         Question question1 = failedAnswer1.getQuestionAnswer().getQuizQuestion().getQuestion();
         Question question2 = failedAnswer2.getQuestionAnswer().getQuizQuestion().getQuestion();
         
-        return question1.equals(question2);
+        return question1.isEqual(question2);
     }
 
     @Override
