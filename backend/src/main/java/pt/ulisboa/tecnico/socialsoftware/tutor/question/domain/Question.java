@@ -334,6 +334,21 @@ public class Question implements DomainEntity {
         return this.questionDetails.getCorrectAnswerRepresentation();
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof Question)) {
+            return false;
+        }
+
+        Question question = (Question) o;
+        return question.getId() == this.getId();
+    }
+    
     @Override
     public String toString() {
         return "Question{" +

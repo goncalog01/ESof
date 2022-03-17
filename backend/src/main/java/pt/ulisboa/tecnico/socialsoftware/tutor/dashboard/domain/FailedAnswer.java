@@ -9,6 +9,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+
+import java.util.Set;
+import java.util.HashSet;
 
 import java.time.LocalDateTime;
 
@@ -31,8 +35,8 @@ public class FailedAnswer implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToMany
-    private SameQuestion sameQuestions;
+    @ManyToOne
+    private SameQuestion sameQuestion;
 
     public FailedAnswer(){
     }
@@ -48,6 +52,18 @@ public class FailedAnswer implements DomainEntity {
 
         if (!questionAnswer.getQuizAnswer().isCompleted() || questionAnswer.isCorrect()) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
+        }
+
+        // Create and update SameQuestion objects
+        Set<FailedAnswer> sameQuestions = new HashSet<>();
+        SameQuestion sameQuestion = new SameQuestion(this, sameQuestions);
+        setSameQuestion(sameQuestion);
+
+        for (FailedAnswer failedAnswer : dashboard.getFailedAnswers()) {
+            if (isSameQuestion(this, failedAnswer)) {
+                this.getSameQuestion().addToSameQuestion(failedAnswer);
+                failedAnswer.getSameQuestion().addToSameQuestion(this);
+            }
         }
 
         setCollected(collected);
@@ -100,6 +116,21 @@ public class FailedAnswer implements DomainEntity {
     public void setDashboard(Dashboard dashboard) {
         this.dashboard = dashboard;
         this.dashboard.addFailedAnswer(this);
+    }
+    
+    public void setSameQuestion(SameQuestion sameQuestion) {
+        this.sameQuestion = sameQuestion;
+    }
+
+    public SameQuestion getSameQuestion() {
+        return sameQuestion;
+    }
+
+    public boolean isSameQuestion(FailedAnswer failedAnswer1, FailedAnswer failedAnswer2) {
+        Question question1 = failedAnswer1.getQuestionAnswer().getQuizQuestion().getQuestion();
+        Question question2 = failedAnswer2.getQuestionAnswer().getQuizQuestion().getQuestion();
+        
+        return question1.equals(question2);
     }
 
     @Override

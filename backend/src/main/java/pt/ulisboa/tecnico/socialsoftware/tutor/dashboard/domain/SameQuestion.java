@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
 
 import java.util.Set;
+import java.util.HashSet;
 
 import javax.persistence.*;
 
@@ -17,8 +18,8 @@ public class SameQuestion implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "sameQuestions", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<FailedAnswer> sameQuestions = new HashSet<>();
+    @OneToMany(mappedBy = "sameQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<FailedAnswer> sameQuestion = new HashSet<>();
 
     @OneToOne
     private FailedAnswer failedAnswer;
@@ -26,26 +27,26 @@ public class SameQuestion implements DomainEntity {
     public SameQuestion() {
     }
 
-    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameQuestions) {
+    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameQuestion) {
         /* add verifications */
         setFailedAnswer(failedAnswer);
-        setSameQuestions(sameQuestions);
+        setSameQuestion(sameQuestion);
     }
 
     public void setFailedAnswer(FailedAnswer failedAnswer) {
         this.failedAnswer = failedAnswer;
     }
 
-    public void setSameQuestions(Set<FailedAnswer> sameQuestions) {
-        this.sameQuestions = sameQuestions;
+    public void setSameQuestion(Set<FailedAnswer> sameQuestion) {
+        this.sameQuestion = sameQuestion;
     }
 
-    public Set<FailedAnswer> getSameQuestions() {
-        return sameQuestions;
+    public Set<FailedAnswer> getSameQuestion() {
+        return sameQuestion;
     }
 
-    public void addSameQuestions(FailedAnswer failedAnswer){
-        this.sameQuestions.add(failedAnswer);
+    public void addToSameQuestion(FailedAnswer failedAnswer){
+        this.sameQuestion.add(failedAnswer);
     }
 
     @Override
@@ -57,7 +58,7 @@ public class SameQuestion implements DomainEntity {
     public String toString() {
         return "SameQuestion{" +
                 "id=" + id +
-                ", sameQuestions=" + sameQuestions +
+                ", sameQuestion=" + sameQuestion +
                 ", failedAnswer=" + failedAnswer +
                 '}';
     }
