@@ -18,6 +18,7 @@ public class SameDifficulty implements DomainEntity {
     private Integer id;
 
     @OneToMany
+    @JoinColumn(name = "same_difficulty_id")
     private Set<DifficultQuestion> sameDifficultyQuestions;
 
     @OneToOne
