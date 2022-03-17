@@ -18,8 +18,9 @@ public class SameQuestion implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "sameQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<FailedAnswer> sameQuestion = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "same_question_id")
+    private Set<FailedAnswer> sameQuestions = new HashSet<>();
 
     @OneToOne
     private FailedAnswer failedAnswer;
@@ -27,26 +28,26 @@ public class SameQuestion implements DomainEntity {
     public SameQuestion() {
     }
 
-    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameQuestion) {
+    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameQuestions) {
         /* add verifications */
         setFailedAnswer(failedAnswer);
-        setSameQuestion(sameQuestion);
+        setSameQuestions(sameQuestions);
     }
 
     public void setFailedAnswer(FailedAnswer failedAnswer) {
         this.failedAnswer = failedAnswer;
     }
 
-    public void setSameQuestion(Set<FailedAnswer> sameQuestion) {
-        this.sameQuestion = sameQuestion;
+    public void setSameQuestions(Set<FailedAnswer> sameQuestion) {
+        this.sameQuestions = sameQuestion;
     }
 
-    public Set<FailedAnswer> getSameQuestion() {
-        return sameQuestion;
+    public Set<FailedAnswer> getSameQuestions() {
+        return sameQuestions;
     }
 
-    public void addToSameQuestion(FailedAnswer failedAnswer){
-        this.sameQuestion.add(failedAnswer);
+    public void addSameQuestion(FailedAnswer failedAnswer){
+        this.sameQuestions.add(failedAnswer);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class SameQuestion implements DomainEntity {
     public String toString() {
         return "SameQuestion{" +
                 "id=" + id +
-                ", sameQuestion=" + sameQuestion +
+                ", sameQuestion=" + sameQuestions +
                 ", failedAnswer=" + failedAnswer +
                 '}';
     }

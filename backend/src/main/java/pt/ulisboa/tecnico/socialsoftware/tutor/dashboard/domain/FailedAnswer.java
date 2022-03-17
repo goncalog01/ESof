@@ -35,13 +35,14 @@ public class FailedAnswer implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @ManyToOne
+    @OneToOne(cascade=CascadeType.ALL, mappedBy="failedAnswer", orphanRemoval=true)
     private SameQuestion sameQuestion;
 
     public FailedAnswer(){
     }
 
     public FailedAnswer(Dashboard dashboard, QuestionAnswer questionAnswer, LocalDateTime collected){
+        System.out.println("I got here 0."); 
         if (dashboard.getCourseExecution() != questionAnswer.getQuizAnswer().getQuiz().getCourseExecution()) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
         }
@@ -54,18 +55,21 @@ public class FailedAnswer implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
         }
 
-        // Create and update SameQuestion objects
+        System.out.println("I got here 1.");  
         Set<FailedAnswer> sameQuestions = new HashSet<>();
-        SameQuestion sameQuestion = new SameQuestion(this, sameQuestions);
-        setSameQuestion(sameQuestion);
-
-        for (FailedAnswer failedAnswer : dashboard.getFailedAnswers()) {
-            if (isSameQuestion(this, failedAnswer)) {
-                this.getSameQuestion().addToSameQuestion(failedAnswer);
-                failedAnswer.getSameQuestion().addToSameQuestion(this);
+        for (FailedAnswer fa : dashboard.getFailedAnswers()) {
+            Integer q1Id = questionAnswer.getQuizQuestion().getQuestion().getId();
+            Integer q2Id = fa.getQuestionAnswer().getQuizQuestion().getQuestion().getId();
+            if (q1Id == q2Id) {
+                sameQuestions.add(fa);
+                fa.sameQuestion.addSameQuestion(this);
             }
         }
 
+        System.out.println("I got here 2."); 
+        setSameQuestion(new SameQuestion(this, sameQuestions));
+
+        System.out.println("I got here 3."); 
         setCollected(collected);
         setAnswered(questionAnswer.isAnswered());
         setQuestionAnswer(questionAnswer);
@@ -126,7 +130,7 @@ public class FailedAnswer implements DomainEntity {
         return sameQuestion;
     }
 
-    public boolean isSameQuestion(FailedAnswer failedAnswer1, FailedAnswer failedAnswer2) {
+    private boolean isSameQuestion(FailedAnswer failedAnswer1, FailedAnswer failedAnswer2) {
         Question question1 = failedAnswer1.getQuestionAnswer().getQuizQuestion().getQuestion();
         Question question2 = failedAnswer2.getQuestionAnswer().getQuizQuestion().getQuestion();
         

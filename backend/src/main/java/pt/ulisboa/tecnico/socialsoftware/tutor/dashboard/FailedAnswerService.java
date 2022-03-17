@@ -56,7 +56,7 @@ public class FailedAnswerService {
         QuestionAnswer questionAnswer = questionAnswerRepository.findById(questionAnswerId).orElseThrow(() -> new TutorException(QUESTION_ANSWER_NOT_FOUND, questionAnswerId));
 
         FailedAnswer failedAnswer = new FailedAnswer(dashboard, questionAnswer, DateHandler.now());
-
+        
         failedAnswerRepository.save(failedAnswer);
 
         return new FailedAnswerDto(failedAnswer);

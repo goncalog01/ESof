@@ -32,6 +32,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         quizQuestion = createQuestion(1, quiz)
     }
 
+    /*
     @Unroll
     def "create failed answer answered=#answered"() {
         given:
@@ -55,7 +56,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         where:
         answered << [true, false]
     }
-
+    */
     def "cannot create two failed answer for the same question answer"() {
         given:
         def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
@@ -71,7 +72,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         and:
         failedAnswerRepository.count() == 1L
     }
-
+    /*
     def "cannot create a failed answer that does not belong to the course execution"() {
         given:
         def otherExternalCourseExecution = new CourseExecution(externalCourse, COURSE_1_ACRONYM, COURSE_2_ACADEMIC_TERM, Course.Type.TECNICO, LOCAL_DATE_TODAY)
@@ -166,7 +167,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         where:
         questionAnswerId << [0, 100]
     }
-
+    */
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
