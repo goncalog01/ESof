@@ -27,7 +27,7 @@ public class WeeklyScore implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade=CascadeType.ALL, orphanRemoval = true)
     private SamePercentage samePercentage;
 
     public WeeklyScore() {
@@ -100,6 +100,10 @@ public class WeeklyScore implements DomainEntity {
     }
 
     public void remove() {
+        for (WeeklyScore ws: getSamePercentage().getSameWeeklyScores()) {
+            ws.getSamePercentage().getSameWeeklyScores().remove(this);
+        }
+        this.samePercentage = null;
         this.dashboard.getWeeklyScores().remove(this);
         this.dashboard = null;
     }

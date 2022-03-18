@@ -36,9 +36,9 @@ public class Dashboard implements DomainEntity {
     private Student student;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
-
     private Set<WeeklyScore> weeklyScores = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
     private Set<DifficultQuestion> difficultQuestions = new HashSet<>();
 
     public Dashboard() {

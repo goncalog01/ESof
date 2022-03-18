@@ -133,6 +133,7 @@ class BeanConfiguration {
     @Bean
     WeeklyScoreService weeklyScoreService() {
         return new WeeklyScoreService()
+    }
       
     @Bean
     DifficultQuestionService difficultQuestionService() {
