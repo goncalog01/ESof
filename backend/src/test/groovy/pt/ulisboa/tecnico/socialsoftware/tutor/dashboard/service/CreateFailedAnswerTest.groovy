@@ -214,6 +214,26 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
 
     }
 
+    def "create two failed answers with different questions"() {
+        given:
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        and:
+        def quiz2 = createQuiz(2)
+        def question = createQuestion(2, quiz2)
+        def questionAnswer2 = answerQuiz(true, false, true, question, quiz2)
+
+        when:
+        failedAnswerService.createFailedAnswer(dashboard.getId(), questionAnswer.getId())
+        failedAnswerService.createFailedAnswer(dashboard.getId(), questionAnswer2.getId())
+
+        then:
+        failedAnswerRepository.count() == 2L
+        def result1 = failedAnswerRepository.findAll().get(0)
+        def result2 = failedAnswerRepository.findAll().get(1)
+        result1.getSameQuestion().getSameQuestions().isEmpty() == true
+        result2.getSameQuestion().getSameQuestions().isEmpty() == true
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
