@@ -100,6 +100,10 @@ public class WeeklyScore implements DomainEntity {
     }
 
     public void remove() {
+        for (WeeklyScore ws: getSamePercentage().getSameWeeklyScores()) {
+            ws.getSamePercentage().getSameWeeklyScores().remove(this);
+        }
+        this.samePercentage = null;
         this.dashboard.getWeeklyScores().remove(this);
         this.dashboard = null;
     }
