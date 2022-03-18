@@ -10,12 +10,16 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
 @Entity
+@Table(name = "dashboard")
 public class Dashboard implements DomainEntity {
 
     @Id
@@ -36,6 +40,12 @@ public class Dashboard implements DomainEntity {
 
     @ManyToOne
     private Student student;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+    private Set<WeeklyScore> weeklyScores = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+    private Set<DifficultQuestion> difficultQuestions = new HashSet<>();
 
     public Dashboard() {
     }
@@ -94,8 +104,17 @@ public class Dashboard implements DomainEntity {
         this.student.addDashboard(this);
     }
 
+
     public List<FailedAnswer> getFailedAnswers() {
         return failedAnswers;
+    }
+  
+    public Set<DifficultQuestion> getDifficultQuestions() {
+        return difficultQuestions;
+    }
+
+    public void setDifficultQuestions(Set<DifficultQuestion> difficultQuestions) {
+        this.difficultQuestions = difficultQuestions;
     }
 
     public void remove() {
@@ -109,8 +128,27 @@ public class Dashboard implements DomainEntity {
         }
         failedAnswers.add(failedAnswer);
     }
+  
+    public void addDifficultQuestion(DifficultQuestion difficultQuestion) {
+        if (difficultQuestions.stream()
+                .anyMatch(difficultQuestion1 -> difficultQuestion1.getQuestion() == difficultQuestion.getQuestion())) {
+            throw new TutorException(ErrorMessage.DIFFICULT_QUESTION_ALREADY_CREATED);
+        }
+        difficultQuestions.add(difficultQuestion);
+    }
 
     public void accept(Visitor visitor) {
+    }
+
+    public Set<WeeklyScore> getWeeklyScores() {
+        return weeklyScores;
+    }
+
+    public void addWeeklyScore(WeeklyScore weeklyScore) {
+        if (weeklyScores.stream().anyMatch(weeklyScore1 -> weeklyScore1.getWeek().isEqual(weeklyScore.getWeek()))) {
+            throw new TutorException(ErrorMessage.WEEKLY_SCORE_ALREADY_CREATED);
+        }
+        weeklyScores.add(weeklyScore);
     }
 
     @Override
