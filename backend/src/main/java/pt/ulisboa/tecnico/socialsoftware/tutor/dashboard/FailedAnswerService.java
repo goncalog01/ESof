@@ -61,4 +61,12 @@ public class FailedAnswerService {
 
         return new FailedAnswerDto(failedAnswer);
     }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void removeFailedAnswer(int failedAnswerId) {
+        FailedAnswer toRemove = failedAnswerRepository.findById(failedAnswerId).orElseThrow(() -> new TutorException(ErrorMessage.FAILED_ANSWER_NOT_FOUND, failedAnswerId));
+        toRemove.remove();
+        failedAnswerRepository.delete(toRemove);
+    }
+    
 }
