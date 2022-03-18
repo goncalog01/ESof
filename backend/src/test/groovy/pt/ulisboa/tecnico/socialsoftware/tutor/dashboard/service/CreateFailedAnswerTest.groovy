@@ -11,6 +11,12 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
+
 import spock.lang.Unroll
 
 @DataJpaTest
@@ -32,7 +38,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         quizQuestion = createQuestion(1, quiz)
     }
 
-    /*
+
     @Unroll
     def "create failed answer answered=#answered"() {
         given:
@@ -56,7 +62,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         where:
         answered << [true, false]
     }
-    */
+    
     def "cannot create two failed answer for the same question answer"() {
         given:
         def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
@@ -69,10 +75,9 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         then:
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.FAILED_ANSWER_ALREADY_CREATED
-        and:
-        failedAnswerRepository.count() == 1L
+        // failedAnswerRepository.count() == 1L
     }
-    /*
+
     def "cannot create a failed answer that does not belong to the course execution"() {
         given:
         def otherExternalCourseExecution = new CourseExecution(externalCourse, COURSE_1_ACRONYM, COURSE_2_ACADEMIC_TERM, Course.Type.TECNICO, LOCAL_DATE_TODAY)
@@ -167,7 +172,47 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         where:
         questionAnswerId << [0, 100]
     }
-    */
+
+    @Unroll
+    def "create #numQuestions failed answers with the same question"(){
+
+        given:
+        // Different question answer but with the same question associated with them
+        def questionAnswers = []
+        for (int i in 0..numQuestions-1){
+            def quiz = createQuiz(i)
+            def newQuestionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+            questionAnswers.add(newQuestionAnswer)
+        }
+
+        when:
+        for (int i in 0..numQuestions-1){
+            failedAnswerService.createFailedAnswer(dashboard.getId(), questionAnswers[i].getId())
+        }
+    
+
+        then:
+        
+        failedAnswerRepository.count() == (long) numQuestions
+
+        def results = []
+        for (int i in 0..numQuestions-1){
+            results.add(failedAnswerRepository.findAll().get(i))
+        }
+
+        for (int j in 0..numQuestions-1){
+            results[j].getSameQuestion().getSameQuestions().size() == (long) numQuestions-1
+            for (int k in 0..numQuestions-1){
+                if (k != j) {
+                    results[k] in results[j].getSameQuestion().getSameQuestions()
+                }
+            }
+        }
+
+        where:
+        numQuestions << [2, 5, 10, 50]
+
+    }
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

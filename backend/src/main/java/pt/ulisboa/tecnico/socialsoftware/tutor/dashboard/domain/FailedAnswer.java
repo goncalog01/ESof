@@ -42,7 +42,6 @@ public class FailedAnswer implements DomainEntity {
     }
 
     public FailedAnswer(Dashboard dashboard, QuestionAnswer questionAnswer, LocalDateTime collected){
-        System.out.println("I got here 0."); 
         if (dashboard.getCourseExecution() != questionAnswer.getQuizAnswer().getQuiz().getCourseExecution()) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
         }
@@ -55,7 +54,6 @@ public class FailedAnswer implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
         }
 
-        System.out.println("I got here 1.");  
         Set<FailedAnswer> sameQuestions = new HashSet<>();
         for (FailedAnswer fa : dashboard.getFailedAnswers()) {
             Integer q1Id = questionAnswer.getQuizQuestion().getQuestion().getId();
@@ -66,10 +64,8 @@ public class FailedAnswer implements DomainEntity {
             }
         }
 
-        System.out.println("I got here 2."); 
         setSameQuestion(new SameQuestion(this, sameQuestions));
 
-        System.out.println("I got here 3."); 
         setCollected(collected);
         setAnswered(questionAnswer.isAnswered());
         setQuestionAnswer(questionAnswer);
