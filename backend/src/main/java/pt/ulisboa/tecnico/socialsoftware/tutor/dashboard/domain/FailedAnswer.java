@@ -117,13 +117,6 @@ public class FailedAnswer implements DomainEntity {
         return sameQuestion;
     }
 
-    private boolean isSameQuestion(FailedAnswer failedAnswer1, FailedAnswer failedAnswer2) {
-        Question question1 = failedAnswer1.getQuestionAnswer().getQuizQuestion().getQuestion();
-        Question question2 = failedAnswer2.getQuestionAnswer().getQuizQuestion().getQuestion();
-        
-        return question1.isEqual(question2);
-    }
-
     @Override
     public void accept(Visitor visitor) {
         // TODO Auto-generated method stub
