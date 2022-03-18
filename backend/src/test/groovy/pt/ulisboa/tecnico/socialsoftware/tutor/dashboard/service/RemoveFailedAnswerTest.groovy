@@ -5,6 +5,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.BeanConfiguration
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
@@ -96,7 +97,8 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
         for (int i in 0..numQuestions-1){
             def quiz1 = createQuiz(1)
             def questionAnswer1 = answerQuiz(true, false, true, quizQuestion, quiz1)
-            createFailedAnswer(questionAnswer1, DateHandler.now().minusDays(5))
+            def failedAnswer = new FailedAnswer(dashboard, questionAnswer1, DateHandler.now().minusDays(5))
+            failedAnswerRepository.save(failedAnswer)
         }
 
         when:
@@ -117,7 +119,8 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
         }
 
         where:
-        numQuestions << [2, 5, 10, 50]
+        numQuestions << [5]
+        // numQuestions << [2, 5, 10, 50]
 
     }
 
