@@ -201,10 +201,10 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         }
 
         for (int j in 0..numQuestions-1){
-            results[j].getSameQuestion().getSameQuestions().size() == (long) numQuestions-1
+            results[j].getSameQuestion().getSameFailedAnswers().size() == (long) numQuestions-1
             for (int k in 0..numQuestions-1){
                 if (k != j) {
-                    results[k] in results[j].getSameQuestion().getSameQuestions()
+                    results[k] in results[j].getSameQuestion().getSameFailedAnswers()
                 }
             }
         }
@@ -230,8 +230,8 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         failedAnswerRepository.count() == 2L
         def result1 = failedAnswerRepository.findAll().get(0)
         def result2 = failedAnswerRepository.findAll().get(1)
-        result1.getSameQuestion().getSameQuestions().isEmpty() == true
-        result2.getSameQuestion().getSameQuestions().isEmpty() == true
+        result1.getSameQuestion().getSameFailedAnswers().isEmpty() == true
+        result2.getSameQuestion().getSameFailedAnswers().isEmpty() == true
     }
 
     def "create one failed answer and right answer"() {
@@ -247,7 +247,7 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         then:
         failedAnswerRepository.count() == 1L
         def result = failedAnswerRepository.findAll().get(0)
-        result.getSameQuestion().getSameQuestions().isEmpty() == true
+        result.getSameQuestion().getSameFailedAnswers().isEmpty() == true
     }
 
     @TestConfiguration
