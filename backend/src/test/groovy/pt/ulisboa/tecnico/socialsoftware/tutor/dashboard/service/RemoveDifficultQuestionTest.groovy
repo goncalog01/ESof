@@ -132,6 +132,65 @@ class RemoveDifficultQuestionTest extends SpockTest {
         100 || DIFFICULT_QUESTION_NOT_FOUND
     }
 
+    @Unroll
+    def "delete a question from a set of #numQuestions difficult questions with the same percentage"(){
+
+        given:
+        def difficultQuestions = []
+        def questions = []
+        for (int i in 0..numQuestions - 1){
+            questions[i] = new Question()
+            questions[i].setTitle(QUESTION_1_TITLE)
+            questions[i].setContent(QUESTION_1_CONTENT)
+            questions[i].setStatus(Question.Status.AVAILABLE)
+            questions[i].setNumberOfAnswers(2 * (i + 1))
+            questions[i].setNumberOfCorrect(i + 1)
+            questions[i].setCourse(externalCourse)
+            questions[i].setQuestionDetails(new MultipleChoiceQuestion())
+            questionRepository.save(questions[i])
+
+            difficultQuestions[i] = new DifficultQuestion()
+            difficultQuestions[i].setQuestion(questions[i])
+            difficultQuestions[i].setDashboard(dashboard)
+            difficultQuestions[i].setPercentage(24)
+            difficultQuestions[i].setRemovedDate(DateHandler.now().minusDays(0))
+            difficultQuestions[i].setRemoved(true)
+            difficultQuestions[i].setSameDifficulty(new SameDifficulty(difficultQuestions[i]))
+            difficultQuestionRepository.save(difficultQuestions[i])
+        }
+        for (int i in 0..numQuestions - 1) {
+            for (int j in 0..numQuestions - 1) {
+                if (i != j) {
+                    difficultQuestions[i].getSameDifficulty().addSameDifficultyQuestion(difficultQuestions[j])
+                }
+            }
+        }
+
+        when:
+        difficultQuestionService.removeDifficultQuestion(difficultQuestions[0].getId())
+
+        then:
+        difficultQuestionRepository.count() == (long) (numQuestions - 1)
+        def results = []
+        for (int i in 0..numQuestions - 2){
+            results.add(difficultQuestionRepository.findAll().get(i))
+        }
+
+        for (int i in 0..numQuestions - 2){
+            results[i].getSameDifficulty().getSameDifficultyQuestions().size() == (long) (numQuestions - 2)
+            for (int j in 0..numQuestions - 2) {
+                if (i != j) {
+                    results[j] in results[i].getSameDifficulty().getSameDifficultyQuestions()
+                }
+            }
+            !(difficultQuestions[0] in results[i].getSameDifficulty().getSameDifficultyQuestions())
+        }
+
+        where:
+        numQuestions << [2, 10]
+
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
