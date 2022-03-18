@@ -76,7 +76,10 @@ public class FailedAnswer implements DomainEntity {
         if (collected.isAfter(DateHandler.now().minusDays(5))) {
                 throw new TutorException(ErrorMessage.CANNOT_REMOVE_FAILED_ANSWER);
         }
-
+        for (SameQuestion sq : getSameQuestion().getSameQuestions()) {
+            sq.getSameQuestion().getSameQuestions().remove(this);
+        }
+        this.sameQuestion = null;
         dashboard.getFailedAnswers().remove(this);
         dashboard = null;
     }
