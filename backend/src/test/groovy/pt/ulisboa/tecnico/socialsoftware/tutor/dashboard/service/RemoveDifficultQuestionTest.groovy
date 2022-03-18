@@ -137,20 +137,19 @@ class RemoveDifficultQuestionTest extends SpockTest {
 
         given:
         def difficultQuestions = []
-        def questions = []
         for (int i in 0..numQuestions - 1){
-            questions[i] = new Question()
-            questions[i].setTitle(QUESTION_1_TITLE)
-            questions[i].setContent(QUESTION_1_CONTENT)
-            questions[i].setStatus(Question.Status.AVAILABLE)
-            questions[i].setNumberOfAnswers(2 * (i + 1))
-            questions[i].setNumberOfCorrect(i + 1)
-            questions[i].setCourse(externalCourse)
-            questions[i].setQuestionDetails(new MultipleChoiceQuestion())
-            questionRepository.save(questions[i])
+            def question = new Question()
+            question.setTitle(QUESTION_1_TITLE)
+            question.setContent(QUESTION_1_CONTENT)
+            question.setStatus(Question.Status.AVAILABLE)
+            question.setNumberOfAnswers(2 * (i + 1))
+            question.setNumberOfCorrect(i + 1)
+            question.setCourse(externalCourse)
+            question.setQuestionDetails(new MultipleChoiceQuestion())
+            questionRepository.save(question)
 
             difficultQuestions[i] = new DifficultQuestion()
-            difficultQuestions[i].setQuestion(questions[i])
+            difficultQuestions[i].setQuestion(question)
             difficultQuestions[i].setDashboard(dashboard)
             difficultQuestions[i].setPercentage(24)
             difficultQuestions[i].setRemovedDate(DateHandler.now().minusDays(0))

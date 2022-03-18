@@ -181,7 +181,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         def result1 = difficultQuestionRepository.findAll().get(0)
         def result2 = difficultQuestionRepository.findAll().get(1)
         result1.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-        result1.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
+        result2.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
     }
 
     @Unroll
@@ -226,7 +226,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         }
 
         where:
-        numQuestions << [2,10]
+        numQuestions << [2, 10]
 
     }
 
