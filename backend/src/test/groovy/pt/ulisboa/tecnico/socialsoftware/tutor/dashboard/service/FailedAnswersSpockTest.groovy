@@ -11,8 +11,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
-
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion
 import java.time.LocalDateTime
+import java.util.HashSet
 
 class FailedAnswersSpockTest extends SpockTest {
 
@@ -91,6 +92,7 @@ class FailedAnswersSpockTest extends SpockTest {
 
     def createFailedAnswer(questionAnswer, collected) {
         def failedAnswer = new FailedAnswer()
+        failedAnswer.setSameQuestion(new SameQuestion(failedAnswer, new HashSet<>()))
         failedAnswer.setQuestionAnswer(questionAnswer)
         failedAnswer.setAnswered(questionAnswer.isAnswered())
         failedAnswer.setCollected(collected)
