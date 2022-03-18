@@ -119,8 +119,7 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
         }
 
         where:
-        numQuestions << [5]
-        // numQuestions << [2, 5, 10, 50]
+        numQuestions << [2, 5, 10, 50]
 
     }
 
