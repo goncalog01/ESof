@@ -20,7 +20,7 @@ public class SameQuestion implements DomainEntity {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "same_question_id")
-    private Set<FailedAnswer> sameQuestions = new HashSet<>();
+    private Set<FailedAnswer> sameFailedAnswers;
 
     @OneToOne
     private FailedAnswer failedAnswer;
@@ -28,26 +28,26 @@ public class SameQuestion implements DomainEntity {
     public SameQuestion() {
     }
 
-    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameQuestions) {
+    public SameQuestion(FailedAnswer failedAnswer, Set<FailedAnswer> sameFailedAnswers) {
         /* add verifications */
         setFailedAnswer(failedAnswer);
-        setSameQuestions(sameQuestions);
+        setSameFailedAnswers(sameFailedAnswers);
     }
 
     public void setFailedAnswer(FailedAnswer failedAnswer) {
         this.failedAnswer = failedAnswer;
     }
 
-    public void setSameQuestions(Set<FailedAnswer> sameQuestion) {
-        this.sameQuestions = sameQuestion;
+    public void setSameFailedAnswers(Set<FailedAnswer> sameFailedAnswers) {
+        this.sameFailedAnswers = sameFailedAnswers;
     }
 
-    public Set<FailedAnswer> getSameQuestions() {
-        return sameQuestions;
+    public Set<FailedAnswer> getSameFailedAnswers() {
+        return sameFailedAnswers;
     }
 
     public void addSameQuestion(FailedAnswer failedAnswer){
-        this.sameQuestions.add(failedAnswer);
+        this.sameFailedAnswers.add(failedAnswer);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SameQuestion implements DomainEntity {
     public String toString() {
         return "SameQuestion{" +
                 "id=" + id +
-                ", sameQuestion=" + sameQuestions +
+                ", sameFailedAnswers=" + sameFailedAnswers +
                 ", failedAnswer=" + failedAnswer +
                 '}';
     }
