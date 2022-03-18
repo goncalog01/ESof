@@ -13,6 +13,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 import spock.lang.Unroll
 
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.DASHBOARD_NOT_FOUND
@@ -81,14 +82,10 @@ class CreateWeeklyScoreTest extends SpockTest {
 
     def "create two weekly scores with same percentageCorrect"() {
         given:
-        def weeklyScore1 = new WeeklyScore()
+        def weeklyScore1 = new WeeklyScore(dashboard, LocalDate.of(2021, 12, 23))
         weeklyScore1.setPercentageCorrect(50)
-        weeklyScore1.setDashboard(dashboard)
-        weeklyScore1.setWeek(DateHandler.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toLocalDate())
-        def weeklyScore2 = new WeeklyScore()
+        def weeklyScore2 = new WeeklyScore(dashboard, LocalDate.of(2021, 11, 23))
         weeklyScore2.setPercentageCorrect(50)
-        weeklyScore2.setDashboard(dashboard)
-        weeklyScore2.setWeek(DateHandler.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toLocalDate())
 
         when:
         weeklyScoreRepository.save(weeklyScore1)
@@ -97,8 +94,28 @@ class CreateWeeklyScoreTest extends SpockTest {
         then:
         def result1 = weeklyScoreRepository.findAll().get(0)
         def result2 = weeklyScoreRepository.findAll().get(1)
-        result1.getSamePercentage().getSameWeeklyScores().isEmpty() == false
-        result2.getSamePercentage().getSameWeeklyScores().isEmpty() == false
+        !result1.getSamePercentage().getSameWeeklyScores().isEmpty()
+        !result2.getSamePercentage().getSameWeeklyScores().isEmpty()
+    }
+
+    def "create two weekly scores with different percentageCorrect"() {
+
+        given:
+        def weeklyScore1 = new WeeklyScore(dashboard, LocalDate.of(1973, 10, 24))
+        def weeklyScore2 = new WeeklyScore(dashboard, LocalDate.of(1973, 10, 10))
+        weeklyScore1.setPercentageCorrect(30)
+        weeklyScore2.setPercentageCorrect(40)
+
+        when:
+        weeklyScoreRepository.save(weeklyScore1)
+        weeklyScoreRepository.save(weeklyScore2)
+
+        then:
+        def result1 = weeklyScoreRepository.findAll().get(0)
+        def result2 = weeklyScoreRepository.findAll().get(1)
+        result1.getSamePercentage().getSameWeeklyScores().isEmpty()
+        result2.getSamePercentage().getSameWeeklyScores().isEmpty()
+
     }
 
     @TestConfiguration
