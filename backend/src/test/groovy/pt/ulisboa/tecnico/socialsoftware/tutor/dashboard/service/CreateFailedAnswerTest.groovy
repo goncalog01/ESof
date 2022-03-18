@@ -234,6 +234,22 @@ class CreateFailedAnswerTest extends FailedAnswersSpockTest {
         result2.getSameQuestion().getSameQuestions().isEmpty() == true
     }
 
+    def "create one failed answer and right answer"() {
+        given:
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        def quiz2 = createQuiz(2)
+        def question = createQuestion(2, quiz2)
+        def questionAnswer2 = answerQuiz(true, true, true, quizQuestion, quiz2)
+
+        when:
+        failedAnswerService.createFailedAnswer(dashboard.getId(), questionAnswer.getId())
+
+        then:
+        failedAnswerRepository.count() == 1L
+        def result = failedAnswerRepository.findAll().get(0)
+        result.getSameQuestion().getSameQuestions().isEmpty() == true
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
