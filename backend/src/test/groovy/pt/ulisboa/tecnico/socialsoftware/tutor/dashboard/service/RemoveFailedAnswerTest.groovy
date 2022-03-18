@@ -86,7 +86,7 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
     }
 
     @Unroll
-    def "remove one failed anwer from a set of failed answers"(){
+    def "remove one failed answer from a set of failed answers"(){
 
         given:
         def quiz = createQuiz(1)
