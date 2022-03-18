@@ -135,7 +135,8 @@ class BeanConfiguration {
     FailedAnswerService failedAnswerService() {
         return new FailedAnswerService()
     }
-  
+    
+    @Bean
     WeeklyScoreService weeklyScoreService() {
         return new WeeklyScoreService()
     }

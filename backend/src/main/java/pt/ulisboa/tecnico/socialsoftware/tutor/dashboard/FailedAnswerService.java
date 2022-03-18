@@ -12,10 +12,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
-// import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion;
-//import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository;
@@ -61,12 +61,4 @@ public class FailedAnswerService {
 
         return new FailedAnswerDto(failedAnswer);
     }
-
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void removeFailedAnswer(int failedAnswerId) {
-        FailedAnswer toRemove = failedAnswerRepository.findById(failedAnswerId).orElseThrow(() -> new TutorException(ErrorMessage.FAILED_ANSWER_NOT_FOUND, failedAnswerId));
-        toRemove.remove();
-        failedAnswerRepository.delete(toRemove);
-    }
-    
 }
