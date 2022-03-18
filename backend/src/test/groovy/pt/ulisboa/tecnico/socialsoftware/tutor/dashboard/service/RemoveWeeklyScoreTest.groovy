@@ -85,6 +85,24 @@ class RemoveWeeklyScoreTest extends SpockTest {
         100           || WEEKLY_SCORE_NOT_FOUND
     }
 
+    def "delete a weekly score from a set of weekly scores with the same percentage"() {
+        given:
+        def weeklyScore1 = new WeeklyScore(dashboard, LocalDate.of(2021, 12, 23))
+        weeklyScore1.setPercentageCorrect(50)
+        def weeklyScore2 = new WeeklyScore(dashboard, LocalDate.of(2021, 11, 23))
+        weeklyScore2.setPercentageCorrect(50)
+
+        when:
+        weeklyScoreRepository.save(weeklyScore1)
+        weeklyScoreRepository.save(weeklyScore2)
+        weeklyScoreService.removeWeeklyScore(weeklyScore1.getId())
+
+        then:
+        weeklyScoreRepository.count() == 1L
+        weeklyScoreRepository.findAll().get(0).getSamePercentage().getSameWeeklyScores().isEmpty()
+
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
