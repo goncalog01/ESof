@@ -36,6 +36,9 @@ public class Dashboard implements DomainEntity {
     private Student student;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+
+    private Set<WeeklyScore> weeklyScores = new HashSet<>();
+
     private Set<DifficultQuestion> difficultQuestions = new HashSet<>();
 
     public Dashboard() {
@@ -117,6 +120,17 @@ public class Dashboard implements DomainEntity {
     }
 
     public void accept(Visitor visitor) {
+    }
+
+    public Set<WeeklyScore> getWeeklyScores() {
+        return weeklyScores;
+    }
+
+    public void addWeeklyScore(WeeklyScore weeklyScore) {
+        if (weeklyScores.stream().anyMatch(weeklyScore1 -> weeklyScore1.getWeek().isEqual(weeklyScore.getWeek()))) {
+            throw new TutorException(ErrorMessage.WEEKLY_SCORE_ALREADY_CREATED);
+        }
+        weeklyScores.add(weeklyScore);
     }
 
     @Override
