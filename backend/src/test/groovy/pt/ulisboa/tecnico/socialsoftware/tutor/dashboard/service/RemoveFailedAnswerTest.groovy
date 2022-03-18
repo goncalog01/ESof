@@ -84,6 +84,43 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
         -1              || ErrorMessage.FAILED_ANSWER_NOT_FOUND
     }
 
+    @Unroll
+    def "remove one failed anwer from a set of failed answers"(){
+
+        given:
+        def quiz = createQuiz(1)
+        def quizQuestion = createQuestion(1, quiz)
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        def removedFailedAnswer = createFailedAnswer(questionAnswer, DateHandler.now().minusDays(5))
+
+        for (int i in 0..numQuestions-1){
+            def quiz1 = createQuiz(1)
+            def questionAnswer1 = answerQuiz(true, false, true, quizQuestion, quiz1)
+            createFailedAnswer(questionAnswer1, DateHandler.now().minusDays(5))
+        }
+
+        when:
+        failedAnswerService.removeFailedAnswer(removedFailedAnswer.getId())
+
+        then:
+        failedAnswerRepository.count() == (long) numQuestions
+        (removedFailedAnswer in failedAnswerRepository.findAll()) == false
+
+        def results = []
+        for (int i in 0..numQuestions-1){
+            results.add(failedAnswerRepository.findAll().get(i))
+        }
+
+        for (int j in 0..numQuestions-1){
+            results[j].getSameQuestion().getSameFailedAnswers().size() == (long) numQuestions-1
+            (removedFailedAnswer in results[j].getSameQuestion().getSameFailedAnswers()) == false
+        }
+
+        where:
+        numQuestions << [2, 5, 10, 50]
+
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
