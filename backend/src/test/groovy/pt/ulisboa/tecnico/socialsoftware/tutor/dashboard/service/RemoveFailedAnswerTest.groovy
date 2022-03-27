@@ -114,8 +114,8 @@ class RemoveFailedAnswerTest extends FailedAnswersSpockTest {
         }
 
         for (int j in 0..numQuestions-1){
-            results[j].getSameQuestion().getSameFailedAnswers().size() == (long) numQuestions-1
-            (removedFailedAnswer in results[j].getSameQuestion().getSameFailedAnswers()) == false
+            results[j].getSameQuestion().getFailedAnswers().size() == (long) numQuestions-1
+            (removedFailedAnswer in results[j].getSameQuestion().getFailedAnswers()) == false
         }
 
         where:
