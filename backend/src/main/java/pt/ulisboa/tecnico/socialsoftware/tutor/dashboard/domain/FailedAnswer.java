@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -9,10 +8,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
-import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-
-import java.util.Set;
-import java.util.HashSet;
 
 import java.time.LocalDateTime;
 
@@ -35,7 +30,7 @@ public class FailedAnswer implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne(cascade=CascadeType.ALL, mappedBy="failedAnswer", orphanRemoval=true)
+    @OneToOne(cascade = CascadeType.ALL)
     private SameQuestion sameQuestion;
 
     public FailedAnswer(){
@@ -54,36 +49,36 @@ public class FailedAnswer implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_FAILED_ANSWER);
         }
 
-        Set<FailedAnswer> sameQuestions = new HashSet<>();
-        for (FailedAnswer fa : dashboard.getFailedAnswers()) {
-            Integer q1Id = questionAnswer.getQuizQuestion().getQuestion().getId();
-            Integer q2Id = fa.getQuestionAnswer().getQuizQuestion().getQuestion().getId();
-            if (q1Id == q2Id) {
-                sameQuestions.add(fa);
-                fa.sameQuestion.addSameQuestion(this);
-            }
-        }
-
-        setSameQuestion(new SameQuestion(this, sameQuestions));
-
         setCollected(collected);
         setAnswered(questionAnswer.isAnswered());
         setQuestionAnswer(questionAnswer);
         setDashboard(dashboard);
+
+        setSameQuestion(new SameQuestion(this));
+
+        dashboard.getFailedAnswers().stream().forEach(failedAnswer -> {
+            if (failedAnswer.getQuestionAnswer().getQuestion().getId() == this.getQuestionAnswer().getQuestion().getId()
+                    && failedAnswer != this) {
+                sameQuestion.getFailedAnswers().add(failedAnswer);
+                failedAnswer.getSameQuestion().getFailedAnswers().add(this);
+            }
+        });
     }
 
     public void remove() {
         if (collected.isAfter(DateHandler.now().minusDays(5))) {
-                throw new TutorException(ErrorMessage.CANNOT_REMOVE_FAILED_ANSWER);
+            throw new TutorException(ErrorMessage.CANNOT_REMOVE_FAILED_ANSWER);
         }
-        for (FailedAnswer fa : getSameQuestion().getSameFailedAnswers()) {
-            fa.getSameQuestion().getSameFailedAnswers().remove(this);
-        }
-        this.sameQuestion = null;
+
+        dashboard.getFailedAnswers().stream().filter(failedAnswer -> failedAnswer.getQuestionAnswer().getQuestion().getId()
+                        == getQuestionAnswer().getQuestion().getId() && failedAnswer != this).map(FailedAnswer::getSameQuestion)
+                .forEach(sameQuestion1 -> sameQuestion1.getFailedAnswers().remove(this));
+        sameQuestion.remove();
+
         dashboard.getFailedAnswers().remove(this);
         dashboard = null;
     }
- 
+
     public Integer getId() {
         return id;
     }
@@ -120,13 +115,13 @@ public class FailedAnswer implements DomainEntity {
         this.dashboard = dashboard;
         this.dashboard.addFailedAnswer(this);
     }
-    
-    public void setSameQuestion(SameQuestion sameQuestion) {
-        this.sameQuestion = sameQuestion;
-    }
 
     public SameQuestion getSameQuestion() {
         return sameQuestion;
+    }
+
+    public void setSameQuestion(SameQuestion sameQuestion) {
+        this.sameQuestion = sameQuestion;
     }
 
     @Override
@@ -137,10 +132,10 @@ public class FailedAnswer implements DomainEntity {
     @Override
     public String toString() {
         return "FailedAnswer{" +
-            "id=" + id +
-            ", answered=" + answered +
-            ", questionAnswer=" + questionAnswer +
-            "}";
+                "id=" + id +
+                ", answered=" + answered +
+                ", questionAnswer=" + questionAnswer +
+                "}";
     }
 
 }
