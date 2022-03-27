@@ -14,7 +14,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
@@ -56,7 +55,6 @@ public class FailedAnswerService {
         QuestionAnswer questionAnswer = questionAnswerRepository.findById(questionAnswerId).orElseThrow(() -> new TutorException(QUESTION_ANSWER_NOT_FOUND, questionAnswerId));
 
         FailedAnswer failedAnswer = new FailedAnswer(dashboard, questionAnswer, DateHandler.now());
-        
         failedAnswerRepository.save(failedAnswer);
 
         return new FailedAnswerDto(failedAnswer);
@@ -68,5 +66,6 @@ public class FailedAnswerService {
         toRemove.remove();
         failedAnswerRepository.delete(toRemove);
     }
-    
+
+
 }
