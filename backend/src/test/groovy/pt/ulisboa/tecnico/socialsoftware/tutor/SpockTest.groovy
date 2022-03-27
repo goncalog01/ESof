@@ -11,6 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepositor
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository
@@ -46,6 +47,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DemoUtils
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.Mailer
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.mock.AutoAttach
 
 import java.time.LocalDateTime
 
@@ -174,6 +176,9 @@ class SpockTest extends Specification {
 
     @Autowired
     FailedAnswerRepository failedAnswerRepository
+
+    @Autowired
+    SameQuestionRepository sameQuestionRepository
 
     @Autowired
     WeeklyScoreService weeklyScoreService

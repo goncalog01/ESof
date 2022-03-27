@@ -14,7 +14,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuizAnswerRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
@@ -28,9 +27,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -56,7 +53,6 @@ public class FailedAnswerService {
         QuestionAnswer questionAnswer = questionAnswerRepository.findById(questionAnswerId).orElseThrow(() -> new TutorException(QUESTION_ANSWER_NOT_FOUND, questionAnswerId));
 
         FailedAnswer failedAnswer = new FailedAnswer(dashboard, questionAnswer, DateHandler.now());
-        
         failedAnswerRepository.save(failedAnswer);
 
         return new FailedAnswerDto(failedAnswer);
@@ -68,5 +64,16 @@ public class FailedAnswerService {
         toRemove.remove();
         failedAnswerRepository.delete(toRemove);
     }
-    
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Collection<FailedAnswerDto> getFailedAnswers(int dashboardId) {
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        List<FailedAnswer> failedAnswers = failedAnswerRepository.findAll().stream()
+                .filter(fa -> fa.getDashboard().getId() == dashboard.getId())
+                .sorted(Comparator.comparing(FailedAnswer::getCollected).reversed())
+                .collect(Collectors.toList());
+        return failedAnswers.stream().map(FailedAnswerDto::new).collect(Collectors.toList());
+    }
+
+
 }
