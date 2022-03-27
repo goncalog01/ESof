@@ -69,7 +69,6 @@ class GetFailedAnswersTest extends FailedAnswersSpockTest {
         def failedAnswerDtos = failedAnswerService.getFailedAnswers(dashboard.getId())
 
         then: "the return statement contains two ordered failed answers"
-        failedAnswerRepository.count() == 2
         failedAnswerDtos.size() == 2
         def failedAnswer1 = failedAnswerDtos.get(0)
         failedAnswer1.getQuestionAnswerDto().getQuestion().getId() === questionAnswer2.getQuestion().getId()
@@ -78,6 +77,23 @@ class GetFailedAnswersTest extends FailedAnswersSpockTest {
         failedAnswer2.getQuestionAnswerDto().getQuestion().getId() === questionAnswer.getQuestion().getId()
         failedAnswer2.getQuestionAnswerDto().getAnswerDetails().getOption().getId() == questionAnswer.getAnswerDetails().getOption().getId()
     }
+
+    @Unroll
+    def "cannot get failed answer with dashboardId=#dashboardId"() {
+        given:
+        answerQuiz(true, false, true, quizQuestion, quiz)
+
+        when:
+        failedAnswerService.getFailedAnswers(dashboardId)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DASHBOARD_NOT_FOUND
+
+        where:
+        dashboardId << [0, 100]
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
