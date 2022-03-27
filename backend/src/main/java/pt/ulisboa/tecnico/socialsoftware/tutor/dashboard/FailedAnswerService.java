@@ -1,7 +1,5 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
-import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
-import org.junit.internal.runners.statements.Fail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
