@@ -27,9 +27,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -65,6 +63,15 @@ public class FailedAnswerService {
         FailedAnswer toRemove = failedAnswerRepository.findById(failedAnswerId).orElseThrow(() -> new TutorException(ErrorMessage.FAILED_ANSWER_NOT_FOUND, failedAnswerId));
         toRemove.remove();
         failedAnswerRepository.delete(toRemove);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Collection<FailedAnswerDto> getFailedAnswers(int dashboardId) {
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
+        List<FailedAnswerDto> failedAnswers = failedAnswerRepository.
+                findAllById(Collections.singleton(dashboard.getId())).
+                stream().map(fa -> new FailedAnswerDto(fa)).collect(Collectors.toList());
+        return failedAnswers;
     }
 
 

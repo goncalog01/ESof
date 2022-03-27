@@ -33,6 +33,28 @@ class GetFailedAnswersTest extends FailedAnswersSpockTest {
         quizQuestion = createQuestion(1, quiz)
     }
 
+    @Unroll
+    def "get failed answer answered=#answered"() {
+        given:
+        def questionAnswer = answerQuiz(answered, false, true, quizQuestion, quiz)
+        createFailedAnswer(questionAnswer, LocalDateTime.now())
+
+        when:
+        def failedAnswerDtos = failedAnswerService.getFailedAnswers(dashboard.getId())
+
+        then: "the return statement contains one failed answer"
+        failedAnswerDtos.size() == 1
+        def failedAnswerDto = failedAnswerDtos.get(0)
+        failedAnswerDto.getId() != 0
+        failedAnswerDto.getAnswered() == answered
+        LocalDateTime.parse(failedAnswerDto.getCollected(), DateTimeFormatter.ISO_DATE_TIME).isAfter(DateHandler.now().minusMinutes(1))
+        failedAnswerDto.getQuestionAnswerDto().getQuestion().getId() === questionAnswer.getQuestion().getId()
+        if (answered) failedAnswerDto.getQuestionAnswerDto().getAnswerDetails().getOption().getId() == questionAnswer.getAnswerDetails().getOption().getId()
+
+        where:
+        answered << [true, false]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
