@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
+import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
+import org.junit.internal.runners.statements.Fail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -67,11 +69,12 @@ public class FailedAnswerService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Collection<FailedAnswerDto> getFailedAnswers(int dashboardId) {
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
-        List<FailedAnswerDto> failedAnswers = failedAnswerRepository.
-                findAllById(Collections.singleton(dashboard.getId())).
-                stream().map(fa -> new FailedAnswerDto(fa)).collect(Collectors.toList());
-        return failedAnswers;
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        List<FailedAnswer> failedAnswers = failedAnswerRepository.findAll().stream()
+                .filter(fa -> fa.getDashboard().getId() == dashboard.getId())
+                .sorted(Comparator.comparing(FailedAnswer::getCollected).reversed())
+                .collect(Collectors.toList());
+        return failedAnswers.stream().map(FailedAnswerDto::new).collect(Collectors.toList());
     }
 
 

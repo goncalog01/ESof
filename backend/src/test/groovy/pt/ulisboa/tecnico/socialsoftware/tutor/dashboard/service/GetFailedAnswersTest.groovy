@@ -55,6 +55,30 @@ class GetFailedAnswersTest extends FailedAnswersSpockTest {
         answered << [true, false]
     }
 
+    def "get ordered failed answers"() {
+        given:
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        createFailedAnswer(questionAnswer, LocalDateTime.now())
+
+        def quiz2 = createQuiz(2)
+        def quizQuestion2 = createQuestion(2, quiz2)
+        def questionAnswer2 = answerQuiz(true, false, true, quizQuestion2, quiz2)
+        createFailedAnswer(questionAnswer2, LocalDateTime.now().plusDays(1))
+
+        when:
+        def failedAnswerDtos = failedAnswerService.getFailedAnswers(dashboard.getId())
+
+        then: "the return statement contains two ordered failed answers"
+        failedAnswerRepository.count() == 2
+        failedAnswerDtos.size() == 2
+        def failedAnswer1 = failedAnswerDtos.get(0)
+        failedAnswer1.getQuestionAnswerDto().getQuestion().getId() === questionAnswer2.getQuestion().getId()
+        failedAnswer1.getQuestionAnswerDto().getAnswerDetails().getOption().getId() == questionAnswer2.getAnswerDetails().getOption().getId()
+        def failedAnswer2 = failedAnswerDtos.get(1)
+        failedAnswer2.getQuestionAnswerDto().getQuestion().getId() === questionAnswer.getQuestion().getId()
+        failedAnswer2.getQuestionAnswerDto().getAnswerDetails().getOption().getId() == questionAnswer.getAnswerDetails().getOption().getId()
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
