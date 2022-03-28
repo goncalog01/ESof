@@ -154,6 +154,24 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         inSeconds << [1, 60*60*24.intdiv(2), 60*60*24]
     }
 
+    @Unroll
+    def "does not create failed answers in specific time period adding seconds=#inSeconds do start date"() {
+        given:
+        answerQuiz(true, false, true, quizQuestion, quiz, LOCAL_DATE_BEFORE.plusSeconds(inSeconds))
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(),  DateHandler.toISOString(LOCAL_DATE_BEFORE),  DateHandler.toISOString(LOCAL_DATE_YESTERDAY))
+
+        then:
+        failedAnswerRepository.count() == 0L
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getFailedAnswers().size() == 0
+
+        where:
+        inSeconds << [-20, 0, 60*60*24+1, 60*60*24*2]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
