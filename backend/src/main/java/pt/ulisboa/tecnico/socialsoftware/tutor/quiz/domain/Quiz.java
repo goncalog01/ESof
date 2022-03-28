@@ -155,7 +155,9 @@ public class Quiz implements DomainEntity {
         this.code = code;
     }
 
-    public boolean isTournamentQuiz() { return type == QuizType.TOURNAMENT; }
+    public boolean isTournamentQuiz() { return this.type.equals(QuizType.TOURNAMENT); }
+
+    public boolean isInClass () {return this.type.equals(QuizType.IN_CLASS); }
 
     public boolean isOneWay() {
         return oneWay;

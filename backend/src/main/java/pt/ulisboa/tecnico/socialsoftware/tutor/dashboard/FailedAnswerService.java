@@ -18,6 +18,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDt
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.FailedAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.*;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -82,7 +84,25 @@ public class FailedAnswerService {
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
             int questionAnswerId = questionAnswer.getId();
 
-            if (questionAnswer.getQuizAnswer().isCompleted() && ! questionAnswer.isCorrect()) {
+            boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
+            boolean isCorrect = questionAnswer.isCorrect();
+            // its only a failed answer if it was completed and the response is not correct
+            if (isCompleted && !isCorrect) {
+                QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
+                Quiz quiz = quizAnswer.getQuiz();
+                dashboard.setLastCheckFailedAnswers(quizAnswer.getCreationDate().minusSeconds(1));
+
+                boolean inClass = quiz.isInClass();
+                // if the type of quiz is IN_CLASS and the results date is later,
+                // its not considered a failed answer
+                if (inClass) {
+                    boolean isLater = LocalDateTime.now().isBefore(quiz.getResultsDate());
+                    if (isLater) {
+                        continue;
+                    }
+                }
+
+                // create a new failed answer
                 this.createFailedAnswer(dashboardId, questionAnswerId);
             }
 

@@ -78,6 +78,23 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         true      | true
     }
 
+    def "does not create failed answer for answer of IN_CLASS quiz where results date is later" () {
+        given:
+        def inClassQuiz= createQuiz(2, Quiz.QuizType.IN_CLASS.toString())
+        inClassQuiz.setResultsDate(DateHandler.now().plusDays(1))
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, inClassQuiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then:
+        failedAnswerRepository.findAll().size() == 0L
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getLastCheckFailedAnswers().isEqual(questionAnswer.getQuizAnswer().getCreationDate().minusSeconds(1))
+    }
+
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
