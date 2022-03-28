@@ -7,6 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
 
 import java.util.Set;
+import java.util.HashSet;
 
 import javax.persistence.*;
 
@@ -27,8 +28,11 @@ public class SameDifficulty implements DomainEntity {
     public SameDifficulty() {
     }
 
+    public SameDifficulty(DifficultQuestion difficultQuestion) {
+        this(difficultQuestion, new HashSet<DifficultQuestion>());
+    }
+
     public SameDifficulty(DifficultQuestion difficultQuestion, Set<DifficultQuestion> sameDifficultyQuestions) {
-        /* add verifications */
         setDifficultQuestion(difficultQuestion);
         setSameDifficultyQuestions(sameDifficultyQuestions);
     }
