@@ -334,6 +334,24 @@ public class Question implements DomainEntity {
         return this.questionDetails.getCorrectAnswerRepresentation();
     }
 
+    public int getLastWeekDifficulty() {
+        int totalAnswers = 0;
+        int correctAnswers = 0;
+
+        for (QuizQuestion qq: getQuizQuestions()) {
+            correctAnswers += qq.getQuestionAnswers().stream().map(qa -> qa.isCorrect() ? 1 : 0)
+                    .reduce(0, (a, b) -> (a + b));
+            totalAnswers += qq.getQuestionAnswers().size();
+        }
+
+        if (totalAnswers == 0) {
+            return 0;
+        } else {
+            return (correctAnswers / totalAnswers) * 100;
+        }
+
+    }
+
     @Override
     public String toString() {
         return "Question{" +

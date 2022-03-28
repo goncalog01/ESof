@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -70,5 +71,25 @@ public class DifficultQuestionService {
             }
         }
         return difficultQuestions;
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateDifficultQuestions(int dashboardId){
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
+
+        Set<DifficultQuestion> oldDifficultQuestions = dashboard.getDifficultQuestions();
+
+        dashboard.updateDifficultQuestions();
+        Set<DifficultQuestion> newDifficultQuestions = dashboard.getDifficultQuestions();
+
+        Set<DifficultQuestion> removedDifficultQuestions = oldDifficultQuestions.stream()
+                .filter(dq -> !newDifficultQuestions.contains(dq)).collect(Collectors.toSet());
+
+        Set<DifficultQuestion> addedDifficultQuestions = newDifficultQuestions.stream()
+                .filter(dq -> !oldDifficultQuestions.contains(dq)).collect(Collectors.toSet());
+
+        removedDifficultQuestions.stream().forEach(dq -> difficultQuestionRepository.delete(dq));
+        addedDifficultQuestions.stream().forEach(dq -> difficultQuestionRepository.save(dq));
+
     }
 }

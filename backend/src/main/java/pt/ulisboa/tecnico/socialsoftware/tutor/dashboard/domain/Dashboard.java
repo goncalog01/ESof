@@ -8,10 +8,17 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.*;
 
@@ -117,6 +124,36 @@ public class Dashboard implements DomainEntity {
     }
 
     public void accept(Visitor visitor) {
+    }
+
+    public void updateDifficultQuestions() {
+
+        // remove existing difficult questions whose difficulty is now over %25
+        setDifficultQuestions(getDifficultQuestions().stream()
+                .filter(df -> df.getQuestion().getLastWeekDifficulty() < 25)
+                .collect(Collectors.toSet()));
+
+        // Get all answered questions by the dashboard's student in the last 7 days
+        // following the associations Dashboard -> Student ->* QuizAnswers -> Quiz ->* QuizQuestion -> Question
+        Set<Question> answeredQuestions = new HashSet<Question>();
+        for (QuizAnswer qa : getStudent().getQuizAnswers()
+                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
+                .collect(Collectors.toSet())) {
+            answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
+                    .map(qq -> qq.getQuestion()).collect(Collectors.toSet()));
+        }
+
+        // add all answered questions that have become difficult since the last update
+        Map<Question, Integer> questionDifficulties = new HashMap<Question, Integer>();
+        answeredQuestions.stream().forEach(aq -> questionDifficulties.put(aq, aq.getLastWeekDifficulty()));
+
+        Set<Question> questionsToAdd = questionDifficulties.keySet().stream()
+                .filter(q -> questionDifficulties.get(q) < 25).collect(Collectors.toSet());
+
+        difficultQuestions.addAll(questionsToAdd.stream()
+                .map(qta -> new DifficultQuestion(this, qta, questionDifficulties.get(qta))).collect(Collectors.toSet()));
+
+        setLastCheckDifficultQuestions(LocalDateTime.now());
     }
 
     @Override
