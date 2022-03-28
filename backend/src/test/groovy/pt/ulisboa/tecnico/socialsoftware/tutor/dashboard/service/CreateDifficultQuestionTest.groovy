@@ -209,6 +209,33 @@ class CreateDifficultQuestionTest extends SpockTest {
         difficultQuestionRepository.count() == 1L
     }
 
+    def "cannot create a difficult question that does not belong to the student course"() {
+        given:
+        def alienCourse = new Course(COURSE_1_NAME, Course.Type.TECNICO)
+        courseRepository.save(alienCourse)
+        and:
+        def alienQuestion = new Question()
+        alienQuestion.setTitle(QUESTION_1_TITLE)
+        alienQuestion.setContent(QUESTION_1_CONTENT)
+        alienQuestion.setStatus(Question.Status.AVAILABLE)
+        alienQuestion.setNumberOfAnswers(2)
+        alienQuestion.setNumberOfCorrect(1)
+        alienQuestion.setCourse(alienCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        alienQuestion.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(alienQuestion)
+
+        when:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), alienQuestion.getId(), 22)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION
+        and:
+        difficultQuestionRepository.count() == 0L
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
