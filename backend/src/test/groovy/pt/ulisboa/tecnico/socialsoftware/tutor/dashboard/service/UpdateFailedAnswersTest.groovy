@@ -35,6 +35,31 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         quizQuestion = createQuestion(1, quiz)
     }
 
+    @Unroll
+    def "create failed answer answered=#answered"() {
+        given:
+        def questionAnswer = answerQuiz(answered, false, true, quizQuestion, quiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then:
+        failedAnswerRepository.count() == 1L
+        def failedAnswer = failedAnswerRepository.findAll().get(0)
+        failedAnswer.getId() != 0
+        failedAnswer.getDashboard().id === dashboard.getId()
+        failedAnswer.getQuestionAnswer().getId() == questionAnswer.getId()
+        failedAnswer.getCollected().isAfter(DateHandler.now().minusMinutes(1))
+        failedAnswer.getAnswered() == answered
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getFailedAnswers().contains(failedAnswer)
+        dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
+
+        where:
+        answered << [true, false]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

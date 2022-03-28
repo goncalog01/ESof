@@ -74,6 +74,20 @@ public class FailedAnswerService {
                 .collect(Collectors.toList());
         return failedAnswers.stream().map(FailedAnswerDto::new).collect(Collectors.toList());
     }
+    
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateFailedAnswers (int dashboardId, String localDateBefore, String localDateYesterday) {
+
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
+        for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
+            int questionAnswerId = questionAnswer.getId();
+
+            if (! questionAnswer.isCorrect()) {
+                this.createFailedAnswer(dashboardId, questionAnswerId);
+            }
+
+        }
+    }
 
 
 }
