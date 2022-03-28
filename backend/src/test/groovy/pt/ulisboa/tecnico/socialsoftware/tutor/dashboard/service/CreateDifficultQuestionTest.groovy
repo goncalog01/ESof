@@ -195,6 +195,21 @@ class CreateDifficultQuestionTest extends SpockTest {
         sameDifficulty2.getDifficultQuestions().size() == 0
     }
 
+    def "cannot create two difficult questions for the same question"() {
+        given:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 13)
+
+        when:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 24)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DIFFICULT_QUESTION_ALREADY_CREATED
+        and:
+        difficultQuestionRepository.count() == 1L
+    }
+
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
