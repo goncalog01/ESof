@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
@@ -17,6 +18,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepos
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
@@ -52,5 +56,19 @@ public class DifficultQuestionService {
 
         difficultQuestion.remove();
         //difficultQuestionRepository.delete(difficultQuestion);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DifficultQuestionDto> getDifficultQuestions(int dashboardId){
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
+
+        List<DifficultQuestionDto> difficultQuestions = new ArrayList<>();
+
+        for(DifficultQuestion difficultQuestion : dashboard.getDifficultQuestions()) {
+            if (!difficultQuestion.isRemoved()) {
+                difficultQuestions.add(new DifficultQuestionDto(difficultQuestion));
+            }
+        }
+        return difficultQuestions;
     }
 }
