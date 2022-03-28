@@ -60,6 +60,24 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         answered << [true, false]
     }
 
+    @Unroll
+    def "does not create failed answer with correct=#correct and completed=#completed" () {
+        given:
+        answerQuiz(true, correct, completed, quizQuestion, quiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then:
+        failedAnswerRepository.findAll().size() == 0L
+
+        where:
+        completed | correct
+        false     | false
+        false     | true
+        true      | true
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

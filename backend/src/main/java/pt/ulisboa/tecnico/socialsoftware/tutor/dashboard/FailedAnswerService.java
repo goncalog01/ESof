@@ -82,7 +82,7 @@ public class FailedAnswerService {
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
             int questionAnswerId = questionAnswer.getId();
 
-            if (! questionAnswer.isCorrect()) {
+            if (questionAnswer.getQuizAnswer().isCompleted() && ! questionAnswer.isCorrect()) {
                 this.createFailedAnswer(dashboardId, questionAnswerId);
             }
 
