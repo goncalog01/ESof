@@ -6,7 +6,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity
@@ -37,6 +36,7 @@ public class WeeklyScore implements DomainEntity {
         setWeek(week);
         setDashboard(dashboard);
         setSamePercentage(new SamePercentage(this, new HashSet<>()));
+        setPercentageCorrect(0);
     }
 
     public Integer getId() {
@@ -65,10 +65,10 @@ public class WeeklyScore implements DomainEntity {
 
     public void setPercentageCorrect(int percentageCorrect) {
         this.percentageCorrect = percentageCorrect;
-        samePercentage.setSameWeeklyScores(dashboard.getWeeklyScores()
+        samePercentage.setWeeklyScores(dashboard.getWeeklyScores()
                 .stream().filter(ws -> ws != this && ws.getPercentageCorrect() == percentageCorrect)
                 .collect(Collectors.toSet()));
-        samePercentage.getSameWeeklyScores().forEach(ws -> ws.getSamePercentage().addSameWeeklyScore(this));
+        samePercentage.getWeeklyScores().forEach(ws -> ws.getSamePercentage().addSameWeeklyScore(this));
     }
 
     public LocalDate getWeek() {
@@ -100,8 +100,8 @@ public class WeeklyScore implements DomainEntity {
     }
 
     public void remove() {
-        for (WeeklyScore ws: getSamePercentage().getSameWeeklyScores()) {
-            ws.getSamePercentage().getSameWeeklyScores().remove(this);
+        for (WeeklyScore ws: getSamePercentage().getWeeklyScores()) {
+            ws.getSamePercentage().getWeeklyScores().remove(this);
         }
         this.samePercentage = null;
         this.dashboard.getWeeklyScores().remove(this);
