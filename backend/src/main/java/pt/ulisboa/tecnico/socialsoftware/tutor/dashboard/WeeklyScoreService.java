@@ -21,7 +21,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -75,7 +77,8 @@ public class WeeklyScoreService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Set<WeeklyScore> getWeeklyScores(Integer dashboardId) {
+    // ordered by week
+    public List<WeeklyScoreDto> getWeeklyScores(Integer dashboardId) {
         if (dashboardId == null) {
             throw new TutorException(DASHBOARD_NOT_FOUND);
         }
@@ -83,6 +86,11 @@ public class WeeklyScoreService {
         Dashboard dashboard = dashboardRepository.findById(dashboardId)
                 .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
 
-        return dashboard.getWeeklyScores();
+        List<WeeklyScoreDto> res = dashboard.getWeeklyScores().stream()
+                .map(WeeklyScoreDto::new)
+                .sorted(Comparator.comparing(WeeklyScoreDto::getWeek))
+                .collect(Collectors.toList());
+        Collections.reverse(res);
+        return res;
     }
 }
