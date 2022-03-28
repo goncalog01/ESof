@@ -73,8 +73,8 @@ public class DifficultQuestion implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
         }
 
-        for (DifficultQuestion dq: getSameDifficulty().getSameDifficultyQuestions()) {
-            dq.getSameDifficulty().getSameDifficultyQuestions().remove(this);
+        for (DifficultQuestion dq: getSameDifficulty().getDifficultQuestions()) {
+            dq.getSameDifficulty().getDifficultQuestions().remove(this);
         }
         sameDifficulty = null;
 
