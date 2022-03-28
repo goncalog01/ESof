@@ -131,6 +131,28 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
     }
 
+    @Unroll
+    def "updates failed answers in specific time period adding seconds=#inSeconds do start date"() {
+        given:
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz, LOCAL_DATE_BEFORE.plusSeconds(inSeconds))
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(),  DateHandler.toISOString(LOCAL_DATE_BEFORE),  DateHandler.toISOString(LOCAL_DATE_YESTERDAY))
+
+        then:
+        failedAnswerRepository.count() == 1L
+        def questionAnswers = failedAnswerRepository.findAll()*.questionAnswer
+        questionAnswers.contains(questionAnswer)
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getFailedAnswers().size() == 1
+        def failedAnswer = failedAnswerRepository.findAll().get(0)
+        dashboard.getFailedAnswers().contains(failedAnswer)
+        dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
+
+        where:
+        inSeconds << [1, 60*60*24.intdiv(2), 60*60*24]
+    }
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

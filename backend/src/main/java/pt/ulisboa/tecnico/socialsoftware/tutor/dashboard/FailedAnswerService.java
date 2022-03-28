@@ -78,30 +78,52 @@ public class FailedAnswerService {
     }
     
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void updateFailedAnswers (int dashboardId, String localDateBefore, String localDateYesterday) {
+    public void updateFailedAnswers (int dashboardId, String minDate, String maxDate) {
 
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
+
             int questionAnswerId = questionAnswer.getId();
             boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
             boolean isCorrect = questionAnswer.isCorrect();
-            // its only a failed answer if it was completed and the response is not correct
+
+            QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
+
+            boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
+            boolean hasTimeInterval = (minDate != null) && (maxDate != null);
+
+            // Check getLastCheck getting the max time
+            if (dashboard.getLastCheckFailedAnswers() == null) {
+                dashboard.setLastCheckFailedAnswers(quizAnswer.getCreationDate().minusSeconds(1));
+            } else {
+                LocalDateTime creationDate = quizAnswer.getCreationDate().minusSeconds(1);
+                LocalDateTime currentDate = dashboard.getLastCheckFailedAnswers();
+                LocalDateTime maxTime = (creationDate.isAfter(currentDate)) ? creationDate : currentDate;
+                dashboard.setLastCheckFailedAnswers(maxTime);
+            }
+
+            if (hasBeenChecked && !hasTimeInterval) {
+                continue;
+            }
+
+            // It's only a failed answer if it was completed and the response is not correct
             if (isCompleted && !isCorrect) {
-                QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
                 Quiz quiz = quizAnswer.getQuiz();
 
-                boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
-                if (hasBeenChecked) {
-                    continue;
+                if (hasTimeInterval) {
+                    LocalDateTime minTime = DateHandler.toLocalDateTime(minDate);
+                    LocalDateTime maxTime = DateHandler.toLocalDateTime(maxDate);
+                    boolean answerInTimeInterval = (quizAnswer.getCreationDate().isAfter(minTime)) && (quizAnswer.getCreationDate().isBefore(maxTime));
+                    if (!answerInTimeInterval) {
+                        continue;
+                    }
                 }
-
-                dashboard.setLastCheckFailedAnswers(quizAnswer.getCreationDate().minusSeconds(1));
 
                 boolean inClass = quiz.isInClass();
                 // if the type of quiz is IN_CLASS and the results date is later,
                 // its not considered a failed answer
                 if (inClass) {
-                    boolean isLater = LocalDateTime.now().isBefore(quiz.getResultsDate());
+                    boolean isLater = DateHandler.now().isBefore(quiz.getResultsDate());
                     if (isLater) {
                         continue;
                     }
@@ -110,7 +132,6 @@ public class FailedAnswerService {
                 // create a new failed answer
                 this.createFailedAnswer(dashboardId, questionAnswerId);
             }
-
         }
     }
 
