@@ -94,6 +94,19 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         dashboard.getLastCheckFailedAnswers().isEqual(questionAnswer.getQuizAnswer().getCreationDate().minusSeconds(1))
     }
 
+    def "create failed answer for answer of IN_CLASS quiz where results date is now" () {
+        given:
+        def inClassQuiz= createQuiz(2, Quiz.QuizType.IN_CLASS.toString())
+        inClassQuiz.setResultsDate(DateHandler.now())
+        answerQuiz(true, false, true, quizQuestion, inClassQuiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then:
+        failedAnswerRepository.findAll().size() == 1L
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
