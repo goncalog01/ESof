@@ -113,6 +113,49 @@ class CreateDifficultQuestionTest extends SpockTest {
         !sameDifficulty2.getDifficultQuestions().contains(sameDifficulty2.getDifficultQuestion())
     }
 
+    def "create two difficulty questions with same difficulty but one is removed"() {
+        given:
+        def otherQuestion = new Question()
+        otherQuestion.setTitle(QUESTION_1_TITLE)
+        otherQuestion.setContent(QUESTION_1_CONTENT)
+        otherQuestion.setStatus(Question.Status.AVAILABLE)
+        otherQuestion.setNumberOfAnswers(2)
+        otherQuestion.setNumberOfCorrect(1)
+        otherQuestion.setCourse(externalCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        otherQuestion.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(otherQuestion)
+        and:
+        def otherDifficultQuestion = new DifficultQuestion(dashboard, otherQuestion, 20)
+        otherDifficultQuestion.setRemovedDate(DateHandler.now().minusDays(1))
+        otherDifficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(otherDifficultQuestion)
+
+        when:
+        def difficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 20)
+
+        then:
+        difficultQuestionRepository.count() == 2L
+        def result = difficultQuestionRepository.findById(otherDifficultQuestion.getId()).get()
+        result.getId() == otherDifficultQuestion.getId()
+        result.getSameDifficulty().getDifficultQuestions().size() == 0
+        def result2 = difficultQuestionRepository.findById(difficultQuestionDto.getId()).get()
+        result2.getId() == difficultQuestionDto.getId()
+        result2.getSameDifficulty().getDifficultQuestions().size() == 0
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getDifficultQuestions().contains(result)
+        and:
+        sameDifficultyRepository.findAll().size() == 2
+        def sameDifficulty1 = sameDifficultyRepository.findAll().get(0)
+        sameDifficulty1.getDifficultQuestions().size() == 0
+        !sameDifficulty1.getDifficultQuestions().contains(sameDifficulty1.getDifficultQuestion())
+        def sameDifficulty2 = sameDifficultyRepository.findAll().get(1)
+        sameDifficulty2.getDifficultQuestions().size() == 0
+        !sameDifficulty2.getDifficultQuestions().contains(sameDifficulty2.getDifficultQuestion())
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
