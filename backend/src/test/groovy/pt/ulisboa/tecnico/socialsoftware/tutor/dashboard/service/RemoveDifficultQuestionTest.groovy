@@ -65,129 +65,21 @@ class RemoveDifficultQuestionTest extends SpockTest {
         dashboardRepository.save(dashboard)
     }
 
-    def "student removes a difficult question from the dashboard with daysSince=#daysSince"() {
+    def "student removes a difficult question"() {
         given:
-        def difficultQuestion = new DifficultQuestion()
-        difficultQuestion.setDashboard(dashboard)
-        difficultQuestion.setQuestion(question)
-        difficultQuestion.setPercentage(24)
-        difficultQuestion.setRemovedDate(DateHandler.now().minusDays(daysSince))
-        difficultQuestion.setRemoved(true)
-        difficultQuestion.setSameDifficulty(new SameDifficulty(difficultQuestion))
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
         difficultQuestionRepository.save(difficultQuestion)
 
         when:
         difficultQuestionService.removeDifficultQuestion(difficultQuestion.getId())
 
         then:
-        difficultQuestionRepository.count() == 0
-        and:
-        def dashboard = dashboardRepository.getById(dashboard.getId())
-        dashboard.getDifficultQuestions().size() == 0
-
-        where:
-        daysSince << [0, 1, 6]
-    }
-
-    @Unroll
-    def "the difficult question cannot be deleted days before #daysSince or not removed #removed"() {
-        given: "a difficult question"
-        def difficultQuestion = new DifficultQuestion()
-        difficultQuestion.setDashboard(dashboard)
-        difficultQuestion.setQuestion(question)
-        difficultQuestion.setPercentage(24)
-        difficultQuestion.setRemovedDate(DateHandler.now().minusDays(daysSince))
-        difficultQuestion.setRemoved(removed)
-        difficultQuestion.setSameDifficulty(new SameDifficulty(difficultQuestion))
-        difficultQuestionRepository.save(difficultQuestion)
-
-        when:
-        difficultQuestionService.removeDifficultQuestion(difficultQuestion.getId())
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == errorMessage
-        and:
         difficultQuestionRepository.count() == 1
-
-        where:
-        removed | daysSince || errorMessage
-        false   | 0         || CANNOT_REMOVE_DIFFICULT_QUESTION
-        true    | 7         || CANNOT_REMOVE_DIFFICULT_QUESTION
-        true    | 8         || CANNOT_REMOVE_DIFFICULT_QUESTION
-    }
-
-    @Unroll
-    def "the difficult question cannot be deleted because invalid difficultQuestionId #id"() {
-        when:
-        difficultQuestionService.removeDifficultQuestion(id)
-
-        then: "an exception is thrown"
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == errorMessage
-
-        where:
-        id  || errorMessage
-        0   || DIFFICULT_QUESTION_NOT_FOUND
-        100 || DIFFICULT_QUESTION_NOT_FOUND
-    }
-
-    @Unroll
-    def "delete a question from a set of #numQuestions difficult questions with the same percentage"(){
-
-        given:
-        def difficultQuestions = []
-        for (int i in 0..numQuestions - 1){
-            def question = new Question()
-            question.setTitle(QUESTION_1_TITLE)
-            question.setContent(QUESTION_1_CONTENT)
-            question.setStatus(Question.Status.AVAILABLE)
-            question.setNumberOfAnswers(2 * (i + 1))
-            question.setNumberOfCorrect(i + 1)
-            question.setCourse(externalCourse)
-            question.setQuestionDetails(new MultipleChoiceQuestion())
-            questionRepository.save(question)
-
-            difficultQuestions[i] = new DifficultQuestion()
-            difficultQuestions[i].setQuestion(question)
-            difficultQuestions[i].setDashboard(dashboard)
-            difficultQuestions[i].setPercentage(24)
-            difficultQuestions[i].setRemovedDate(DateHandler.now().minusDays(0))
-            difficultQuestions[i].setRemoved(true)
-            difficultQuestions[i].setSameDifficulty(new SameDifficulty(difficultQuestions[i]))
-            difficultQuestionRepository.save(difficultQuestions[i])
-        }
-        for (int i in 0..numQuestions - 1) {
-            for (int j in 0..numQuestions - 1) {
-                if (i != j) {
-                    difficultQuestions[i].getSameDifficulty().addSameDifficultyQuestion(difficultQuestions[j])
-                }
-            }
-        }
-
-        when:
-        difficultQuestionService.removeDifficultQuestion(difficultQuestions[0].getId())
-
-        then:
-        difficultQuestionRepository.count() == (long) (numQuestions - 1)
-        def results = []
-        for (int i in 0..numQuestions - 2){
-            results.add(difficultQuestionRepository.findAll().get(i))
-        }
-
-        for (int i in 0..numQuestions - 2){
-            results[i].getSameDifficulty().getSameDifficultyQuestions().size() == (long) (numQuestions - 2)
-            for (int j in 0..numQuestions - 2) {
-                if (i != j) {
-                    results[j] in results[i].getSameDifficulty().getSameDifficultyQuestions()
-                }
-            }
-            !(difficultQuestions[0] in results[i].getSameDifficulty().getSameDifficultyQuestions())
-        }
-
-        where:
-        numQuestions << [2, 10]
-
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() == difficultQuestion.getId()
+        result.isRemoved() == true
+        result.getRemovedDate().isAfter(DateHandler.now().minusSeconds(30))
     }
 
     @TestConfiguration

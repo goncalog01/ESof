@@ -67,6 +67,14 @@ public class DifficultQuestion implements DomainEntity {
     }
 
     public void remove() {
+
+        if (!removed) {
+            setRemoved(true);
+            setRemovedDate(LocalDateTime.now());
+        }
+    }
+
+    /*public void remove() {
         if (!removed) {
             throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
         } else if (removedDate.isBefore(DateHandler.now().minusDays(7))) {
@@ -80,7 +88,7 @@ public class DifficultQuestion implements DomainEntity {
 
         dashboard.getDifficultQuestions().remove(this);
         dashboard = null;
-    }
+    }*/
 
     public Dashboard getDashboard() {
         return dashboard;
