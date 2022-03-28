@@ -236,6 +236,21 @@ class CreateDifficultQuestionTest extends SpockTest {
         difficultQuestionRepository.count() == 0L
     }
 
+    @Unroll
+    def "cannot create difficult question with invalid percentage=#percentage"() {
+        when:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), percentage)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == CANNOT_CREATE_DIFFICULT_QUESTION
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        percentage << [-100, -1, 25, 50, 150]
+
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
