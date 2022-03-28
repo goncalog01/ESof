@@ -105,6 +105,19 @@ class RemoveDifficultQuestionTest extends SpockTest {
         result.getRemovedDate().equals(now)
     }
 
+    @Unroll
+    def "the difficult question cannot be deleted because invalid difficultQuestionId #id"() {
+        when:
+        difficultQuestionService.removeDifficultQuestion(id)
+
+        then: "an exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == DIFFICULT_QUESTION_NOT_FOUND
+
+        where:
+        id  << [0, 100]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
