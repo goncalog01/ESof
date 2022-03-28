@@ -73,4 +73,16 @@ public class WeeklyScoreService {
         weeklyScore.remove();
         weeklyScoreRepository.delete(weeklyScore);
     }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Set<WeeklyScore> getWeeklyScores(Integer dashboardId) {
+        if (dashboardId == null) {
+            throw new TutorException(DASHBOARD_NOT_FOUND);
+        }
+
+        Dashboard dashboard = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+
+        return dashboard.getWeeklyScores();
+    }
 }
