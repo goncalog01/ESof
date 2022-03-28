@@ -36,6 +36,7 @@ public class WeeklyScore implements DomainEntity {
         setWeek(week);
         setDashboard(dashboard);
         setSamePercentage(new SamePercentage(this, new HashSet<>()));
+        setPercentageCorrect(0);
     }
 
     public Integer getId() {
