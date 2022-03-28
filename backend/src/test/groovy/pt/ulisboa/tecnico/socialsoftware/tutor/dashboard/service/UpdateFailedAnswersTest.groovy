@@ -107,6 +107,30 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         failedAnswerRepository.findAll().size() == 1L
     }
 
+    def "updates failed answers after last check"() {
+        given:
+        dashboard.setLastCheckFailedAnswers(LocalDateTime.now().minusDays(1))
+        answerQuiz(true, false, true, quizQuestion, quiz, LocalDateTime.now().minusDays(2))
+        and:
+        def quiz2 = createQuiz(2)
+        def quizQuestion2 = createQuestion(2, quiz2)
+        def questionAnswer2 = answerQuiz(true, false, true, quizQuestion2, quiz2)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then:
+        failedAnswerRepository.count() == 1L
+        def questionAnswers = failedAnswerRepository.findAll()*.questionAnswer
+        questionAnswers.contains(questionAnswer2)
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getFailedAnswers().size() == 1
+        def failedAnswer = failedAnswerRepository.findAll().get(0)
+        dashboard.getFailedAnswers().contains(failedAnswer)
+        dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

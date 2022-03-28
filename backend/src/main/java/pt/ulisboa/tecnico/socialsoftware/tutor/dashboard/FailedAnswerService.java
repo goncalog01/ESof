@@ -83,13 +83,18 @@ public class FailedAnswerService {
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
             int questionAnswerId = questionAnswer.getId();
-
             boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
             boolean isCorrect = questionAnswer.isCorrect();
             // its only a failed answer if it was completed and the response is not correct
             if (isCompleted && !isCorrect) {
                 QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
                 Quiz quiz = quizAnswer.getQuiz();
+
+                boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
+                if (hasBeenChecked) {
+                    continue;
+                }
+
                 dashboard.setLastCheckFailedAnswers(quizAnswer.getCreationDate().minusSeconds(1));
 
                 boolean inClass = quiz.isInClass();
