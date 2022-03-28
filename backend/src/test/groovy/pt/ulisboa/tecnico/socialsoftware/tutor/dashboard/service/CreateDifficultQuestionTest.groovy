@@ -265,6 +265,20 @@ class CreateDifficultQuestionTest extends SpockTest {
         dashboardId << [0, 100]
     }
 
+    @Unroll
+    def "cannot create difficult question with invalid questionId=#questionId"() {
+        when:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), questionId, 20)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == QUESTION_NOT_FOUND
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        questionId << [0, 100]
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
