@@ -9,6 +9,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestio
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameDifficultyRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
@@ -28,6 +29,9 @@ public class DifficultQuestionService {
     @Autowired
     private DifficultQuestionRepository difficultQuestionRepository;
 
+    @Autowired
+    private SameDifficultyRepository sameDifficultyRepository;
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DifficultQuestionDto createDifficultQuestion(int dashboardId, int questionId, int percentage) {
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
@@ -35,6 +39,7 @@ public class DifficultQuestionService {
 
         DifficultQuestion difficultQuestion = new DifficultQuestion(dashboard, question, percentage);
         difficultQuestionRepository.save(difficultQuestion);
+        sameDifficultyRepository.save(difficultQuestion.getSameDifficulty());
 
         return new DifficultQuestionDto(difficultQuestion);
     }
