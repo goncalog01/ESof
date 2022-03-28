@@ -172,6 +172,9 @@ class SpockTest extends Specification {
     DifficultQuestionRepository difficultQuestionRepository
 
     @Autowired
+    DifficultQuestionRepository sameDifficultyRepository
+
+    @Autowired
     ImageRepository imageRepository
 
     @Autowired

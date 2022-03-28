@@ -49,7 +49,7 @@ public class SameDifficulty implements DomainEntity {
         this.sameDifficultyQuestions = sameDifficultyQuestions;
     }
 
-    public Set<DifficultQuestion> getSameDifficultyQuestions() {
+    public Set<DifficultQuestion> getDifficultQuestions() {
         return sameDifficultyQuestions;
     }
 

@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.BeanConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
@@ -13,7 +14,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Unroll
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
-
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.DASHBOARD_NOT_FOUND
@@ -49,9 +49,9 @@ class CreateDifficultQuestionTest extends SpockTest {
     }
 
     @Unroll
-    def "create difficult question with percentage #percentage"() {
+    def "create difficult question with difficulty #difficulty"() {
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), percentage)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), difficulty)
 
         then:
         difficultQuestionRepository.count() == 1L
@@ -61,173 +61,16 @@ class CreateDifficultQuestionTest extends SpockTest {
         result.getQuestion().getId() == question.getId()
         result.isRemoved() == false
         result.getRemovedDate() == null
-        result.getPercentage() == percentage
-        result.getSameDifficulty() != null
-        result.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-        result.getSameDifficulty().getDifficultQuestion().getId() == question.getId()
+        result.getPercentage() == difficulty
+        result.getSameDifficulty().getDifficultQuestions().size() == 0
         and:
         def dashboard = dashboardRepository.getById(dashboard.getId())
         dashboard.getDifficultQuestions().contains(result)
-        dashboard.getLastCheckDifficultQuestions().isAfter(DateHandler.now().minusMinutes(1))
-
-        where:
-        percentage << [0, 12, 24]
-    }
-
-    def "cannot create two difficult questions for the same question"() {
-        given:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 13)
-
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 24)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.DIFFICULT_QUESTION_ALREADY_CREATED
         and:
-        difficultQuestionRepository.count() == 1L
-    }
-
-    def "cannot create a difficult question that does not belong to the student course"() {
-        given:
-        def alienCourse = new Course(COURSE_1_NAME, Course.Type.TECNICO)
-        courseRepository.save(alienCourse)
-        and:
-        def alienQuestion = new Question()
-        alienQuestion.setTitle(QUESTION_1_TITLE)
-        alienQuestion.setContent(QUESTION_1_CONTENT)
-        alienQuestion.setStatus(Question.Status.AVAILABLE)
-        alienQuestion.setNumberOfAnswers(2)
-        alienQuestion.setNumberOfCorrect(1)
-        alienQuestion.setCourse(alienCourse)
-        def questionDetails = new MultipleChoiceQuestion()
-        alienQuestion.setQuestionDetails(questionDetails)
-        questionDetailsRepository.save(questionDetails)
-        questionRepository.save(alienQuestion)
-
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), alienQuestion.getId(), 22)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION
-        and:
-        difficultQuestionRepository.count() == 0L
-    }
-
-    @Unroll
-    def "cannot create difficult question with invalid percentage=#percentage"() {
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), percentage)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == CANNOT_CREATE_DIFFICULT_QUESTION
-        difficultQuestionRepository.count() == 0L
+        sameDifficultyRepository.findAll().size() == 1
 
         where:
-        percentage << [-100, -1, 25, 50, 150]
-
-    }
-
-    @Unroll
-    def "cannot create difficult question with invalid dashboardId=#dashboardId"() {
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboardId, question.getId(), 20)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == DASHBOARD_NOT_FOUND
-        difficultQuestionRepository.count() == 0L
-
-        where:
-        dashboardId << [0, 100]
-    }
-
-    @Unroll
-    def "cannot create difficult question with invalid questionId=#questionId"() {
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), questionId, 20)
-
-        then:
-        def exception = thrown(TutorException)
-        exception.getErrorMessage() == QUESTION_NOT_FOUND
-        difficultQuestionRepository.count() == 0L
-
-        where:
-        questionId << [0, 100]
-    }
-
-    def "create two difficult questions with different percentages"(){
-        given:
-        def question2 = new Question()
-        question2.setTitle(QUESTION_2_TITLE)
-        question2.setContent(QUESTION_2_CONTENT)
-        question2.setStatus(Question.Status.AVAILABLE)
-        question2.setNumberOfAnswers(2)
-        question2.setNumberOfCorrect(1)
-        question2.setCourse(externalCourse)
-        def questionDetails = new MultipleChoiceQuestion()
-        question2.setQuestionDetails(questionDetails)
-        questionDetailsRepository.save(questionDetails)
-        questionRepository.save(question2)
-
-        when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 20)
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question2.getId(), 10)
-
-        then:
-        difficultQuestionRepository.count() == 2L
-        def result1 = difficultQuestionRepository.findAll().get(0)
-        def result2 = difficultQuestionRepository.findAll().get(1)
-        result1.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-        result2.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-    }
-
-    @Unroll
-    def "create #numQuestions difficult questions with the same percentage"(){
-
-        given:
-        def questions = [question]
-        for (int i in 1..numQuestions-1){
-            def newQuestion = new Question()
-            newQuestion.setTitle(QUESTION_2_TITLE)
-            newQuestion.setContent(QUESTION_2_CONTENT)
-            newQuestion.setStatus(Question.Status.AVAILABLE)
-            newQuestion.setNumberOfAnswers(2*i)
-            newQuestion.setNumberOfCorrect(i)
-            newQuestion.setCourse(externalCourse)
-            def questionDetails = new MultipleChoiceQuestion()
-            newQuestion.setQuestionDetails(questionDetails)
-            questionDetailsRepository.save(questionDetails)
-            questionRepository.save(newQuestion)
-            questions.add(newQuestion)
-        }
-
-        when:
-        for (int i in 0..numQuestions-1){
-            difficultQuestionService.createDifficultQuestions(dashboard.getId(), questions[i].getId(), 10)
-        }
-
-        then:
-        difficultQuestionRepository.count() == (long) numQuestions
-        def results = []
-        for (int i in 0..numQuestions-1){
-            results.add(difficultQuestionRepository.findAll().get(i))
-        }
-
-        for (int j in 0..numQuestions-1){
-            results[j].getSameDifficulty().getSameDifficultyQuestions().size() == (long) numQuestions-1
-            for (int k in 0..numQuestions-1){
-                if (k != j) {
-                    results[k] in results[j].getSameDifficulty().getSameDifficultyQuestions()
-                }
-            }
-        }
-
-        where:
-        numQuestions << [2, 10]
-
+        difficulty << [0, 12, 24]
     }
 
     @TestConfiguration
