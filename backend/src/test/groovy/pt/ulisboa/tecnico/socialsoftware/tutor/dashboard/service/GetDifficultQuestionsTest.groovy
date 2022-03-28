@@ -87,6 +87,20 @@ class GetDifficultQuestionsTest extends SpockTest {
         resultDifficultQuestion.getQuestionDto().getId() == question.getId()
     }
 
+    def "does not get removed difficult questions"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(DateHandler.now().minusDays(3))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        def difficultQuestions = difficultQuestionService.getDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestions.size() == 0
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

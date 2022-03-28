@@ -65,9 +65,10 @@ public class DifficultQuestionService {
         List<DifficultQuestionDto> difficultQuestions = new ArrayList<>();
 
         for(DifficultQuestion difficultQuestion : dashboard.getDifficultQuestions()) {
-            difficultQuestions.add(new DifficultQuestionDto(difficultQuestion));
+            if (!difficultQuestion.isRemoved()) {
+                difficultQuestions.add(new DifficultQuestionDto(difficultQuestion));
+            }
         }
-
         return difficultQuestions;
     }
 }
