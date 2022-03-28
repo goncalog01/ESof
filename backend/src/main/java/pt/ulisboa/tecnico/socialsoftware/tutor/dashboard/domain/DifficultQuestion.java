@@ -67,19 +67,14 @@ public class DifficultQuestion implements DomainEntity {
     }
 
     public void remove() {
-        if (!removed) {
-            throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
-        } else if (removedDate.isBefore(DateHandler.now().minusDays(7))) {
+
+        if (removed) {
             throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
         }
-
-        for (DifficultQuestion dq: getSameDifficulty().getDifficultQuestions()) {
-            dq.getSameDifficulty().getDifficultQuestions().remove(this);
+        else {
+            setRemoved(true);
+            setRemovedDate(LocalDateTime.now());
         }
-        sameDifficulty = null;
-
-        dashboard.getDifficultQuestions().remove(this);
-        dashboard = null;
     }
 
     public Dashboard getDashboard() {

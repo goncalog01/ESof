@@ -16,6 +16,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
+import java.time.LocalDateTime;
+
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
 
 @Service
@@ -49,6 +51,6 @@ public class DifficultQuestionService {
         DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(difficultQuestionId).orElseThrow(() -> new TutorException(DIFFICULT_QUESTION_NOT_FOUND, difficultQuestionId));
 
         difficultQuestion.remove();
-        difficultQuestionRepository.delete(difficultQuestion);
+        //difficultQuestionRepository.delete(difficultQuestion);
     }
 }
