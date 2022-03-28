@@ -101,6 +101,21 @@ class GetDifficultQuestionsTest extends SpockTest {
         difficultQuestions.size() == 0
     }
 
+    @Unroll
+    def "cannot get difficult questions because invalid dashboard #id"() {
+        when:
+        difficultQuestionService.getDifficultQuestions(id)
+
+        then: "an exception is thrown"
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == errorMessage
+
+        where:
+        id  || errorMessage
+        0   || DASHBOARD_NOT_FOUND
+        100 || DASHBOARD_NOT_FOUND
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
