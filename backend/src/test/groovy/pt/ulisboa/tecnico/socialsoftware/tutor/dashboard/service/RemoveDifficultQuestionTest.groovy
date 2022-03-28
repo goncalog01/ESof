@@ -82,6 +82,29 @@ class RemoveDifficultQuestionTest extends SpockTest {
         result.getRemovedDate().isAfter(DateHandler.now().minusSeconds(30))
     }
 
+    def "cannot remove a removed difficult question"() {
+        given:
+        def now = DateHandler.now()
+        and:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemoved(true)
+        difficultQuestion.setRemovedDate(now)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.removeDifficultQuestion(difficultQuestion.getId())
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == CANNOT_REMOVE_DIFFICULT_QUESTION
+        and:
+        difficultQuestionRepository.count() == 1
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.isRemoved() == true
+        result.getRemovedDate().equals(now)
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

@@ -68,7 +68,13 @@ public class DifficultQuestion implements DomainEntity {
 
     public void remove() {
 
-        if (!removed) {
+        if (removed) {
+            throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
+        }
+        else if (removedDate != null && removedDate.isBefore(DateHandler.now().minusDays(7))) {
+            throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
+        }
+        else {
             setRemoved(true);
             setRemovedDate(LocalDateTime.now());
         }
