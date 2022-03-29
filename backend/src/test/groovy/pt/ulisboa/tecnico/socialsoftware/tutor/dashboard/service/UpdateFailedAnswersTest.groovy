@@ -178,7 +178,7 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         def failedAnswer = createFailedAnswer(questionAnswer, LocalDateTime.now())
 
         when:
-        failedAnswerService.updateFailedAnswers(dashboard.getId(), DateHandler.toISOString(LOCAL_DATE_BEFORE), DateHandler.toISOString(LOCAL_DATE_YESTERDAY))
+        failedAnswerService.updateFailedAnswers(dashboard.getId(),  DateHandler.toISOString(LOCAL_DATE_BEFORE),  DateHandler.toISOString(LOCAL_DATE_YESTERDAY))
 
         then:
         failedAnswerRepository.count() == 1L
@@ -247,6 +247,7 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         where:
         dashboardId << [0, 100]
     }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
