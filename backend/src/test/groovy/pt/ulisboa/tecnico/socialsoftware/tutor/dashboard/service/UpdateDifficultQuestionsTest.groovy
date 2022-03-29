@@ -144,6 +144,18 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         result.getPercentage() == 0
     }
 
+    def "delete difficult question that is not difficult anymore"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
