@@ -211,6 +211,28 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
     }
 
+    def "does not create failed answers if quiz does not belong to the course execution"() {
+        given:
+        def otherExternalCourseExecution = new CourseExecution(externalCourse, COURSE_1_ACRONYM, COURSE_2_ACADEMIC_TERM, Course.Type.TECNICO, LOCAL_DATE_TODAY)
+        courseExecutionRepository.save(otherExternalCourseExecution)
+        and:
+        dashboard.setCourseExecution(otherExternalCourseExecution)
+        and:
+        answerQuiz(true, false, true, quizQuestion, quiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then: "no failed answer is updated in the database"
+        failedAnswerRepository.findAll().size() == 0L
+        and: "the student dashboard's failed answers is empty"
+        def dashboard = dashboardRepository.findById(dashboard.getId()).get()
+        dashboard.getStudent().getId() === student.getId()
+        dashboard.getCourseExecution().getId() === otherExternalCourseExecution.getId()
+        dashboard.getFailedAnswers().findAll().size() == 0L
+        dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

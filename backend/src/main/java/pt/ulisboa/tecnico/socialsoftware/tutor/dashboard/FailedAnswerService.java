@@ -83,13 +83,8 @@ public class FailedAnswerService {
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
             int questionAnswerId = questionAnswer.getId();
-            boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
-            boolean isCorrect = questionAnswer.isCorrect();
-
             QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
-
-            boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
-            boolean hasTimeInterval = (minDate != null) && (maxDate != null);
+            Quiz quiz = quizAnswer.getQuiz();
 
             // Check getLastCheck getting the max time
             if (dashboard.getLastCheckFailedAnswers() == null) {
@@ -99,6 +94,13 @@ public class FailedAnswerService {
                 LocalDateTime currentDate = dashboard.getLastCheckFailedAnswers();
                 LocalDateTime maxTime = (creationDate.isAfter(currentDate)) ? creationDate : currentDate;
                 dashboard.setLastCheckFailedAnswers(maxTime);
+            }
+
+            // Check if this question has been checked before
+            boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
+            boolean hasTimeInterval = (minDate != null) && (maxDate != null);
+            if (hasBeenChecked && !hasTimeInterval) {
+                continue;
             }
 
             // Check if failed answer already exists
@@ -115,13 +117,16 @@ public class FailedAnswerService {
                 continue;
             }
 
-            if (hasBeenChecked && !hasTimeInterval) {
+            // Check if quiz belongs to course execution
+            boolean inSameCourseExecution = dashboard.getCourseExecution().getId() == quiz.getCourseExecution().getId();
+            if (!inSameCourseExecution) {
                 continue;
             }
 
             // It's only a failed answer if it was completed and the response is not correct
+            boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
+            boolean isCorrect = questionAnswer.isCorrect();
             if (isCompleted && !isCorrect) {
-                Quiz quiz = quizAnswer.getQuiz();
 
                 if (hasTimeInterval) {
                     LocalDateTime minTime = DateHandler.toLocalDateTime(minDate);
