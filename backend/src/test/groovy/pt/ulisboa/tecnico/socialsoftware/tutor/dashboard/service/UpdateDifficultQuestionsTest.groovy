@@ -116,6 +116,34 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         difficultQuestion.getDashboard().getLastCheckDifficultQuestions().isAfter(now)
     }
 
+    def "delete and create a difficult question that continues to be difficult"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1L
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() != difficultQuestion.getId()
+        result.getQuestion() == question
+        result.getPercentage() == 0
+    }
+
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

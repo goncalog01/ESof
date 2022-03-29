@@ -42,11 +42,14 @@ public class DifficultQuestion implements DomainEntity {
     }
 
     public DifficultQuestion(Dashboard dashboard, Question question, int percentage){
-        if (percentage < 0 || percentage > 24)
+        if (percentage < 0 || percentage > 24) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+
+        }
 
         if (question.getCourse() != dashboard.getCourseExecution().getCourse()) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+
         }
 
         Set<DifficultQuestion> sameDifficultyQuestions = new HashSet<>();
