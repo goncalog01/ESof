@@ -174,6 +174,36 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         daysAgo << [0, 5, 6]
     }
 
+    def "does not delete removed difficult question that was removed in less than 4 days ago even if it continues to be difficulty"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(4))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() == difficultQuestion.getId()
+        result.getQuestion() == question
+        result.getPercentage() == 24
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
