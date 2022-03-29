@@ -109,6 +109,12 @@ public class FailedAnswerService {
                 continue;
             }
 
+            // Check if student that responded is the same
+            boolean sameStudent = quizAnswer.getStudent().getId() == dashboard.getStudent().getId();
+            if (!sameStudent) {
+                continue;
+            }
+
             if (hasBeenChecked && !hasTimeInterval) {
                 continue;
             }

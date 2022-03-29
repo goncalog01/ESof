@@ -188,6 +188,29 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         dashboard.getFailedAnswers().contains(failedAnswer)
     }
 
+    def "does not create failed answers if answered other student"() {
+        given:
+        def otherStudent = new Student(USER_2_NAME, USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.TECNICO)
+        otherStudent.addCourse(externalCourseExecution)
+        userRepository.save(otherStudent)
+        and:
+        dashboard.setStudent(otherStudent)
+        and:
+        answerQuiz(true, false, true, quizQuestion, quiz)
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), null, null)
+
+        then: "no failed answer is updated in the database"
+        failedAnswerRepository.findAll().size() == 0L
+        and: "the student dashboard's failed answers is empty"
+        def dashboard = dashboardRepository.findById(dashboard.getId()).get()
+        dashboard.getStudent().getId() === otherStudent.getId()
+        dashboard.getCourseExecution().getId() === externalCourseExecution.getId()
+        dashboard.getFailedAnswers().findAll().size() == 0L
+        dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
