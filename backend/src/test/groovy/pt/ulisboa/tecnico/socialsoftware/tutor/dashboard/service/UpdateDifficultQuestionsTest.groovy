@@ -287,6 +287,62 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         result.getPercentage() == 0
     }
 
+    @Unroll
+    def "question is correctly computed as not difficulty with #numberOfIncorrect incorrect"() {
+        given:
+        answerQuiz(true)
+        (1..3).each {
+            answerQuiz(false)
+        }
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+
+        // where:
+        // numberOfIncorrect << [3]
+    }
+
+    def answerQuiz(correct, date = LocalDateTime.now()) {
+        def quiz = new Quiz()
+        quiz.setCourseExecution(externalCourseExecution)
+        quiz.setAvailableDate(now.minusHours(1))
+        quiz.setConclusionDate(now)
+        quizRepository.save(quiz)
+
+        def quizQuestion = new QuizQuestion()
+        quizQuestion.setQuiz(quiz)
+        quizQuestion.setQuestion(question)
+        quizQuestionRepository.save(quizQuestion)
+
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setCompleted(true)
+        quizAnswer.setCreationDate(date)
+        quizAnswer.setAnswerDate(date)
+        quizAnswer.setStudent(student)
+        quizAnswer.setQuiz(quiz)
+        quizAnswerRepository.save(quizAnswer)
+
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setTimeTaken(1)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswerRepository.save(questionAnswer)
+
+        def answerDetails
+        if (correct) answerDetails = new MultipleChoiceAnswer(questionAnswer, optionOK)
+        else if (!correct) answerDetails = new MultipleChoiceAnswer(questionAnswer, optionKO)
+        else {
+            questionAnswerRepository.save(questionAnswer)
+            return questionAnswer
+        }
+        questionAnswer.setAnswerDetails(answerDetails)
+        answerDetailsRepository.save(answerDetails)
+        return questionAnswer
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
