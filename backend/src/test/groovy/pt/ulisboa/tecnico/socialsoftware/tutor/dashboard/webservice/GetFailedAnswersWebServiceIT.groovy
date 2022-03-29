@@ -89,7 +89,18 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def "teacher can't get student's failed answers"() {
+        given: "demo teacher"
+        demoTeacherLogin()
 
+        when: "the web service is invoked"
+        response = restClient.get(
+                path: '/students/failedanswers/' + dashboard.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
     def "student can't get another student's failed answers"() {
