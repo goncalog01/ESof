@@ -86,24 +86,28 @@ public class FailedAnswerService {
             QuizAnswer quizAnswer = questionAnswer.getQuizAnswer();
             Quiz quiz = quizAnswer.getQuiz();
 
-            // Check getLastCheck getting the max time
+            // Setting dashboard's last check failed answers to max question creation date
             if (dashboard.getLastCheckFailedAnswers() == null) {
                 dashboard.setLastCheckFailedAnswers(quizAnswer.getCreationDate().minusSeconds(1));
             } else {
                 LocalDateTime creationDate = quizAnswer.getCreationDate().minusSeconds(1);
                 LocalDateTime currentDate = dashboard.getLastCheckFailedAnswers();
                 LocalDateTime maxTime = (creationDate.isAfter(currentDate)) ? creationDate : currentDate;
-                dashboard.setLastCheckFailedAnswers(maxTime);
+                if (!maxTime.isEqual(currentDate)) {
+                    dashboard.setLastCheckFailedAnswers(maxTime);
+                }
             }
 
-            // Check if this question has been checked before
-            boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
+            // Boolean to check if there were given min and max dates
             boolean hasTimeInterval = (minDate != null) && (maxDate != null);
+
+            // Check if this question has been checked before, if so ignore it (if no min and max dates were given)
+            boolean hasBeenChecked = dashboard.getLastCheckFailedAnswers().isAfter(quizAnswer.getCreationDate());
             if (hasBeenChecked && !hasTimeInterval) {
                 continue;
             }
 
-            // Check if failed answer already exists
+            // Check if failed answer already exists, if so ignore it
             boolean isInFailedAnswers = dashboard.getFailedAnswers()
                     .stream().filter(fa -> fa.getQuestionAnswer().getId() == questionAnswerId)
                     .collect(Collectors.toList()).size() > 0;
@@ -111,13 +115,13 @@ public class FailedAnswerService {
                 continue;
             }
 
-            // Check if student that responded is the same
+            // Check if student that responded is the same, if not ignore it
             boolean sameStudent = quizAnswer.getStudent().getId() == dashboard.getStudent().getId();
             if (!sameStudent) {
                 continue;
             }
 
-            // Check if quiz belongs to course execution
+            // Check if quiz belongs to course execution, if not ignore it
             boolean inSameCourseExecution = dashboard.getCourseExecution().getId() == quiz.getCourseExecution().getId();
             if (!inSameCourseExecution) {
                 continue;
@@ -127,7 +131,7 @@ public class FailedAnswerService {
             boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
             boolean isCorrect = questionAnswer.isCorrect();
             if (isCompleted && !isCorrect) {
-
+                // A given min and max time were given
                 if (hasTimeInterval) {
                     LocalDateTime minTime = DateHandler.toLocalDateTime(minDate);
                     LocalDateTime maxTime = DateHandler.toLocalDateTime(maxDate);
@@ -136,19 +140,18 @@ public class FailedAnswerService {
                         continue;
                     }
                 }
-
+                // Check if quiz is type IN_CLASS
                 boolean inClass = quiz.isInClass();
-                // if the type of quiz is IN_CLASS and the results date is later,
-                // its not considered a failed answer
                 if (inClass) {
-                    boolean isLater = DateHandler.now().isBefore(quiz.getResultsDate());
-                    if (isLater) {
+                    // If so, check if quiz's results dates are later
+                    // If they are, don't count it as a failed answer just yet
+                    boolean resultsAreLater = DateHandler.now().isBefore(quiz.getResultsDate());
+                    if (resultsAreLater) {
                         continue;
                     }
                 }
-
-                // create a new failed answer
-                this.createFailedAnswer(dashboardId, questionAnswerId);
+                // Create a new failed answer
+                createFailedAnswer(dashboardId, questionAnswerId);
             }
         }
     }
