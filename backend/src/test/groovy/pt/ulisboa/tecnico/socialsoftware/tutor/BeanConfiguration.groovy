@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.AnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthUserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.AssessmentService
@@ -129,6 +131,16 @@ class BeanConfiguration {
         return new DashboardService()
     }
 
+    @Bean
+    FailedAnswerService failedAnswerService() {
+        return new FailedAnswerService()
+    }
+    
+    @Bean
+    WeeklyScoreService weeklyScoreService() {
+        return new WeeklyScoreService()
+    }
+      
     @Bean
     DifficultQuestionService difficultQuestionService() {
         return new DifficultQuestionService()
