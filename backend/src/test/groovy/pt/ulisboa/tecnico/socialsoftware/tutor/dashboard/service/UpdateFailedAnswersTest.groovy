@@ -233,6 +233,21 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         dashboard.getLastCheckFailedAnswers().isAfter(DateHandler.now().minusSeconds(1))
     }
 
+    @Unroll
+    def "cannot update failed answers with dashboardId=#dashboardId"() {
+        when:
+        failedAnswerService.updateFailedAnswers(dashboardId, null, null)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == ErrorMessage.DASHBOARD_NOT_FOUND
+        and:
+        failedAnswerRepository.count() == 0L
+
+        where:
+        dashboardId << [0, 100]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
