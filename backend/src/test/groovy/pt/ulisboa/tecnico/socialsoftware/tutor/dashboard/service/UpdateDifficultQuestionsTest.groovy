@@ -237,6 +237,25 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         result.getPercentage() == 24
     }
 
+
+    @Unroll
+    def "delete removed difficult question that was removed in more than #daysAgo days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(daysAgo))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        daysAgo << [7, 15]
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }
