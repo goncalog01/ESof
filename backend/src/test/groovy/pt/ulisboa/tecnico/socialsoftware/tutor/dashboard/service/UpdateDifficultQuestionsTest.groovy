@@ -305,6 +305,26 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         // numberOfIncorrect << [3]
     }
 
+    @Unroll
+    def "question is correctly computed as difficult"() {
+        given:
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(true)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1L
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getQuestion() == question
+        result.getPercentage() == 20
+    }
+
     def answerQuiz(correct, date = LocalDateTime.now()) {
         def quiz = new Quiz()
         quiz.setCourseExecution(externalCourseExecution)
