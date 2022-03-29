@@ -8,6 +8,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthTecnicoUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
@@ -25,6 +27,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.questionsubmission.repository.Que
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository;
 
@@ -68,6 +71,9 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
 
+    @Autowired
+    private DashboardRepository dashboardRepository;
+
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         AuthUser authUser = ((AuthUser) authentication.getPrincipal());
@@ -93,6 +99,8 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
+                case "DASHBOARD.ACCESS":
+                    return userHasDashboard(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -128,7 +136,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     }
                     return false;
                 case "TOURNAMENT.PARTICIPANT":
-                        return userParticipatesInTournament(userId, id);
+                    return userParticipatesInTournament(userId, id);
                 case "TOURNAMENT.OWNER":
                     Tournament tournament = tournamentRepository.findById(id).orElse(null);
                     if (tournament != null) {
@@ -182,5 +190,13 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return courseExecutionRepository.getCourseExecutionsIdByCourseId(courseId)
                 .stream()
                 .anyMatch(courseExecutionId ->  userHasThisExecution(authUser, courseExecutionId));
+    }
+
+    public boolean userHasDashboard(AuthUser authUser, int dashboardId) {
+        if (!authUser.getUser().isStudent()) { return false; }
+        Student student = (Student) authUser.getUser();
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
+        if (dashboard == null)  { return false; }
+        return dashboard.getStudent().getId() == student.getId();
     }
 }
