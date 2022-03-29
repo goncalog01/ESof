@@ -133,10 +133,15 @@ public class Dashboard implements DomainEntity {
             System.out.println(dq);
         }*/
 
-        // remove existing difficult questions whose difficulty is now over %25
+        // add difficult questions back if 7 days have passed sinced they were removed
+        difficultQuestions.stream()
+                .forEach(dq -> { if(dq.isRemoved() && dq.getRemovedDate().isBefore(LocalDateTime.now().minusDays(7)))
+                                    dq.setRemoved(false); });
+
+        // remove existing difficult questions whose difficulty has changed
         // difficultQuestions.stream().forEach(dq -> dq.setPercentage(dq.getQuestion().getLastWeekDifficulty()));
-        setDifficultQuestions(getDifficultQuestions().stream()
-                .filter(df -> df.getPercentage() == df.getQuestion().getLastWeekDifficulty())
+        setDifficultQuestions(difficultQuestions.stream()
+                .filter(df -> (df.getPercentage() == df.getQuestion().getLastWeekDifficulty() || df.isRemoved()))
                 .collect(Collectors.toSet()));
 
         /*System.out.println("\n\nAFTER REMOVING\n\n");
@@ -151,7 +156,6 @@ public class Dashboard implements DomainEntity {
         Set<Question> markedQuestions = difficultQuestions.stream()
                 .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
 
-        // TODO: pass all questions as an argument
         for (QuizAnswer qa : getStudent().getQuizAnswers()
                 .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
                 .collect(Collectors.toSet())) {

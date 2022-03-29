@@ -156,6 +156,23 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         difficultQuestionRepository.count() == 0L
     }
 
+    @Unroll
+    def "does not delete removed difficult question that was removed in less than #daysAgo days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(daysAgo))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1
+
+        where:
+        daysAgo << [0, 5, 6]
+    }
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
