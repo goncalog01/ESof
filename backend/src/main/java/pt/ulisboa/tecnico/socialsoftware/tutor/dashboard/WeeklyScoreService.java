@@ -93,4 +93,32 @@ public class WeeklyScoreService {
         Collections.reverse(res);
         return res;
     }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public WeeklyScoreDto updateWeeklyScore(Integer dashboardId){
+        if (dashboardId == null) {
+            throw new TutorException(DASHBOARD_NOT_FOUND);
+        }
+
+        Dashboard dashboard = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+
+        TemporalAdjuster weekSunday = TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY);
+        LocalDate week = DateHandler.now().with(weekSunday).toLocalDate();
+
+        WeeklyScore weeklyScore = dashboard.getWeeklyScores().stream()
+                .filter(ws -> ws.getWeek().isEqual(week))
+                .findFirst()
+                .orElse(null);
+
+        if (weeklyScore == null) {
+            weeklyScore = new WeeklyScore(dashboard, week);
+        }
+
+        weeklyScore.computeStatistics();
+
+        weeklyScoreRepository.save(weeklyScore);
+
+        return new WeeklyScoreDto(weeklyScore);
+    }
 }

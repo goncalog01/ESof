@@ -30,7 +30,7 @@ public class Dashboard implements DomainEntity {
 
     private LocalDateTime lastCheckDifficultQuestions;
 
-    private LocalDateTime lastCheckWeeklyScores;
+    private LocalDateTime lastCheckWeeklyScores = null;
 
     @ManyToOne
     private CourseExecution courseExecution;
