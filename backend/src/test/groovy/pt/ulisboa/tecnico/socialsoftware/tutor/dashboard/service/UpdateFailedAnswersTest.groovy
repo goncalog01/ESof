@@ -172,6 +172,22 @@ class UpdateFailedAnswersTest extends FailedAnswersSpockTest {
         inSeconds << [-20, 0, 60*60*24+1, 60*60*24*2]
     }
 
+    def "does not create the same failed answer twice"() {
+        given:
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz, LOCAL_DATE_BEFORE.plusSeconds(20))
+        def failedAnswer = createFailedAnswer(questionAnswer, LocalDateTime.now())
+
+        when:
+        failedAnswerService.updateFailedAnswers(dashboard.getId(), DateHandler.toISOString(LOCAL_DATE_BEFORE), DateHandler.toISOString(LOCAL_DATE_YESTERDAY))
+
+        then:
+        failedAnswerRepository.count() == 1L
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getFailedAnswers().size() == 1
+        dashboard.getFailedAnswers().contains(failedAnswer)
+    }
+
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
 }

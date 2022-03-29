@@ -82,7 +82,6 @@ public class FailedAnswerService {
 
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
         for (QuestionAnswer questionAnswer : questionAnswerRepository.findAll()) {
-
             int questionAnswerId = questionAnswer.getId();
             boolean isCompleted = questionAnswer.getQuizAnswer().isCompleted();
             boolean isCorrect = questionAnswer.isCorrect();
@@ -100,6 +99,14 @@ public class FailedAnswerService {
                 LocalDateTime currentDate = dashboard.getLastCheckFailedAnswers();
                 LocalDateTime maxTime = (creationDate.isAfter(currentDate)) ? creationDate : currentDate;
                 dashboard.setLastCheckFailedAnswers(maxTime);
+            }
+
+            // Check if failed answer already exists
+            boolean isInFailedAnswers = dashboard.getFailedAnswers()
+                    .stream().filter(fa -> fa.getQuestionAnswer().getId() == questionAnswerId)
+                    .collect(Collectors.toList()).size() > 0;
+            if (isInFailedAnswers) {
+                continue;
             }
 
             if (hasBeenChecked && !hasTimeInterval) {
