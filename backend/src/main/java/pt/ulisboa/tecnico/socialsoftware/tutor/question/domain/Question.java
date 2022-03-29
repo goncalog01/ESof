@@ -342,7 +342,6 @@ public class Question implements DomainEntity {
             correctAnswers += qq.getQuestionAnswers().stream().map(qa -> qa.isCorrect() ? 1 : 0)
                     .reduce(0, (a, b) -> (a + b));
             totalAnswers += qq.getQuestionAnswers().size();
-            System.out.println("Correct: " + correctAnswers + " total+ " + totalAnswers);
         }
 
         if (totalAnswers == 0) {

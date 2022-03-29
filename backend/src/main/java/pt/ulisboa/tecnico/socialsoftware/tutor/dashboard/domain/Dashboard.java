@@ -128,11 +128,6 @@ public class Dashboard implements DomainEntity {
 
     public void updateDifficultQuestions() {
 
-        /*System.out.println("\n\nBEGIN\n\n");
-        for (DifficultQuestion dq: difficultQuestions) {
-            System.out.println(dq);
-        }*/
-
         // add difficult questions back if 7 days have passed sinced they were removed
         difficultQuestions.stream()
                 .forEach(dq -> { if(dq.isRemoved() && dq.getRemovedDate().isBefore(LocalDateTime.now().minusDays(7)))
@@ -143,12 +138,6 @@ public class Dashboard implements DomainEntity {
         setDifficultQuestions(difficultQuestions.stream()
                 .filter(df -> (df.getPercentage() == df.getQuestion().getLastWeekDifficulty() || df.isRemoved()))
                 .collect(Collectors.toSet()));
-
-        /*System.out.println("\n\nAFTER REMOVING\n\n");
-        for (DifficultQuestion dq: difficultQuestions) {
-            System.out.println(dq);
-            System.out.println("With difficulty " + dq.getPercentage());
-        }*/
 
         // Get all answered questions by the dashboard's student in the last 7 days
         // following the associations Dashboard -> Student ->* QuizAnswers -> Quiz ->* QuizQuestion -> Question
@@ -165,23 +154,12 @@ public class Dashboard implements DomainEntity {
                     .collect(Collectors.toSet()));
         }
 
-        /*System.out.println("\n\nALL QUESTIONS\n\n");
-        for (Question dq: answeredQuestions) {
-            System.out.println(dq);
-            System.out.println("\nWith difficulty: " + dq.getLastWeekDifficulty());
-        }*/
-
         // add all answered questions that have become difficult since the last update
         Map<Question, Integer> questionDifficulties = new HashMap<Question, Integer>();
         answeredQuestions.stream().forEach(aq -> questionDifficulties.put(aq, aq.getLastWeekDifficulty()));
 
         Set<Question> questionsToAdd = questionDifficulties.keySet().stream()
                 .filter(q -> questionDifficulties.get(q) < 25).collect(Collectors.toSet());
-
-        /*System.out.println("\n\nTO ADD\n\n");
-        for (Question dq: questionsToAdd) {
-            System.out.println(dq);
-        }*/
 
         difficultQuestions.addAll(questionsToAdd.stream()
                 .map(qta -> new DifficultQuestion(this, qta, questionDifficulties.get(qta))).collect(Collectors.toSet()));

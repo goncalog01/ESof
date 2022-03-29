@@ -325,6 +325,20 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         result.getPercentage() == 20
     }
 
+    @Unroll
+    def "cannot update difficult questions with invalid dashboardId=#dashboardId"() {
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboardId)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == DASHBOARD_NOT_FOUND
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        dashboardId << [0, 100]
+    }
+
     def answerQuiz(correct, date = LocalDateTime.now()) {
         def quiz = new Quiz()
         quiz.setCourseExecution(externalCourseExecution)
