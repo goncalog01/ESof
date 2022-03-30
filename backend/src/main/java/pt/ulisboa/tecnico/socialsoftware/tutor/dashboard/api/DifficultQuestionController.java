@@ -28,4 +28,10 @@ public class DifficultQuestionController {
     public List<DifficultQuestionDto> getDifficultQuestions(@PathVariable int dashboardId) {
         return this.difficultQuestionService.getDifficultQuestions(dashboardId);
     }
+
+    @GetMapping("/students/dashboards/{dashboardId}/updatedifficultquestion")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
+    public void updateDifficultQuestions(@PathVariable int dashboardId) {
+        this.difficultQuestionService.updateDifficultQuestions(dashboardId);
+    }
 }
