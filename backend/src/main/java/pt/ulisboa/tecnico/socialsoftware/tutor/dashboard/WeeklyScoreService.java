@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -97,11 +98,17 @@ public class WeeklyScoreService {
         LocalDate week = DateHandler.now().with(weekSunday).toLocalDate();
 
         dashboard.getWeeklyScores().stream()
-                .filter(weeklyScore -> !weeklyScore.getWeek().isEqual(week) && weeklyScore.isClosed())
+                .filter(WeeklyScore::isClosed)
                 .forEach(weeklyScore -> {
             weeklyScore.remove();
             weeklyScoreRepository.delete(weeklyScore);
         });
+
+        Set<LocalDate> weeks = dashboard.getStudent().getQuizAnswers().stream().map(student -> student.getAnswerDate().toLocalDate()).collect(Collectors.toSet());
+
+        dashboard.getWeeklyScores().forEach(ws -> weeks.remove(ws.getWeek()));
+
+        weeks.forEach(answerWeek -> weeklyScoreRepository.save(new WeeklyScore(dashboard, answerWeek)));
 
         dashboard.getWeeklyScores().forEach(weeklyScore -> {
             weeklyScore.computeStatistics();
