@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService;
@@ -29,7 +30,7 @@ public class DifficultQuestionController {
         return this.difficultQuestionService.getDifficultQuestions(dashboardId);
     }
 
-    @GetMapping("/students/dashboards/{dashboardId}/updatedifficultquestion")
+    @PutMapping("/students/dashboards/{dashboardId}/updatedifficultquestions")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
     public void updateDifficultQuestions(@PathVariable int dashboardId) {
         this.difficultQuestionService.updateDifficultQuestions(dashboardId);
