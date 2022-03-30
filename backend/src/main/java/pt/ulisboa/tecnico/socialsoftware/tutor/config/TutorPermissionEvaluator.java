@@ -168,11 +168,18 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "REPLY.ACCESS":
                     Reply reply = replyRepository.findById(id).orElse(null);
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
+                case "DASHBOARD.ACCESS":
+                    Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
+                    return dashboard != null && userHasThisDashboard(userId, dashboard.getStudent().getId());
                 default: return false;
             }
         }
 
         return false;
+    }
+
+    private boolean userHasThisDashboard(int userId, int dashboardStudentId) {
+        return userId == dashboardStudentId;
     }
 
     private boolean userHasThisExecution(AuthUser authUser, int courseExecutionId) {
