@@ -96,6 +96,8 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
             int id = (int) targetDomainObject;
             String permissionValue = (String) permission;
             switch (permissionValue) {
+                case "DASHBOARD.ACCESS":
+                    return userHasThisDashboard(authUser, id);
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
@@ -179,6 +181,11 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     private boolean userParticipatesInTournament(int userId, int tournamentId) {
         return userRepository.countUserTournamentPairById(userId, tournamentId) == 1;
+    }
+
+    private boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
+        return authUser.getUser().getId().equals(dashboard.getStudent().getId());
     }
 
     @Override
