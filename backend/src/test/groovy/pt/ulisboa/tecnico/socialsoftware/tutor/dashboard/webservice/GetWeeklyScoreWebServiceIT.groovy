@@ -30,29 +30,41 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
 
     def "demo student gets weekly scores"() {
         given: 'a demo student with a weekly score'
-            demoStudentLogin()
+        demoStudentLogin()
 
         when: 'the web service is invoked'
-            response = restClient.get(
-                    path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
-                    requestContentType: 'application/json'
-            )
+        response = restClient.get(
+                path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
+                requestContentType: 'application/json'
+        )
 
         then: "the request returns 200"
-            response.status == 200
+        response.status == 200
         and: "has value"
-            response.data.id != null
+        response.data.id != null
         and: 'only has one weeklyScore and the id matches with the weeklyScore created'
-            response.data.size() == 1
-            response.data.get(0).id == weeklyScoreService.getWeeklyScores(dashboardDto.getId()).get(0).getId()
+        response.data.size() == 1
+        response.data.get(0).id == weeklyScoreService.getWeeklyScores(dashboardDto.getId()).get(0).getId()
         and: 'it is in the database'
-            weeklyScoreRepository.findAll().size() == 1
+        weeklyScoreRepository.findAll().size() == 1
 
         cleanup:
-            weeklyScoreRepository.deleteAll()
+        weeklyScoreRepository.deleteAll()
     }
 
     def "demo teacher does not have access"() {
+        given: 'demo teacher'
+        demoTeacherLogin()
+
+        when: 'the web service is invoked'
+        response = restClient.get(
+                path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
 
     }
 
