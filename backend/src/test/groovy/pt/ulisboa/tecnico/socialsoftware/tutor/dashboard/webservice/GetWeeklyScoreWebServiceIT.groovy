@@ -69,6 +69,18 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
     }
 
     def "new demo student does not have access"() {
+        given: 'a demo student with a weekly score'
+        newDemoStudentLogin()
+
+        when: 'the web service is invoked'
+        response = restClient.get(
+                path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
 
     }
 
