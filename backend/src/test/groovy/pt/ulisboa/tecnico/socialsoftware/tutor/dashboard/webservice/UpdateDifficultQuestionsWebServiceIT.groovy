@@ -141,6 +141,30 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
         error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
+    def "student cant update another students difficult questions"() {
+
+        given: "a student who logged in who does not have access to the dasboard"
+        def otherStudent = new Student(USER_2_NAME,  USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.EXTERNAL)
+        otherStudent.authUser.setPassword(passwordEncoder.encode(USER_2_PASSWORD))
+        otherStudent.addCourse(externalCourseExecution)
+        userRepository.save(otherStudent)
+        createdUserLogin(USER_2_USERNAME, USER_2_PASSWORD)
+
+        when: "Get web service is invoked"
+        response = restClient.put(
+                path: '/students/dashboards/' + dashboard.getId() + '/updatedifficultquestions',
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns status code 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+
+        cleanup:
+        userRepository.deleteById(otherStudent.getId())
+
+    }
+
     def cleanup() {
         userRepository.deleteById(student.getId())
         courseExecutionRepository.deleteById(externalCourseExecution.getId())
