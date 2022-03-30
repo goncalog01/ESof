@@ -95,7 +95,7 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
                 requestContentType: 'application/json'
         )
 
-        then: "the request returns 200"
+        then: "the request returns status code 200"
         response != null
         response.status == 200
 
@@ -109,10 +109,8 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
         (info.get(1).questionDto.id == question.getId()) || (info.get(1).questionDto.id == question2.getId())
 
         cleanup:
-        dashboardRepository.deleteAll()
         difficultQuestionRepository.deleteAll()
-        userRepository.deleteAll()
-        questionDetailsRepository.deleteAll()
+        questionDetailsRepository.deleteById(questionDetails2.getId())
         questionRepository.deleteAll()
     }
 
@@ -129,9 +127,41 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
         then: "the request returns status code 403"
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-
-        cleanup:
-        dashboardRepository.deleteAll()
     }
 
+    def "student can't get another student's difficult questions"() {
+        given: "a second student"
+        def student2 = new Student(USER_2_NAME, USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.EXTERNAL)
+        student2.authUser.setPassword(passwordEncoder.encode(USER_2_PASSWORD))
+        student2.addCourse(externalCourseExecution)
+        userRepository.save(student2)
+        createdUserLogin(USER_2_USERNAME, USER_2_PASSWORD)
+
+        and: "a second dashboard"
+        def dashboard2 = new Dashboard(externalCourseExecution, student2)
+        dashboardRepository.save(dashboard2)
+
+        when: "get web service is invoked"
+        response = restClient.get(
+                path: '/students/dashboards/' + dashboard.getId() + '/difficultquestions',
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns status code 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+
+        cleanup:
+        userRepository.deleteById(student2.getId())
+    }
+
+    def cleanup() {
+        userRepository.deleteById(student.getId())
+        courseExecutionRepository.deleteById(externalCourseExecution.getId())
+        courseRepository.deleteById(externalCourseExecution.getCourse().getId())
+        questionRepository.deleteAll()
+        questionDetailsRepository.deleteAll()
+        optionRepository.deleteAll()
+        dashboardRepository.deleteAll()
+    }
 }
