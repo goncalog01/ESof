@@ -99,19 +99,39 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
         response != null
         response.status == 200
 
+        and: "both questions are in the repository"
+        difficultQuestionRepository.findAll().size() == 2
+
         and: "the difficult questions are returned"
         def info = response.data
         info.size() == 2
-        // TODO: Check if they are the exact questions. How to ???
-        /*info.get(0).questionDto.id == question2.getId()
-        info.get(1).difficultQuestionDto.question.id == difficultQuestionDto1.getDifficultQuestionDto().getQuestion().getId()*/
+        (info.get(0).questionDto.id == question.getId()) || (info.get(0).questionDto.id == question2.getId())
+        (info.get(1).questionDto.id == question.getId()) || (info.get(1).questionDto.id == question2.getId())
 
         cleanup:
-        difficultQuestionRepository.deleteAll()
         dashboardRepository.deleteAll()
+        difficultQuestionRepository.deleteAll()
         userRepository.deleteAll()
         questionDetailsRepository.deleteAll()
-        questionRepository.deleteById(question.getId())
-        questionRepository.deleteById(question2.getId())
+        questionRepository.deleteAll()
     }
+
+    def "teacher can't get student's difficult questions"() {
+        given: "a demo teacher"
+        demoTeacherLogin()
+
+        when: "Get web service is invoked"
+        response = restClient.get(
+                path: '/students/dashboards/' + dashboard.getId() + '/difficultquestions',
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns status code 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+
+        cleanup:
+        dashboardRepository.deleteAll()
+    }
+
 }
