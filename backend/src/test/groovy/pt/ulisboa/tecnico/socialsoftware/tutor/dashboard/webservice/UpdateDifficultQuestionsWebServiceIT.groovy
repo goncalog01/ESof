@@ -126,6 +126,21 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
 
     }
 
+    def "teacher cant update student's difficult questions"() {
+        given: "a demo teacher"
+        demoTeacherLogin()
+
+        when: "Get web service is invoked"
+        response = restClient.put(
+                path: '/students/dashboards/' + dashboard.getId() + '/updatedifficultquestions',
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns status code 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+    }
+
     def cleanup() {
         userRepository.deleteById(student.getId())
         courseExecutionRepository.deleteById(externalCourseExecution.getId())
