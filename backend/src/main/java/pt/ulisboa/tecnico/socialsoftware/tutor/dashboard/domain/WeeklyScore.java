@@ -50,7 +50,12 @@ public class WeeklyScore implements DomainEntity {
         setWeek(week);
         setDashboard(dashboard);
         setSamePercentage(new SamePercentage(this, new HashSet<>()));
-        setPercentageCorrect(0);
+        dashboard.getWeeklyScores().forEach(weeklyScore -> {
+            if (weeklyScore.getPercentageCorrect() == this.getPercentageCorrect() && weeklyScore != this) {
+                samePercentage.getWeeklyScores().add(weeklyScore);
+                weeklyScore.getSamePercentage().getWeeklyScores().add(this);
+            }
+        });
     }
 
     public Integer getId() {
@@ -79,10 +84,6 @@ public class WeeklyScore implements DomainEntity {
 
     public void setPercentageCorrect(int percentageCorrect) {
         this.percentageCorrect = percentageCorrect;
-        samePercentage.setWeeklyScores(dashboard.getWeeklyScores()
-                .stream().filter(ws -> ws != this && ws.getPercentageCorrect() == percentageCorrect)
-                .collect(Collectors.toSet()));
-        samePercentage.getWeeklyScores().forEach(ws -> ws.getSamePercentage().addSameWeeklyScore(this));
     }
 
     public LocalDate getWeek() {
