@@ -181,8 +181,8 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     }
 
     private boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
-        Dashboard dashboard = dashboardRepository.getById(dashboardId);
-        return authUser.getId() == dashboard.getStudent().getId();
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
+        return authUser.getUser().getId().equals(dashboard.getStudent().getId());
     }
 
     @Override
