@@ -5,6 +5,7 @@ import groovyx.net.http.RESTClient
 import org.apache.http.HttpStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore
@@ -61,10 +62,6 @@ class RemoveWeeklyScoreWebServiceIT extends FailedAnswersSpockTest {
         response.status == 200
         and: 'repository is empty'
         weeklyScoreRepository.findAll().size() == 0
-
-        cleanup:
-        weeklyScoreRepository.deleteAll()
-        userRepository.deleteById(student.getId())
     }
 
     def "teacher can't get remove student's weekly score from dashboard"() {
@@ -80,14 +77,27 @@ class RemoveWeeklyScoreWebServiceIT extends FailedAnswersSpockTest {
         then: "the server understands the request but refuses to authorize it"
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-
-        cleanup:
-        weeklyScoreRepository.deleteAll()
-        userRepository.deleteById(student.getId())
     }
 
     def "student can't get another student's weekly score from dashboard"() {
+        given: 'a demo student with a weekly score'
+        newDemoStudentLogin()
 
+        when: 'the web service is invoked'
+        response = restClient.delete(
+                path: '/students/dashboards/weeklyscores/' + weeklyScore.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+    }
+
+    def cleanup() {
+        userRepository.deleteAll()
+        courseRepository.deleteById(externalCourseExecution.getCourse().getId())
+        weeklyScoreRepository.deleteAll()
     }
 
 }
