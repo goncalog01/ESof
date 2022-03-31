@@ -48,8 +48,6 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         and: 'it is in the database'
         weeklyScoreRepository.findAll().size() == 1
 
-        cleanup:
-        weeklyScoreRepository.deleteAll()
     }
 
     def "demo teacher does not have access"() {
@@ -82,6 +80,10 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
 
+    }
+
+    def cleanup() {
+        userRepository.deleteAll()
     }
 
 }
