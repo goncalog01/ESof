@@ -9,13 +9,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerR
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthTecnicoUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
-<<<<<<< HEAD
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
-=======
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
->>>>>>> prd-get-webservice
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;

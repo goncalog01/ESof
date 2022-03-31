@@ -8,12 +8,12 @@ import org.springframework.boot.web.server.LocalServerPort
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
 
-import java.time.LocalDateTime
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GetDifficultQuestionWebServiceIT extends SpockTest {
@@ -70,24 +70,10 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
     }
 
     def "student gets difficult questions"() {
-        given: '2 difficult questions in a students dashboard'
+        given: 'a difficult questions in a students dashboard'
         createdUserLogin(USER_1_USERNAME, USER_1_PASSWORD)
-        def question2 = new Question()
-        question2.setKey(2)
-        question2.setTitle(QUESTION_2_TITLE)
-        question2.setContent(QUESTION_2_CONTENT)
-        question2.setStatus(Question.Status.AVAILABLE)
-        question2.setNumberOfAnswers(3)
-        question2.setNumberOfCorrect(2)
-        question2.setCourse(externalCourse)
-        def questionDetails2 = new MultipleChoiceQuestion()
-        question2.setQuestionDetails(questionDetails2)
-        questionDetailsRepository.save(questionDetails2)
-        questionRepository.save(question2)
-
-        def difficultQuestionDto1 = DifficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 24)
-        def difficultQuestionDto2 = DifficultQuestionService.createDifficultQuestion(dashboard.getId(), question2.getId(), 20)
-
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestionRepository.save(difficultQuestion)
 
         when: 'Get web service is invoked'
         response = restClient.get(
@@ -99,19 +85,18 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
         response != null
         response.status == 200
 
-        and: "both questions are in the repository"
-        difficultQuestionRepository.findAll().size() == 2
+        and: "the question is in the repository"
+        difficultQuestionRepository.findAll().size() == 1
 
-        and: "the difficult questions are returned"
+        and: "the difficult question is returned"
         def info = response.data
-        info.size() == 2
-        (info.get(0).questionDto.id == question.getId()) || (info.get(0).questionDto.id == question2.getId())
-        (info.get(1).questionDto.id == question.getId()) || (info.get(1).questionDto.id == question2.getId())
-
+        info.size() == 1
+        info.get(0).questionDto.id == question.getId()
+        info.get(0).questionDto.content == question.getContent()
+        info.get(0).questionDto.title == question.getTitle()
+        
         cleanup:
         difficultQuestionRepository.deleteAll()
-        questionDetailsRepository.deleteById(questionDetails2.getId())
-        questionRepository.deleteAll()
     }
 
     def "teacher can't get student's difficult questions"() {
