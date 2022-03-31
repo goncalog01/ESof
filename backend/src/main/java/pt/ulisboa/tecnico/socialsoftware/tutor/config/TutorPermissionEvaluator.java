@@ -10,6 +10,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthTecnicoUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
@@ -27,7 +31,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.questionsubmission.repository.Que
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository;
@@ -78,7 +81,13 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     private DashboardRepository dashboardRepository;
 
     @Autowired
-    private FailedAnswerRepository failedAnswerRepository; 
+    private FailedAnswerRepository failedAnswerRepository;
+
+    @Autowired
+    private DifficultQuestionRepository difficultQuestionRepository;
+
+    @Autowired
+    private WeeklyScoreRepository weeklyScoreRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -102,13 +111,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
             int id = (int) targetDomainObject;
             String permissionValue = (String) permission;
             switch (permissionValue) {
+
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
-                case "DASHBOARD.ACCESS":
-                    return userHasThisDashboard(authUser, id);
-                case "FAILED_ANSWER.ACCESS":
-                    return userHasThisFailedAnswer(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -174,6 +180,18 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "REPLY.ACCESS":
                     Reply reply = replyRepository.findById(id).orElse(null);
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
+                case "DASHBOARD.ACCESS":
+                    Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
+                    return dashboard != null && userHasThisDashboard(authUser, dashboard);
+                case "FAILED_ANSWER.ACCESS":
+                    FailedAnswer failedAnswer = failedAnswerRepository.findById(id).orElse(null);
+                    return failedAnswer != null && userHasThisFailedAnswer(authUser, failedAnswer);
+                case "DIFFICULT.QUESTION.ACCESS":
+                    DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(id).orElse(null);
+                    return difficultQuestion != null && userHasThisDifficultQuestion(authUser, difficultQuestion);
+                case "WEEKLY_SCORE.ACCESS":
+                    WeeklyScore weeklyScore = weeklyScoreRepository.findById(id).orElse(null);
+                    return weeklyScore != null && userHasThisWeeklyScore(authUser, weeklyScore);
                 default: return false;
             }
         }
@@ -189,6 +207,22 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return userRepository.countUserTournamentPairById(userId, tournamentId) == 1;
     }
 
+    private boolean userHasThisDashboard(AuthUser authUser, Dashboard dashboard) {
+        return authUser.getUser().isStudent() && authUser.getUser().getId().equals(dashboard.getStudent().getId());
+    }
+
+    private boolean userHasThisFailedAnswer(AuthUser authUser, FailedAnswer failedAnswer) {
+        return userHasThisDashboard(authUser, failedAnswer.getDashboard());
+    }
+
+    private boolean userHasThisDifficultQuestion(AuthUser authUser, DifficultQuestion difficultQuestion) {
+        return userHasThisDashboard(authUser, difficultQuestion.getDashboard());
+    }
+
+    private boolean userHasThisWeeklyScore(AuthUser authUser, WeeklyScore weeklyScore) {
+        return userHasThisDashboard(authUser, weeklyScore.getDashboard());
+    }
+
     @Override
     public boolean hasPermission(Authentication authentication, Serializable serializable, String s, Object o) {
         return false;
@@ -198,25 +232,5 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return courseExecutionRepository.getCourseExecutionsIdByCourseId(courseId)
                 .stream()
                 .anyMatch(courseExecutionId ->  userHasThisExecution(authUser, courseExecutionId));
-    }
-
-    public boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
-        if (!authUser.getUser().isStudent()) { return false; }
-
-        Student student = (Student) authUser.getUser();
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
-        if (dashboard == null)  { return false; }
-        return dashboard.getStudent().getId() == student.getId();
-    }
-
-    public boolean userHasThisFailedAnswer(AuthUser authUser, int failedAnswerId) {
-        if (!authUser.getUser().isStudent()) { return false; }
-
-        Student student = (Student) authUser.getUser();
-        FailedAnswer failedAnswer = failedAnswerRepository.findById(failedAnswerId).orElse(null);
-
-        if (failedAnswer == null) { return false; }
-        Dashboard dashboard = failedAnswer.getDashboard();
-        return dashboard.getStudent().getId() == student.getId();
     }
 }
