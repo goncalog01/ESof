@@ -355,6 +355,10 @@ public class Question implements DomainEntity {
 
     }
 
+    public boolean isEqual (Question question) {
+        return question.getId() == this.getId();
+    }
+
     @Override
     public String toString() {
         return "Question{" +
