@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
@@ -35,5 +36,11 @@ public class FailedAnswerController {
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
     public void updateFailedAnswers(@PathVariable int dashboardId) {
         this.failedAnswerService.updateFailedAnswers(dashboardId, null, null);
+    }
+
+    @DeleteMapping("/students/failedanswers/{failedAnswerId}")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#failedAnswerId, 'FAILED_ANSWER.ACCESS')")
+    public void removeFailedAnswers(@PathVariable int failedAnswerId) {
+        this.failedAnswerService.removeFailedAnswer(failedAnswerId);
     }
 }
