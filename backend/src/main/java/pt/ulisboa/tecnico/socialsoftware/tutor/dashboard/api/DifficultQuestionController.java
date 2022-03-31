@@ -31,7 +31,7 @@ public class DifficultQuestionController {
         return this.difficultQuestionService.getDifficultQuestions(dashboardId);
     }
 
-    @DeleteMapping("/students/dashboards/difficultquestions/{difficultQuestionId}")
+    @DeleteMapping("/students/difficultquestions/{difficultQuestionId}")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#difficultQuestionId, 'DIFFICULT.QUESTION.ACCESS')")
     public void deleteDifficultQuestion(@PathVariable int difficultQuestionId) {
         this.difficultQuestionService.removeDifficultQuestion(difficultQuestionId);
