@@ -339,13 +339,16 @@ public class Question implements DomainEntity {
         int correctAnswers = 0;
 
         for (QuizQuestion qq: getQuizQuestions()) {
-            correctAnswers += qq.getQuestionAnswers().stream().map(qa -> qa.isCorrect() ? 1 : 0)
+            correctAnswers += qq.getQuestionAnswers().stream()
+                    .filter(qa -> qa.getQuizAnswer().getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
+                    .map(qa -> qa.isCorrect() ? 1 : 0)
                     .reduce(0, (a, b) -> (a + b));
             totalAnswers += qq.getQuestionAnswers().size();
         }
 
+        // if there were no question answers in the last 7 days, return an infinite percentage value
         if (totalAnswers == 0) {
-            return 0;
+            return Integer.MAX_VALUE;
         } else {
             return (correctAnswers * 100) / totalAnswers ;
         }
