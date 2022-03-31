@@ -78,7 +78,7 @@ class RemoveDifficultQuestionsWebServiceIT extends SpockTest {
         createdUserLogin(USER_1_USERNAME, USER_1_PASSWORD)
 
         when: "delete web service is invoked"
-        response = restClient.put(
+        response = restClient.delete(
                 path: '/students/dashboards/difficultquestions/' + difficultQuestion.getId(),
                 requestContentType: 'application/json'
         )
@@ -104,7 +104,7 @@ class RemoveDifficultQuestionsWebServiceIT extends SpockTest {
         demoTeacherLogin()
 
         when: 'delete web service is invoked'
-        response = restClient.put(
+        response = restClient.delete(
                 path: '/students/dashboards/difficultquestions/' + difficultQuestion.getId(),
                 requestContentType: 'application/json'
         )
@@ -119,7 +119,7 @@ class RemoveDifficultQuestionsWebServiceIT extends SpockTest {
         demoStudentLogin()
 
         when: 'delete web service is invoked'
-        response = restClient.put(
+        response = restClient.delete(
                 path: '/students/dashboards/difficultquestions/' + difficultQuestion.getId(),
                 requestContentType: 'application/json'
         )

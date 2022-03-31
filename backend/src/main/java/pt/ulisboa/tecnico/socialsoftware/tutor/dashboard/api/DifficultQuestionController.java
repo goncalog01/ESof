@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService;
@@ -21,7 +21,7 @@ public class DifficultQuestionController {
         this.difficultQuestionService = difficultQuestionService;
     }
 
-    @PutMapping("/students/dashboards/difficultquestions/{difficultQuestionId}")
+    @DeleteMapping("/students/dashboards/difficultquestions/{difficultQuestionId}")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#difficultQuestionId, 'DIFFICULT.QUESTION.ACCESS')")
     public void deleteDifficultQuestion(@PathVariable int difficultQuestionId) {
         this.difficultQuestionService.removeDifficultQuestion(difficultQuestionId);
