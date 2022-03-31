@@ -91,10 +91,12 @@ class GetDifficultQuestionWebServiceIT extends SpockTest {
         and: "the difficult question is returned"
         def info = response.data
         info.size() == 1
-        info.get(0).questionDto.id == question.getId()
-        info.get(0).questionDto.content == question.getContent()
-        info.get(0).questionDto.title == question.getTitle()
-        
+        info.get(0).id == difficultQuestion.getId()
+        info.get(0).percentage == difficultQuestion.getPercentage()
+        info.get(0).removed == difficultQuestion.isRemoved()
+        info.get(0).questionDto.content == difficultQuestion.getQuestion().getContent()
+
+
         cleanup:
         difficultQuestionRepository.deleteAll()
     }
