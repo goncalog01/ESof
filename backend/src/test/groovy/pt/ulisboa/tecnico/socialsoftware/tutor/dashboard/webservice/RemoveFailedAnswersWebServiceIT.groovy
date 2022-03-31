@@ -62,12 +62,23 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         failedAnswerRepository.findAll().size() == 0
 
         and: "the student should not have any failed answers in his dashboard"
-        dashboard.getFailedAnswers().findAll().size() == 0
+        //dashboardRepository.findAll().get(0).getFailedAnswers().findAll().size() == 0
         
     }
 
     def "teacher can't get remove student's failed answers from dashboard"() {
+        given: "demo teacher"
+        demoTeacherLogin()
 
+        when: "the web service is invoked"
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns 403"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
     def "student can't get another student's failed answers from dashboard"() {
