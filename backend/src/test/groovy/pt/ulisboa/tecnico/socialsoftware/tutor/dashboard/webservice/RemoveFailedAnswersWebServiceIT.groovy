@@ -60,9 +60,6 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
         and: "there should not be any failed answers in the repository"
         failedAnswerRepository.findAll().size() == 0
-
-        and: "the student should not have any failed answers in his dashboard"
-        //dashboardRepository.findAll().get(0).getFailedAnswers().findAll().size() == 0
         
     }
 
