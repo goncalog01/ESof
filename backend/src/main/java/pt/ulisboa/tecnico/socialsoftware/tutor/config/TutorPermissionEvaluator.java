@@ -100,7 +100,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
                 case "DASHBOARD.ACCESS":
-                    return userHasDashboard(authUser, id);
+                    return userHasThisDashboard(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -194,7 +194,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     public boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
         if (!authUser.getUser().isStudent()) { return false; }
-        
+
         Student student = (Student) authUser.getUser();
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
         if (dashboard == null)  { return false; }
