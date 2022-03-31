@@ -29,6 +29,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.questionsubmission.repository.Que
 import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.repository.QuizRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.domain.Tournament;
 import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository;
 
@@ -103,6 +104,8 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
+                case "DASHBOARD.ACCESS":
+                    return userHasThisDashboard(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -138,7 +141,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     }
                     return false;
                 case "TOURNAMENT.PARTICIPANT":
-                        return userParticipatesInTournament(userId, id);
+                    return userParticipatesInTournament(userId, id);
                 case "TOURNAMENT.OWNER":
                     Tournament tournament = tournamentRepository.findById(id).orElse(null);
                     if (tournament != null) {
@@ -168,9 +171,6 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "REPLY.ACCESS":
                     Reply reply = replyRepository.findById(id).orElse(null);
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
-                case "DASHBOARD.ACCESS":
-                    Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
-                    return dashboard != null && userHasThisDashboard(userId, dashboard);
                 case "WEEKLY_SCORE.ACCESS":
                     WeeklyScore weeklyScore = weeklyScoreRepository.findById(id).orElse(null);
                     return weeklyScore != null && userHasThisWeeklyScore(userId, weeklyScore);
@@ -181,14 +181,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
-    private boolean userHasThisDashboard(int userId, Dashboard dashboard) {
-        return dashboard.getStudent().getId().equals(userId);
-    }
-
     private boolean userHasThisWeeklyScore(int userId, WeeklyScore weeklyScore) {
         return weeklyScore.getDashboard().getStudent().getId().equals(userId);
     }
-
+  
     private boolean userHasThisExecution(AuthUser authUser, int courseExecutionId) {
         return authUser.getCourseExecutionsIds().contains(courseExecutionId);
     }
@@ -206,5 +202,14 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return courseExecutionRepository.getCourseExecutionsIdByCourseId(courseId)
                 .stream()
                 .anyMatch(courseExecutionId ->  userHasThisExecution(authUser, courseExecutionId));
+    }
+
+    public boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
+        if (!authUser.getUser().isStudent()) { return false; }
+
+        Student student = (Student) authUser.getUser();
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
+        if (dashboard == null)  { return false; }
+        return dashboard.getStudent().getId() == student.getId();
     }
 }

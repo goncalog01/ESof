@@ -8,6 +8,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestio
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 import javax.persistence.*;
 
@@ -49,8 +50,12 @@ public class SameDifficulty implements DomainEntity {
         this.sameDifficultyQuestions = sameDifficultyQuestions;
     }
 
-    public Set<DifficultQuestion> getSameDifficultyQuestions() {
-        return sameDifficultyQuestions;
+    public Set<DifficultQuestion> getDifficultQuestions() {
+        if (difficultQuestion.isRemoved()) {
+            return new HashSet<DifficultQuestion>();
+        } else {
+            return sameDifficultyQuestions.stream().filter(df -> !df.isRemoved()).collect(Collectors.toSet());
+        }
     }
 
     public void addSameDifficultyQuestion(DifficultQuestion difficultQuestion){

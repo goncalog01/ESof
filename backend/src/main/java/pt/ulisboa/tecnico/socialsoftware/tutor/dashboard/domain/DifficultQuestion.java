@@ -42,11 +42,14 @@ public class DifficultQuestion implements DomainEntity {
     }
 
     public DifficultQuestion(Dashboard dashboard, Question question, int percentage){
-        if (percentage < 0 || percentage > 24)
+        if (percentage < 0 || percentage > 24) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+
+        }
 
         if (question.getCourse() != dashboard.getCourseExecution().getCourse()) {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
+
         }
 
         Set<DifficultQuestion> sameDifficultyQuestions = new HashSet<>();
@@ -67,19 +70,14 @@ public class DifficultQuestion implements DomainEntity {
     }
 
     public void remove() {
-        if (!removed) {
-            throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
-        } else if (removedDate.isBefore(DateHandler.now().minusDays(7))) {
+
+        if (removed) {
             throw new TutorException(ErrorMessage.CANNOT_REMOVE_DIFFICULT_QUESTION);
         }
-
-        for (DifficultQuestion dq: getSameDifficulty().getSameDifficultyQuestions()) {
-            dq.getSameDifficulty().getSameDifficultyQuestions().remove(this);
+        else {
+            setRemoved(true);
+            setRemovedDate(LocalDateTime.now());
         }
-        sameDifficulty = null;
-
-        dashboard.getDifficultQuestions().remove(this);
-        dashboard = null;
     }
 
     public Dashboard getDashboard() {
