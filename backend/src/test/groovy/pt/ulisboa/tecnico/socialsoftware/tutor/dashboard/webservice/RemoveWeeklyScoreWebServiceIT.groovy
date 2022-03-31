@@ -48,7 +48,7 @@ class RemoveWeeklyScoreWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def "student removes weekly score"() {
-        given:
+        given: 'a logged-in student'
         createdUserLogin(USER_1_EMAIL, USER_1_PASSWORD)
 
         when: 'the web service is invoked'
@@ -68,7 +68,22 @@ class RemoveWeeklyScoreWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def "teacher can't get remove student's weekly score from dashboard"() {
+        given: 'demo teacher'
+        demoTeacherLogin()
 
+        when: 'the web service is invoked'
+        response = restClient.delete(
+                path: '/students/dashboards/weeklyscores/' + weeklyScore.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+
+        cleanup:
+        weeklyScoreRepository.deleteAll()
+        userRepository.deleteById(student.getId())
     }
 
     def "student can't get another student's weekly score from dashboard"() {
