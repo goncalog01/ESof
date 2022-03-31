@@ -103,6 +103,21 @@ class RemoveDifficultQuestionsWebServiceIT extends SpockTest {
         difficultQuestionRepository.deleteAll()
     }
 
+    def "teacher cant update student's difficult questions"() {
+        given: 'a demo teacher'
+        demoTeacherLogin()
+
+        when: 'delete web service is invoked'
+        response = restClient.put(
+                path: '/students/dashboards/difficultquestions/' + difficultQuestion.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+    }
+
     def cleanup() {
         userRepository.deleteById(student.getId())
         courseExecutionRepository.deleteById(externalCourseExecution.getId())
