@@ -30,6 +30,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.tournament.repository.TournamentR
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.User;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.repository.UserRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
+
 
 import java.io.Serializable;
 
@@ -74,6 +77,9 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     @Autowired
     private DashboardRepository dashboardRepository;
 
+    @Autowired
+    private FailedAnswerRepository failedAnswerRepository; 
+
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         AuthUser authUser = ((AuthUser) authentication.getPrincipal());
@@ -101,6 +107,8 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     return courseExecutionDto.getName().equals("Demo Course");
                 case "DASHBOARD.ACCESS":
                     return userHasThisDashboard(authUser, id);
+                case "FAILED_ANSWER.ACCESS":
+                    return userHasThisFailedAnswer(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -198,6 +206,17 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         Student student = (Student) authUser.getUser();
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
         if (dashboard == null)  { return false; }
+        return dashboard.getStudent().getId() == student.getId();
+    }
+
+    public boolean userHasThisFailedAnswer(AuthUser authUser, int failedAnswerId) {
+        if (!authUser.getUser().isStudent()) { return false; }
+
+        Student student = (Student) authUser.getUser();
+        FailedAnswer failedAnswer = failedAnswerRepository.findById(failedAnswerId).orElse(null);
+
+        if (failedAnswer == null) { return false; }
+        Dashboard dashboard = failedAnswer.getDashboard();
         return dashboard.getStudent().getId() == student.getId();
     }
 }

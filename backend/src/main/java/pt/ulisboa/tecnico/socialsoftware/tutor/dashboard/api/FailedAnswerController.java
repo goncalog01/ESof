@@ -39,7 +39,7 @@ public class FailedAnswerController {
     }
 
     @DeleteMapping("/students/failedanswers/{failedAnswerId}")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#failedAnswerId, 'FAILED_ANSWER.ACCESS')")
     public void removeFailedAnswers(@PathVariable int failedAnswerId) {
         this.failedAnswerService.removeFailedAnswer(failedAnswerId);
     }
