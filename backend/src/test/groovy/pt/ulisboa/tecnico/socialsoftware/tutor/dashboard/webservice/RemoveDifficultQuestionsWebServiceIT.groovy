@@ -6,8 +6,6 @@ import org.apache.http.HttpStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
@@ -15,8 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestio
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.Quiz
-import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 
@@ -106,6 +102,21 @@ class RemoveDifficultQuestionsWebServiceIT extends SpockTest {
     def "teacher cant update student's difficult questions"() {
         given: 'a demo teacher'
         demoTeacherLogin()
+
+        when: 'delete web service is invoked'
+        response = restClient.put(
+                path: '/students/dashboards/difficultquestions/' + difficultQuestion.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
+    }
+
+    def "student cant remove another students difficult questions"() {
+        given: 'a demo student'
+        demoStudentLogin()
 
         when: 'delete web service is invoked'
         response = restClient.put(

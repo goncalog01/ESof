@@ -8,6 +8,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthTecnicoUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
@@ -68,6 +72,12 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     @Autowired
     private CourseExecutionRepository courseExecutionRepository;
 
+    @Autowired
+    private DashboardRepository dashboardRepository;
+
+    @Autowired
+    private DifficultQuestionRepository difficultQuestionRepository;
+
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         AuthUser authUser = ((AuthUser) authentication.getPrincipal());
@@ -90,6 +100,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
             int id = (int) targetDomainObject;
             String permissionValue = (String) permission;
             switch (permissionValue) {
+                case "DIFFICULT.QUESTION.ACCESS":
+                    return userHasThisDifficultQuestion(authUser, id);
+                case "DASHBOARD.ACCESS":
+                    return userHasThisDashboard(authUser, id);
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
@@ -171,6 +185,17 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     private boolean userParticipatesInTournament(int userId, int tournamentId) {
         return userRepository.countUserTournamentPairById(userId, tournamentId) == 1;
+    }
+
+    private boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
+        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
+        return authUser.getUser().getId().equals(dashboard.getStudent().getId());
+    }
+
+    private boolean userHasThisDifficultQuestion(AuthUser authUser, int difficultQuestionId) {
+        DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(difficultQuestionId).orElse(null);
+
+        return userHasThisDashboard(authUser, difficultQuestion.getDashboard().getId());
     }
 
     @Override

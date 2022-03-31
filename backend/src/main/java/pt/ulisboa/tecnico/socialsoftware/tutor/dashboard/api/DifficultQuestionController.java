@@ -22,7 +22,7 @@ public class DifficultQuestionController {
     }
 
     @PutMapping("/students/dashboards/difficultquestions/{difficultQuestionId}")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#difficultQuestionId, 'DIFFICULT.QUESTION.ACCESS')")
     public void deleteDifficultQuestion(@PathVariable int difficultQuestionId) {
         this.difficultQuestionService.removeDifficultQuestion(difficultQuestionId);
     }
