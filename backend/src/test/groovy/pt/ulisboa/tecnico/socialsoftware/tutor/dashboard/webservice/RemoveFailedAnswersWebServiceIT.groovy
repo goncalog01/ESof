@@ -21,6 +21,7 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     def courseExecution
     def quiz
     def quizQuestion
+    def questionAnswer
     def failedAnswer
 
     def setup() {
@@ -29,7 +30,7 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         and:
         createExternalCourseAndExecution()
         and:
-        student = new Student(USER_1_NAME, USER_1_EMAIL, USER_1_PASSWORD, false, AuthUser.Type.EXTERNAL)
+        student = new Student(USER_1_NAME, USER_1_USERNAME, USER_1_EMAIL, false, AuthUser.Type.EXTERNAL)
         student.authUser.setPassword(passwordEncoder.encode(USER_1_PASSWORD))
         student.addCourse(externalCourseExecution)
         userRepository.save(student)
@@ -39,12 +40,26 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         and:
         quiz = createQuiz(1)
         quizQuestion = createQuestion(1, quiz)
-        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
         failedAnswer = createFailedAnswer(questionAnswer, LocalDateTime.now().minusDays(8))
     }
 
     def "student gets failed answers from dashboard then removes it"() {
+        given: "student is logged in"
+        createdUserLogin(USER_1_USERNAME, USER_1_PASSWORD)
 
+        when: "the web service is invoked"
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
+                requestContentType: 'application/json'
+        )
+
+        then: "the request returns 200"
+        response != null
+        response.status == 200
+
+        and: "there should not be any failed answers"
+        failedAnswerRepository.findAll().size() == 0
     }
 
     def "teacher can't get remove student's failed answers from dashboard"() {
@@ -53,6 +68,14 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
     def "student can't get another student's failed answers from dashboard"() {
 
+    }
+
+    def cleanup () {
+        failedAnswerRepository.deleteAll()
+        questionAnswerRepository.deleteById(questionAnswer.getId())
+        userRepository.deleteById(student.getId())
+        courseExecutionRepository.deleteById(externalCourseExecution.getId())
+        courseRepository.deleteById(externalCourseExecution.getCourse().getId())
     }
 
 }
