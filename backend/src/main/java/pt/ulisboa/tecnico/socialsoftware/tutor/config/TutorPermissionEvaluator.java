@@ -9,7 +9,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.QuestionAnswerR
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthTecnicoUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Discussion;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.domain.Reply;
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository;
@@ -72,6 +74,9 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired
     private DashboardRepository dashboardRepository;
+
+    @Autowired
+    private WeeklyScoreRepository weeklyScoreRepository;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -165,7 +170,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
                 case "DASHBOARD.ACCESS":
                     Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
-                    return dashboard != null && userHasThisDashboard(userId, dashboard.getStudent().getId());
+                    return dashboard != null && userHasThisDashboard(userId, dashboard);
+                case "WEEKLY_SCORE.ACCESS":
+                    WeeklyScore weeklyScore = weeklyScoreRepository.findById(id).orElse(null);
+                    return weeklyScore != null && userHasThisWeeklyScore(userId, weeklyScore);
                 default: return false;
             }
         }
@@ -173,8 +181,12 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
-    private boolean userHasThisDashboard(int userId, int dashboardStudentId) {
-        return userId == dashboardStudentId;
+    private boolean userHasThisDashboard(int userId, Dashboard dashboard) {
+        return dashboard.getStudent().getId().equals(userId);
+    }
+
+    private boolean userHasThisWeeklyScore(int userId, WeeklyScore weeklyScore) {
+        return weeklyScore.getDashboard().getStudent().getId().equals(userId);
     }
 
     private boolean userHasThisExecution(AuthUser authUser, int courseExecutionId) {
