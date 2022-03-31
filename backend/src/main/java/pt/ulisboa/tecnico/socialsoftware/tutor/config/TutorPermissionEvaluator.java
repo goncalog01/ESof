@@ -96,8 +96,6 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
             int id = (int) targetDomainObject;
             String permissionValue = (String) permission;
             switch (permissionValue) {
-                case "DASHBOARD.ACCESS":
-                    return userHasThisDashboard(authUser, id);
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
@@ -168,18 +166,11 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "REPLY.ACCESS":
                     Reply reply = replyRepository.findById(id).orElse(null);
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
-                case "DASHBOARD.ACCESS":
-                    Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
-                    return dashboard != null && userHasThisDashboard(userId, dashboard.getStudent().getId());
                 default: return false;
             }
         }
 
         return false;
-    }
-
-    private boolean userHasThisDashboard(int userId, int dashboardStudentId) {
-        return userId == dashboardStudentId;
     }
 
     private boolean userHasThisExecution(AuthUser authUser, int courseExecutionId) {
@@ -188,11 +179,6 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     private boolean userParticipatesInTournament(int userId, int tournamentId) {
         return userRepository.countUserTournamentPairById(userId, tournamentId) == 1;
-    }
-
-    private boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
-        return authUser.getUser().getId().equals(dashboard.getStudent().getId());
     }
 
     @Override
@@ -206,8 +192,9 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 .anyMatch(courseExecutionId ->  userHasThisExecution(authUser, courseExecutionId));
     }
 
-    public boolean userHasDashboard(AuthUser authUser, int dashboardId) {
+    public boolean userHasThisDashboard(AuthUser authUser, int dashboardId) {
         if (!authUser.getUser().isStudent()) { return false; }
+        
         Student student = (Student) authUser.getUser();
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElse(null);
         if (dashboard == null)  { return false; }
