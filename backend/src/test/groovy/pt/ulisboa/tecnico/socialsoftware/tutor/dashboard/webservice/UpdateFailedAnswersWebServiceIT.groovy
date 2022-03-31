@@ -72,28 +72,11 @@ class UpdateFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def "teacher cant update student's failed answers"() {
-        given: "demo teacher"
-        demoTeacherLogin()
 
-        when: "the web service is invoked"
-        response = restClient.put(
-                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers',
-                requestContentType: 'application/json'
-        )
-
-        then: "the request returns 403"
-        def error = thrown(HttpResponseException)
-        error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
     def "student cant update another students failed answers"() {
 
-    }
-
-    def cleanup() {
-        userRepository.deleteById(student.getId())
-        courseExecutionRepository.deleteById(externalCourseExecution.getId())
-        courseRepository.deleteById(externalCourseExecution.getCourse().getId())
     }
 
 }
