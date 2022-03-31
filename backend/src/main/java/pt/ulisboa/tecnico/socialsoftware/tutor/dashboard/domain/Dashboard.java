@@ -134,7 +134,6 @@ public class Dashboard implements DomainEntity {
                                     dq.setRemoved(false); });
 
         // remove existing difficult questions whose difficulty has changed
-        // difficultQuestions.stream().forEach(dq -> dq.setPercentage(dq.getQuestion().getLastWeekDifficulty()));
         setDifficultQuestions(difficultQuestions.stream()
                 .filter(df -> (df.getPercentage() == df.getQuestion().getLastWeekDifficulty() || df.isRemoved()))
                 .collect(Collectors.toSet()));

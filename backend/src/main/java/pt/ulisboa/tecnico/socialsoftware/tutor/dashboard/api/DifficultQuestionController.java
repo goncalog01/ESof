@@ -30,7 +30,7 @@ public class DifficultQuestionController {
         return this.difficultQuestionService.getDifficultQuestions(dashboardId);
     }
 
-    @PutMapping("/students/dashboards/{dashboardId}/updatedifficultquestions")
+    @PutMapping("/students/dashboards/{dashboardId}/difficultquestions")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
     public void updateDifficultQuestions(@PathVariable int dashboardId) {
         this.difficultQuestionService.updateDifficultQuestions(dashboardId);

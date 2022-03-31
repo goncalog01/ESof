@@ -104,7 +104,7 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
 
         when: "Update webservice is invoked"
         response = restClient.put(
-                path: '/students/dashboards/' + dashboard.getId() + '/updatedifficultquestions',
+                path: '/students/dashboards/' + dashboard.getId() + '/difficultquestions',
                 requestContentType: 'application/json'
         )
 
@@ -132,7 +132,7 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
 
         when: "Get web service is invoked"
         response = restClient.put(
-                path: '/students/dashboards/' + dashboard.getId() + '/updatedifficultquestions',
+                path: '/students/dashboards/' + dashboard.getId() + '/difficultquestions',
                 requestContentType: 'application/json'
         )
 
@@ -152,7 +152,7 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
 
         when: "Get web service is invoked"
         response = restClient.put(
-                path: '/students/dashboards/' + dashboard.getId() + '/updatedifficultquestions',
+                path: '/students/dashboards/' + dashboard.getId() + '/difficultquestions',
                 requestContentType: 'application/json'
         )
 
