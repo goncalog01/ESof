@@ -60,7 +60,7 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
         when: "the web service is invoked"
         response = restClient.get(
-                path: '/students/failedanswers/' + dashboard.getId(),
+                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers',
                 requestContentType: 'application/json'
         )
 
@@ -94,7 +94,7 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
         when: "the web service is invoked"
         response = restClient.get(
-                path: '/students/failedanswers/' + dashboard.getId(),
+                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers',
                 requestContentType: 'application/json'
         )
 
@@ -117,7 +117,7 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
         when: "the web service is invoked"
         response = restClient.get(
-                path: '/students/failedanswers/' + dashboard.getId(),
+                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers',
                 requestContentType: 'application/json'
         )
 
