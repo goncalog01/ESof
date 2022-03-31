@@ -58,8 +58,12 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         response != null
         response.status == 200
 
-        and: "there should not be any failed answers"
+        and: "there should not be any failed answers in the repository"
         failedAnswerRepository.findAll().size() == 0
+
+        and: "the student should not have any failed answers in his dashboard"
+        dashboard.getFailedAnswers().findAll().size() == 0
+        
     }
 
     def "teacher can't get remove student's failed answers from dashboard"() {

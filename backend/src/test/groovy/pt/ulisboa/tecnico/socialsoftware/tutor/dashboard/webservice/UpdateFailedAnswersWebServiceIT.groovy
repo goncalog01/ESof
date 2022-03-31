@@ -65,10 +65,6 @@ class UpdateFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
 
         addedFailedAnswer.getQuestionAnswer().getId() == questionAnswer.getId()
         addedFailedAnswer.getQuestionAnswer().getTimeTaken() == questionAnswer.getTimeTaken()
-
-        cleanup:
-        failedAnswerRepository.deleteAll()
-        questionAnswerRepository.deleteById(questionAnswer.getId())
     }
 
     def "teacher cant update student's failed answers"() {
@@ -109,6 +105,8 @@ class UpdateFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def cleanup() {
+        failedAnswerRepository.deleteAll()
+        questionAnswerRepository.deleteById(questionAnswer.getId())
         userRepository.deleteById(student.getId())
         courseExecutionRepository.deleteById(externalCourseExecution.getId())
         courseRepository.deleteById(externalCourseExecution.getCourse().getId())
