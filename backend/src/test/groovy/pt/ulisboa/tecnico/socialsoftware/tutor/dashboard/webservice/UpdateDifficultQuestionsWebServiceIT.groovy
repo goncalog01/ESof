@@ -165,14 +165,12 @@ class UpdateDifficultQuestionsWebServiceIT extends SpockTest {
 
     }
 
+    /* minimal repository cleanup according to current "orphanDelete" relations */
     def cleanup() {
         userRepository.deleteById(student.getId())
-        courseExecutionRepository.deleteById(externalCourseExecution.getId())
         courseRepository.deleteById(externalCourseExecution.getCourse().getId())
-        questionRepository.deleteAll()
-        questionDetailsRepository.deleteAll()
         optionRepository.deleteAll()
-        dashboardRepository.deleteAll()
+        quizAnswerRepository.deleteAll()
     }
 
 }

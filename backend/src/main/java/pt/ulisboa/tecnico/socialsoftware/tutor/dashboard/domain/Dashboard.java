@@ -42,7 +42,7 @@ public class Dashboard implements DomainEntity {
     @ManyToOne
     private Student student;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
     private Set<DifficultQuestion> difficultQuestions = new HashSet<>();
 
     public Dashboard() {
@@ -107,7 +107,8 @@ public class Dashboard implements DomainEntity {
     }
 
     public void setDifficultQuestions(Set<DifficultQuestion> difficultQuestions) {
-        this.difficultQuestions = difficultQuestions;
+        this.difficultQuestions.clear();
+        this.difficultQuestions.addAll(difficultQuestions);
     }
 
     public void remove() {
@@ -145,7 +146,8 @@ public class Dashboard implements DomainEntity {
                 .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
 
         for (QuizAnswer qa : getStudent().getQuizAnswers()
-                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
+                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7))
+                                    && q.getQuiz().getCourseExecution() == courseExecution)
                 .collect(Collectors.toSet())) {
             answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
                     .map(qq -> qq.getQuestion())

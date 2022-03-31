@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -77,10 +78,12 @@ public class DifficultQuestionService {
     public void updateDifficultQuestions(int dashboardId){
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
 
-        Set<DifficultQuestion> oldDifficultQuestions = dashboard.getDifficultQuestions();
+        Set<DifficultQuestion> oldDifficultQuestions = new HashSet<DifficultQuestion>();
+        oldDifficultQuestions.addAll(dashboard.getDifficultQuestions());
 
         dashboard.updateDifficultQuestions();
-        Set<DifficultQuestion> newDifficultQuestions = dashboard.getDifficultQuestions();
+        Set<DifficultQuestion> newDifficultQuestions = new HashSet<DifficultQuestion>();
+        newDifficultQuestions.addAll(dashboard.getDifficultQuestions());
 
         Set<DifficultQuestion> removedDifficultQuestions = oldDifficultQuestions.stream()
                 .filter(dq -> !newDifficultQuestions.contains(dq)).collect(Collectors.toSet());
