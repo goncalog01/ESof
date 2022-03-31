@@ -116,6 +116,266 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         difficultQuestion.getDashboard().getLastCheckDifficultQuestions().isAfter(now)
     }
 
+    def "delete and create a difficult question that continues to be difficult"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1L
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() != difficultQuestion.getId()
+        result.getQuestion() == question
+        result.getPercentage() == 0
+    }
+
+    def "delete difficult question that is not difficult anymore"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+    }
+
+    @Unroll
+    def "does not delete removed difficult question that was removed in less than #daysAgo days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(daysAgo))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1
+
+        where:
+        daysAgo << [0, 5, 6]
+    }
+
+    def "does not delete removed difficult question that was removed in less than 4 days ago even if it continues to be difficulty"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(4))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() == difficultQuestion.getId()
+        result.getQuestion() == question
+        result.getPercentage() == 24
+    }
+
+    @Unroll
+    def "does not create difficult question of removed difficult question in less than 4 days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(4))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() == difficultQuestion.getId()
+        result.getQuestion() == question
+        result.isRemoved() == true
+        result.getRemovedDate() == now.minusDays(4)
+        result.getPercentage() == 24
+    }
+
+
+    @Unroll
+    def "delete removed difficult question that was removed in more than #daysAgo days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(daysAgo))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        daysAgo << [7, 15]
+    }
+
+    @Unroll
+    def "create difficult question that continues to be difficult of a removed difficult question that was removed in more than #daysAgo days ago"() {
+        given:
+        def difficultQuestion = new DifficultQuestion(dashboard, question, 24)
+        difficultQuestion.setRemovedDate(now.minusDays(15))
+        difficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(difficultQuestion)
+        and:
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setQuiz(quiz)
+        quizAnswer.setStudent(student)
+        quizAnswerRepository.save(quizAnswer)
+        and:
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswerRepository.save(questionAnswer)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1L
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getId() != difficultQuestion.getId()
+        result.getQuestion() == question
+        result.getPercentage() == 0
+    }
+
+    @Unroll
+    def "question is correctly computed as not difficulty with #numberOfIncorrect incorrect"() {
+        given:
+        answerQuiz(true)
+        (1..3).each {
+            answerQuiz(false)
+        }
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 0L
+
+        // where:
+        // numberOfIncorrect << [3]
+    }
+
+    @Unroll
+    def "question is correctly computed as difficult"() {
+        given:
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(false)
+        answerQuiz(true)
+
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboard.getId())
+
+        then:
+        difficultQuestionRepository.count() == 1L
+        and:
+        def result = difficultQuestionRepository.findAll().get(0)
+        result.getQuestion() == question
+        result.getPercentage() == 20
+    }
+
+    @Unroll
+    def "cannot update difficult questions with invalid dashboardId=#dashboardId"() {
+        when:
+        difficultQuestionService.updateDifficultQuestions(dashboardId)
+
+        then:
+        def exception = thrown(TutorException)
+        exception.getErrorMessage() == DASHBOARD_NOT_FOUND
+        difficultQuestionRepository.count() == 0L
+
+        where:
+        dashboardId << [0, 100]
+    }
+
+    def answerQuiz(correct, date = LocalDateTime.now()) {
+        def quiz = new Quiz()
+        quiz.setCourseExecution(externalCourseExecution)
+        quiz.setAvailableDate(now.minusHours(1))
+        quiz.setConclusionDate(now)
+        quizRepository.save(quiz)
+
+        def quizQuestion = new QuizQuestion()
+        quizQuestion.setQuiz(quiz)
+        quizQuestion.setQuestion(question)
+        quizQuestionRepository.save(quizQuestion)
+
+        def quizAnswer = new QuizAnswer()
+        quizAnswer.setCompleted(true)
+        quizAnswer.setCreationDate(date)
+        quizAnswer.setAnswerDate(date)
+        quizAnswer.setStudent(student)
+        quizAnswer.setQuiz(quiz)
+        quizAnswerRepository.save(quizAnswer)
+
+        def questionAnswer = new QuestionAnswer()
+        questionAnswer.setTimeTaken(1)
+        questionAnswer.setQuizAnswer(quizAnswer)
+        questionAnswer.setQuizQuestion(quizQuestion)
+        questionAnswerRepository.save(questionAnswer)
+
+        def answerDetails
+        if (correct) answerDetails = new MultipleChoiceAnswer(questionAnswer, optionOK)
+        else if (!correct) answerDetails = new MultipleChoiceAnswer(questionAnswer, optionKO)
+        else {
+            questionAnswerRepository.save(questionAnswer)
+            return questionAnswer
+        }
+        questionAnswer.setAnswerDetails(answerDetails)
+        answerDetailsRepository.save(answerDetails)
+        return questionAnswer
+    }
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}

@@ -9,10 +9,16 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.*
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthUserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameQuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SamePercentageRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameDifficultyRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.DiscussionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.repository.ReplyRepository
@@ -43,6 +49,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DemoUtils
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.Mailer
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.mock.AutoAttach
 
 import java.time.LocalDateTime
 
@@ -167,6 +174,24 @@ class SpockTest extends Specification {
     DashboardRepository dashboardRepository
 
     @Autowired
+    FailedAnswerService failedAnswerService
+
+    @Autowired
+    FailedAnswerRepository failedAnswerRepository
+
+    @Autowired
+    SameQuestionRepository sameQuestionRepository
+
+    @Autowired
+    WeeklyScoreService weeklyScoreService
+
+    @Autowired
+    WeeklyScoreRepository weeklyScoreRepository
+
+    @Autowired
+    SamePercentageRepository samePercentageRepository
+    
+    @Autowired
     DifficultQuestionService difficultQuestionService
 
     @Autowired
@@ -286,12 +311,20 @@ class SpockTest extends Specification {
         restClient.headers['Authorization']  = "Bearer " + loginResponse.data.token
     }
 
-    def demoStudentLogin() {
+    def auxDemoStudentLogin(createNew) {
         def loginResponse = restClient.get(
                 path: '/auth/demo/student',
-                query: ['createNew': false]
+                query: ['createNew': createNew]
         )
         restClient.headers['Authorization']  = "Bearer " + loginResponse.data.token
+    }
+
+    def demoStudentLogin() {
+        auxDemoStudentLogin(false)
+    }
+
+    def newDemoStudentLogin() {
+        auxDemoStudentLogin(true)
     }
 
     def demoTeacherLogin() {

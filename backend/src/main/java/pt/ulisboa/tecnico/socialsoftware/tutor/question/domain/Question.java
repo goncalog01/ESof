@@ -347,9 +347,13 @@ public class Question implements DomainEntity {
         if (totalAnswers == 0) {
             return 0;
         } else {
-            return (correctAnswers / totalAnswers) * 100;
+            return (correctAnswers * 100) / totalAnswers ;
         }
 
+    }
+
+    public boolean isEqual (Question question) {
+        return question.getId() == this.getId();
     }
 
     @Override
