@@ -32,7 +32,7 @@ public class FailedAnswerController {
     }
     
     @PutMapping("/students/dashboards/{dashboardId}/failedanswers")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
     public void updateFailedAnswers(@PathVariable int dashboardId) {
         this.failedAnswerService.updateFailedAnswers(dashboardId, null, null);
     }
