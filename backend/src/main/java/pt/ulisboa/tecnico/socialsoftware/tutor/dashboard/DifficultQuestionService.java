@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
+import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -56,7 +58,6 @@ public class DifficultQuestionService {
         DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(difficultQuestionId).orElseThrow(() -> new TutorException(DIFFICULT_QUESTION_NOT_FOUND, difficultQuestionId));
 
         difficultQuestion.remove();
-        //difficultQuestionRepository.delete(difficultQuestion);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -77,10 +78,12 @@ public class DifficultQuestionService {
     public void updateDifficultQuestions(int dashboardId){
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(ErrorMessage.DASHBOARD_NOT_FOUND, dashboardId));
 
-        Set<DifficultQuestion> oldDifficultQuestions = dashboard.getDifficultQuestions();
+        Set<DifficultQuestion> oldDifficultQuestions = new HashSet<DifficultQuestion>();
+        oldDifficultQuestions.addAll(dashboard.getDifficultQuestions());
 
         dashboard.updateDifficultQuestions();
-        Set<DifficultQuestion> newDifficultQuestions = dashboard.getDifficultQuestions();
+        Set<DifficultQuestion> newDifficultQuestions = new HashSet<DifficultQuestion>();
+        newDifficultQuestions.addAll(dashboard.getDifficultQuestions());
 
         Set<DifficultQuestion> removedDifficultQuestions = oldDifficultQuestions.stream()
                 .filter(dq -> !newDifficultQuestions.contains(dq)).collect(Collectors.toSet());
