@@ -80,7 +80,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     @Autowired
     private DifficultQuestionRepository difficultQuestionRepository;
-  
+
     @Autowired
     private WeeklyScoreRepository weeklyScoreRepository;
 
@@ -106,12 +106,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
             int id = (int) targetDomainObject;
             String permissionValue = (String) permission;
             switch (permissionValue) {
-                
+
                 case "DEMO.ACCESS":
                     CourseExecutionDto courseExecutionDto = courseExecutionService.getCourseExecutionById(id);
                     return courseExecutionDto.getName().equals("Demo Course");
-                case "DASHBOARD.ACCESS":
-                    return userHasThisDashboard(authUser, id);
                 case "COURSE.ACCESS":
                     return userHasAnExecutionOfCourse(authUser, id);
                 case "EXECUTION.ACCESS":
@@ -178,10 +176,10 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     Reply reply = replyRepository.findById(id).orElse(null);
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
                 case "DASHBOARD.ACCESS":
-                    Dashboard dashboard = dashboardReposity.findById(id).orElse(null);
+                    Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
                     return dashboard != null && userHasThisDashboard(authUser, dashboard);
                 case "DIFFICULT.QUESTION.ACCESS":
-                    DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(difficultQuestionId).orElse(null);
+                    DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(id).orElse(null);
                     return difficultQuestion != null && userHasThisDifficultQuestion(authUser, difficultQuestion);
                 case "WEEKLY_SCORE.ACCESS":
                     WeeklyScore weeklyScore = weeklyScoreRepository.findById(id).orElse(null);
@@ -192,7 +190,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
         return false;
     }
-  
+
     private boolean userHasThisExecution(AuthUser authUser, int courseExecutionId) {
         return authUser.getCourseExecutionsIds().contains(courseExecutionId);
     }
@@ -208,7 +206,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     private boolean userHasThisDifficultQuestion(AuthUser authUser, DifficultQuestion difficultQuestion) {
         return userHasThisDashboard(authUser, difficultQuestion.getDashboard());
     }
-  
+
     private boolean userHasThisWeeklyScore(AuthUser authUser, WeeklyScore weeklyScore) {
         return userHasThisDashboard(authUser, weeklyScore.getDashboard());
     }
@@ -225,4 +223,3 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
     }
 
 }
-
