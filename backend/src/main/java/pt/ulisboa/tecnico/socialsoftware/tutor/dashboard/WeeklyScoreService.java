@@ -1,14 +1,10 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SamePercentage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.WeeklyScoreDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
@@ -17,7 +13,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreR
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
-import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjuster;
@@ -87,7 +82,7 @@ public class WeeklyScoreService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void updateWeeklyScore(Integer dashboardId) {
+    public void updateWeeklyScores(Integer dashboardId) {
         if (dashboardId == null) {
             throw new TutorException(DASHBOARD_NOT_FOUND);
         }
