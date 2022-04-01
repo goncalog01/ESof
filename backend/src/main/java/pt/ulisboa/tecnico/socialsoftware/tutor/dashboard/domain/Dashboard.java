@@ -121,7 +121,8 @@ public class Dashboard implements DomainEntity {
     }
 
     public void setDifficultQuestions(Set<DifficultQuestion> difficultQuestions) {
-        this.difficultQuestions = difficultQuestions;
+        this.difficultQuestions.clear();
+        this.difficultQuestions.addAll(difficultQuestions);
     }
 
     public void remove() {
@@ -155,7 +156,6 @@ public class Dashboard implements DomainEntity {
                                     dq.setRemoved(false); });
 
         // remove existing difficult questions whose difficulty has changed
-        // difficultQuestions.stream().forEach(dq -> dq.setPercentage(dq.getQuestion().getLastWeekDifficulty()));
         setDifficultQuestions(difficultQuestions.stream()
                 .filter(df -> (df.getPercentage() == df.getQuestion().getLastWeekDifficulty() || df.isRemoved()))
                 .collect(Collectors.toSet()));
@@ -167,7 +167,8 @@ public class Dashboard implements DomainEntity {
                 .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
 
         for (QuizAnswer qa : getStudent().getQuizAnswers()
-                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
+                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7))
+                                    && q.getQuiz().getCourseExecution() == courseExecution)
                 .collect(Collectors.toSet())) {
             answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
                     .map(qq -> qq.getQuestion())
