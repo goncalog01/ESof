@@ -35,8 +35,8 @@ public class WeeklyScoreController {
 
     @PutMapping("/students/dashboards/{dashboardId}/weeklyscores")
     @PreAuthorize("hasRole('ROLE_STUDENT') and hasPermission(#dashboardId, 'DASHBOARD.ACCESS')")
-    public void updateWeeklyScores(@PathVariable int dashboardId) {
-        weeklyScoreService.updateWeeklyScores(dashboardId);
+    public List<WeeklyScoreDto> updateWeeklyScores(@PathVariable int dashboardId) {
+        return weeklyScoreService.updateWeeklyScores(dashboardId);
     }
 
 }

@@ -82,7 +82,7 @@ public class WeeklyScoreService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public void updateWeeklyScores(Integer dashboardId) {
+    public List<WeeklyScoreDto> updateWeeklyScores(Integer dashboardId) {
         if (dashboardId == null) {
             throw new TutorException(DASHBOARD_NOT_FOUND);
         }
@@ -118,5 +118,7 @@ public class WeeklyScoreService {
             ws.computeStatistics();
             weeklyScoreRepository.save(ws);
         }
+
+        return dashboard.getWeeklyScores().stream().map(WeeklyScoreDto::new).collect(Collectors.toList());
     }
 }
