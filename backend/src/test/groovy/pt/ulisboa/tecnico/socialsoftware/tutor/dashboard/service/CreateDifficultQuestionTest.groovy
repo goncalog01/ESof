@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.BeanConfiguration
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Course
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
@@ -13,7 +14,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import spock.lang.Unroll
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
-
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.DASHBOARD_NOT_FOUND
@@ -49,9 +49,9 @@ class CreateDifficultQuestionTest extends SpockTest {
     }
 
     @Unroll
-    def "create difficult question with percentage #percentage"() {
+    def "create difficult question with difficulty #difficulty"() {
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), percentage)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), difficulty)
 
         then:
         difficultQuestionRepository.count() == 1L
@@ -61,25 +61,146 @@ class CreateDifficultQuestionTest extends SpockTest {
         result.getQuestion().getId() == question.getId()
         result.isRemoved() == false
         result.getRemovedDate() == null
-        result.getPercentage() == percentage
-        result.getSameDifficulty() != null
-        result.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-        result.getSameDifficulty().getDifficultQuestion().getId() == question.getId()
+        result.getPercentage() == difficulty
+        result.getSameDifficulty().getDifficultQuestions().size() == 0
         and:
         def dashboard = dashboardRepository.getById(dashboard.getId())
         dashboard.getDifficultQuestions().contains(result)
-        dashboard.getLastCheckDifficultQuestions().isAfter(DateHandler.now().minusMinutes(1))
+        and:
+        sameDifficultyRepository.findAll().size() == 1
 
         where:
-        percentage << [0, 12, 24]
+        difficulty << [0, 12, 24]
+    }
+
+    def "create two difficulty questions with same difficulty"() {
+        given:
+        def otherQuestion = new Question()
+        otherQuestion.setTitle(QUESTION_1_TITLE)
+        otherQuestion.setContent(QUESTION_1_CONTENT)
+        otherQuestion.setStatus(Question.Status.AVAILABLE)
+        otherQuestion.setNumberOfAnswers(2)
+        otherQuestion.setNumberOfCorrect(1)
+        otherQuestion.setCourse(externalCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        otherQuestion.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(otherQuestion)
+        and:
+        def otherDifficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), otherQuestion.getId(), 20)
+
+        when:
+        def difficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 20)
+
+        then:
+        difficultQuestionRepository.count() == 2L
+        def result = difficultQuestionRepository.findById(otherDifficultQuestionDto.getId()).get()
+        result.getId() == otherDifficultQuestionDto.getId()
+        result.getSameDifficulty().getDifficultQuestions().size() == 1
+        def result2 = difficultQuestionRepository.findById(difficultQuestionDto.getId()).get()
+        result2.getId() == difficultQuestionDto.getId()
+        result2.getSameDifficulty().getDifficultQuestions().size() == 1
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getDifficultQuestions().contains(result)
+        and:
+        sameDifficultyRepository.findAll().size() == 2
+        def sameDifficulty1 = sameDifficultyRepository.findAll().get(0)
+        sameDifficulty1.getDifficultQuestions().size() == 1
+        !sameDifficulty1.getDifficultQuestions().contains(sameDifficulty1.getDifficultQuestion())
+        def sameDifficulty2 = sameDifficultyRepository.findAll().get(1)
+        sameDifficulty2.getDifficultQuestions().size() == 1
+        !sameDifficulty2.getDifficultQuestions().contains(sameDifficulty2.getDifficultQuestion())
+    }
+
+    def "create two difficulty questions with same difficulty but one is removed"() {
+        given:
+        def otherQuestion = new Question()
+        otherQuestion.setTitle(QUESTION_1_TITLE)
+        otherQuestion.setContent(QUESTION_1_CONTENT)
+        otherQuestion.setStatus(Question.Status.AVAILABLE)
+        otherQuestion.setNumberOfAnswers(2)
+        otherQuestion.setNumberOfCorrect(1)
+        otherQuestion.setCourse(externalCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        otherQuestion.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(otherQuestion)
+        and:
+        def otherDifficultQuestion = new DifficultQuestion(dashboard, otherQuestion, 20)
+        otherDifficultQuestion.setRemovedDate(DateHandler.now().minusDays(1))
+        otherDifficultQuestion.setRemoved(true)
+        difficultQuestionRepository.save(otherDifficultQuestion)
+
+        when:
+        def difficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 20)
+
+        then:
+        difficultQuestionRepository.count() == 2L
+        def result = difficultQuestionRepository.findById(otherDifficultQuestion.getId()).get()
+        result.getId() == otherDifficultQuestion.getId()
+        result.getSameDifficulty().getDifficultQuestions().size() == 0
+        def result2 = difficultQuestionRepository.findById(difficultQuestionDto.getId()).get()
+        result2.getId() == difficultQuestionDto.getId()
+        result2.getSameDifficulty().getDifficultQuestions().size() == 0
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getDifficultQuestions().contains(result)
+        and:
+        sameDifficultyRepository.findAll().size() == 2
+        def sameDifficulty1 = sameDifficultyRepository.findAll().get(0)
+        sameDifficulty1.getDifficultQuestions().size() == 0
+        !sameDifficulty1.getDifficultQuestions().contains(sameDifficulty1.getDifficultQuestion())
+        def sameDifficulty2 = sameDifficultyRepository.findAll().get(1)
+        sameDifficulty2.getDifficultQuestions().size() == 0
+        !sameDifficulty2.getDifficultQuestions().contains(sameDifficulty2.getDifficultQuestion())
+    }
+
+    def "create two difficulty questions with different difficulty"() {
+        given:
+        def otherQuestion = new Question()
+        otherQuestion.setTitle(QUESTION_1_TITLE)
+        otherQuestion.setContent(QUESTION_1_CONTENT)
+        otherQuestion.setStatus(Question.Status.AVAILABLE)
+        otherQuestion.setNumberOfAnswers(2)
+        otherQuestion.setNumberOfCorrect(1)
+        otherQuestion.setCourse(externalCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        otherQuestion.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(otherQuestion)
+        and:
+        def otherDifficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), otherQuestion.getId(), 20)
+
+        when:
+        def difficultQuestionDto = difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 15)
+
+        then:
+        difficultQuestionRepository.count() == 2L
+        def result = difficultQuestionRepository.findById(otherDifficultQuestionDto.getId()).get()
+        result.getId() == otherDifficultQuestionDto.getId()
+        result.getSameDifficulty().getDifficultQuestions().size() == 0
+        def result2 = difficultQuestionRepository.findById(difficultQuestionDto.getId()).get()
+        result2.getId() == difficultQuestionDto.getId()
+        result2.getSameDifficulty().getDifficultQuestions().size() == 0
+        and:
+        def dashboard = dashboardRepository.getById(dashboard.getId())
+        dashboard.getDifficultQuestions().contains(result)
+        and:
+        sameDifficultyRepository.findAll().size() == 2
+        def sameDifficulty1 = sameDifficultyRepository.findAll().get(0)
+        sameDifficulty1.getDifficultQuestions().size() == 0
+        !sameDifficulty1.getDifficultQuestions().contains(sameDifficulty1.getDifficultQuestion())
+        def sameDifficulty2 = sameDifficultyRepository.findAll().get(1)
+        sameDifficulty2.getDifficultQuestions().size() == 0
     }
 
     def "cannot create two difficult questions for the same question"() {
         given:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 13)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 13)
 
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 24)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 24)
 
         then:
         def exception = thrown(TutorException)
@@ -106,7 +227,7 @@ class CreateDifficultQuestionTest extends SpockTest {
         questionRepository.save(alienQuestion)
 
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), alienQuestion.getId(), 22)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), alienQuestion.getId(), 22)
 
         then:
         def exception = thrown(TutorException)
@@ -118,7 +239,7 @@ class CreateDifficultQuestionTest extends SpockTest {
     @Unroll
     def "cannot create difficult question with invalid percentage=#percentage"() {
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), percentage)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), percentage)
 
         then:
         def exception = thrown(TutorException)
@@ -133,7 +254,7 @@ class CreateDifficultQuestionTest extends SpockTest {
     @Unroll
     def "cannot create difficult question with invalid dashboardId=#dashboardId"() {
         when:
-        difficultQuestionService.createDifficultQuestions(dashboardId, question.getId(), 20)
+        difficultQuestionService.createDifficultQuestion(dashboardId, question.getId(), 20)
 
         then:
         def exception = thrown(TutorException)
@@ -147,7 +268,7 @@ class CreateDifficultQuestionTest extends SpockTest {
     @Unroll
     def "cannot create difficult question with invalid questionId=#questionId"() {
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), questionId, 20)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), questionId, 20)
 
         then:
         def exception = thrown(TutorException)
@@ -173,15 +294,15 @@ class CreateDifficultQuestionTest extends SpockTest {
         questionRepository.save(question2)
 
         when:
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question.getId(), 20)
-        difficultQuestionService.createDifficultQuestions(dashboard.getId(), question2.getId(), 10)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 20)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question2.getId(), 10)
 
         then:
         difficultQuestionRepository.count() == 2L
         def result1 = difficultQuestionRepository.findAll().get(0)
         def result2 = difficultQuestionRepository.findAll().get(1)
-        result1.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
-        result2.getSameDifficulty().getSameDifficultyQuestions().isEmpty() == true
+        result1.getSameDifficulty().getDifficultQuestions().isEmpty() == true
+        result2.getSameDifficulty().getDifficultQuestions().isEmpty() == true
     }
 
     @Unroll
@@ -206,7 +327,7 @@ class CreateDifficultQuestionTest extends SpockTest {
 
         when:
         for (int i in 0..numQuestions-1){
-            difficultQuestionService.createDifficultQuestions(dashboard.getId(), questions[i].getId(), 10)
+            difficultQuestionService.createDifficultQuestion(dashboard.getId(), questions[i].getId(), 10)
         }
 
         then:
@@ -217,10 +338,10 @@ class CreateDifficultQuestionTest extends SpockTest {
         }
 
         for (int j in 0..numQuestions-1){
-            results[j].getSameDifficulty().getSameDifficultyQuestions().size() == (long) numQuestions-1
+            results[j].getSameDifficulty().getDifficultQuestions().size() == (long) numQuestions-1
             for (int k in 0..numQuestions-1){
                 if (k != j) {
-                    results[k] in results[j].getSameDifficulty().getSameDifficultyQuestions()
+                    results[k] in results[j].getSameDifficulty().getDifficultQuestions()
                 }
             }
         }

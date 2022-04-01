@@ -16,7 +16,7 @@ public class SamePercentage implements DomainEntity {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "same_percentage_id")
-    private Set<WeeklyScore> sameWeeklyScores;
+    private Set<WeeklyScore> weeklyScores;
 
     @OneToOne
     private WeeklyScore weeklyScore;
@@ -24,21 +24,21 @@ public class SamePercentage implements DomainEntity {
     public SamePercentage() {
     }
 
-    public SamePercentage(WeeklyScore weeklyScore, Set<WeeklyScore> sameWeeklyScores) {
+    public SamePercentage(WeeklyScore weeklyScore, Set<WeeklyScore> weeklyScores) {
         setWeeklyScore(weeklyScore);
-        setSameWeeklyScores(sameWeeklyScores);
+        setWeeklyScores(weeklyScores);
     }
 
     public Integer getId() {
         return id;
     }
 
-    public Set<WeeklyScore> getSameWeeklyScores() {
-        return sameWeeklyScores;
+    public Set<WeeklyScore> getWeeklyScores() {
+        return weeklyScores;
     }
 
-    public void setSameWeeklyScores(Set<WeeklyScore> sameWeeklyScores) {
-        this.sameWeeklyScores = sameWeeklyScores;
+    public void setWeeklyScores(Set<WeeklyScore> weeklyScores) {
+        this.weeklyScores = weeklyScores;
     }
 
     public WeeklyScore getWeeklyScore() {
@@ -50,7 +50,7 @@ public class SamePercentage implements DomainEntity {
     }
 
     public void addSameWeeklyScore(WeeklyScore weeklyScore){
-        this.sameWeeklyScores.add(weeklyScore);
+        this.weeklyScores.add(weeklyScore);
     }
 
     public void accept(Visitor visitor) {
@@ -60,7 +60,7 @@ public class SamePercentage implements DomainEntity {
     public String toString() {
         return "SamePercentage{" +
                 "id=" + id +
-                ", sameWeeklyScores=" + sameWeeklyScores +
+                ", sameWeeklyScores=" + weeklyScores +
                 ", weeklyScore=" + weeklyScore +
                 '}';
     }

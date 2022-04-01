@@ -8,6 +8,10 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.user.domain.Student;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 import pt.ulisboa.tecnico.socialsoftware.tutor.execution.domain.CourseExecution;
+import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.quiz.domain.QuizQuestion;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +19,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.*;
 
@@ -30,7 +37,7 @@ public class Dashboard implements DomainEntity {
 
     private LocalDateTime lastCheckDifficultQuestions;
 
-    private LocalDateTime lastCheckWeeklyScores;
+    private LocalDateTime lastCheckWeeklyScores = null;
 
     @ManyToOne
     private CourseExecution courseExecution;
@@ -114,7 +121,8 @@ public class Dashboard implements DomainEntity {
     }
 
     public void setDifficultQuestions(Set<DifficultQuestion> difficultQuestions) {
-        this.difficultQuestions = difficultQuestions;
+        this.difficultQuestions.clear();
+        this.difficultQuestions.addAll(difficultQuestions);
     }
 
     public void remove() {
@@ -140,6 +148,47 @@ public class Dashboard implements DomainEntity {
     public void accept(Visitor visitor) {
     }
 
+    public void updateDifficultQuestions() {
+
+        // add difficult questions back if 7 days have passed sinced they were removed
+        difficultQuestions.stream()
+                .forEach(dq -> { if(dq.isRemoved() && dq.getRemovedDate().isBefore(LocalDateTime.now().minusDays(7)))
+                                    dq.setRemoved(false); });
+
+        // remove existing difficult questions whose difficulty has changed
+        setDifficultQuestions(difficultQuestions.stream()
+                .filter(df -> (df.getPercentage() == df.getQuestion().getLastWeekDifficulty() || df.isRemoved()))
+                .collect(Collectors.toSet()));
+
+        // Get all answered questions by the dashboard's student in the last 7 days
+        // following the associations Dashboard -> Student ->* QuizAnswers -> Quiz ->* QuizQuestion -> Question
+        Set<Question> answeredQuestions = new HashSet<Question>();
+        Set<Question> markedQuestions = difficultQuestions.stream()
+                .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
+
+        for (QuizAnswer qa : getStudent().getQuizAnswers()
+                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7))
+                                    && q.getQuiz().getCourseExecution() == courseExecution)
+                .collect(Collectors.toSet())) {
+            answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
+                    .map(qq -> qq.getQuestion())
+                    .filter(qq -> !markedQuestions.contains(qq))
+                    .collect(Collectors.toSet()));
+        }
+
+        // add all answered questions that have become difficult since the last update
+        Map<Question, Integer> questionDifficulties = new HashMap<Question, Integer>();
+        answeredQuestions.stream().forEach(aq -> questionDifficulties.put(aq, aq.getLastWeekDifficulty()));
+
+        Set<Question> questionsToAdd = questionDifficulties.keySet().stream()
+                .filter(q -> questionDifficulties.get(q) < 25).collect(Collectors.toSet());
+
+        difficultQuestions.addAll(questionsToAdd.stream()
+                .map(qta -> new DifficultQuestion(this, qta, questionDifficulties.get(qta))).collect(Collectors.toSet()));
+
+        setLastCheckDifficultQuestions(LocalDateTime.now());
+    }
+  
     public Set<WeeklyScore> getWeeklyScores() {
         return weeklyScores;
     }
@@ -149,6 +198,7 @@ public class Dashboard implements DomainEntity {
             throw new TutorException(ErrorMessage.WEEKLY_SCORE_ALREADY_CREATED);
         }
         weeklyScores.add(weeklyScore);
+
     }
 
     @Override

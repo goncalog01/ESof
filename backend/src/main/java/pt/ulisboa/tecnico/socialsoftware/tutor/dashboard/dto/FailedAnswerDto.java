@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.dto.QuestionAnswerDto;
@@ -11,6 +12,8 @@ public class FailedAnswerDto implements Serializable {
 
     private Integer id;
 
+    private String collected;
+
     private boolean answered;
 
     private QuestionAnswerDto questionAnswerDto;
@@ -19,6 +22,7 @@ public class FailedAnswerDto implements Serializable {
     }
 
     public FailedAnswerDto(FailedAnswer failedAnswer){
+        setCollected(failedAnswer.getCollected());
         setAnswered(failedAnswer.getAnswered());
         setQuestionAnswerDto(new QuestionAnswerDto(failedAnswer.getQuestionAnswer()));
     }
@@ -26,6 +30,10 @@ public class FailedAnswerDto implements Serializable {
     public Integer getId() {
         return id;
     }
+
+    public String getCollected() { return collected; }
+
+    public void setCollected(LocalDateTime collected) { this.collected = collected.format(DateTimeFormatter.ISO_DATE_TIME); }
 
     public boolean getAnswered() {
         return answered;
@@ -47,6 +55,7 @@ public class FailedAnswerDto implements Serializable {
     public String toString() {
         return "FailedAnswerDto{" +
             "id=" + id +
+            ", collected=" + collected +
             ", answered=" + answered +
             "}";
     }
