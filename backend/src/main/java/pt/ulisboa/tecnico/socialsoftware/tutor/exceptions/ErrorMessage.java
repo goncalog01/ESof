@@ -153,6 +153,19 @@ public enum ErrorMessage {
     FRAUD_SERVICE_NOT_AVAILABLE("Fraud service not available"),
     FRAUD_SERVICE_QUIZ_TYPE_NOT_SUPPORTED("Fraud service only supports timed, one way, in class quizzes"),
 
+    FAILED_ANSWER_NOT_FOUND("Failed answer not found"),
+    FAILED_ANSWER_MISSING_START_TIME("Failed answer filter requires the definition of the start date"),
+    FAILED_ANSWER_MISSING_END_TIME("Failed answer filter requires the definition of the end date"),
+    FAILED_ANSWER_ALREADY_CREATED("Failed answer already created"),
+    CANNOT_CREATE_FAILED_ANSWER("Cannot create failed answer"),
+    CANNOT_REMOVE_FAILED_ANSWER("Cannot remove failed answer"),
+
+    WEEKLY_SCORE_ALREADY_CREATED("Weekly Score already created for this week"),
+    WEEKLY_SCORE_NOT_FOUND("Weekly Score not found: %d"),
+    UPDATE_WEEKLY_SCORE_NOT_POSSIBLE("Impossible to update old Weekly Score: %s"),
+    CANNOT_REMOVE_WEEKLY_SCORE("Impossible to remove current Weekly Score"),
+    CANNOT_CLOSE_CURRENT_WEEK("Impossible to close Weekly Score for the current week"),
+
     DIFFICULT_QUESTION_NOT_FOUND("Difficult question not found"),
     DIFFICULT_QUESTION_ALREADY_CREATED("Difficult question already created"),
     CANNOT_CREATE_DIFFICULT_QUESTION("Cannot create difficult question"),

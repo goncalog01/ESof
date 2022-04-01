@@ -279,6 +279,77 @@ class CreateDifficultQuestionTest extends SpockTest {
         questionId << [0, 100]
     }
 
+    def "create two difficult questions with different percentages"(){
+        given:
+        def question2 = new Question()
+        question2.setTitle(QUESTION_2_TITLE)
+        question2.setContent(QUESTION_2_CONTENT)
+        question2.setStatus(Question.Status.AVAILABLE)
+        question2.setNumberOfAnswers(2)
+        question2.setNumberOfCorrect(1)
+        question2.setCourse(externalCourse)
+        def questionDetails = new MultipleChoiceQuestion()
+        question2.setQuestionDetails(questionDetails)
+        questionDetailsRepository.save(questionDetails)
+        questionRepository.save(question2)
+
+        when:
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question.getId(), 20)
+        difficultQuestionService.createDifficultQuestion(dashboard.getId(), question2.getId(), 10)
+
+        then:
+        difficultQuestionRepository.count() == 2L
+        def result1 = difficultQuestionRepository.findAll().get(0)
+        def result2 = difficultQuestionRepository.findAll().get(1)
+        result1.getSameDifficulty().getDifficultQuestions().isEmpty() == true
+        result2.getSameDifficulty().getDifficultQuestions().isEmpty() == true
+    }
+
+    @Unroll
+    def "create #numQuestions difficult questions with the same percentage"(){
+
+        given:
+        def questions = [question]
+        for (int i in 1..numQuestions-1){
+            def newQuestion = new Question()
+            newQuestion.setTitle(QUESTION_2_TITLE)
+            newQuestion.setContent(QUESTION_2_CONTENT)
+            newQuestion.setStatus(Question.Status.AVAILABLE)
+            newQuestion.setNumberOfAnswers(2*i)
+            newQuestion.setNumberOfCorrect(i)
+            newQuestion.setCourse(externalCourse)
+            def questionDetails = new MultipleChoiceQuestion()
+            newQuestion.setQuestionDetails(questionDetails)
+            questionDetailsRepository.save(questionDetails)
+            questionRepository.save(newQuestion)
+            questions.add(newQuestion)
+        }
+
+        when:
+        for (int i in 0..numQuestions-1){
+            difficultQuestionService.createDifficultQuestion(dashboard.getId(), questions[i].getId(), 10)
+        }
+
+        then:
+        difficultQuestionRepository.count() == (long) numQuestions
+        def results = []
+        for (int i in 0..numQuestions-1){
+            results.add(difficultQuestionRepository.findAll().get(i))
+        }
+
+        for (int j in 0..numQuestions-1){
+            results[j].getSameDifficulty().getDifficultQuestions().size() == (long) numQuestions-1
+            for (int k in 0..numQuestions-1){
+                if (k != j) {
+                    results[k] in results[j].getSameDifficulty().getDifficultQuestions()
+                }
+            }
+        }
+
+        where:
+        numQuestions << [2, 10]
+
+    }
 
     @TestConfiguration
     static class LocalBeanConfiguration extends BeanConfiguration {}
