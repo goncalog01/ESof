@@ -8,7 +8,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class GetWeeklyScoreWebServiceIT extends SpockTest {
+class UpdateWeeklyScoreWebServiceIT extends SpockTest {
     @LocalServerPort
     private int port
 
@@ -25,15 +25,14 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         courseExecutionDto = courseService.getDemoCourse()
         authUserDto = authUserService.demoStudentAuth(false).getUser()
         dashboardDto = dashboardService.getDashboard(courseExecutionDto.getCourseExecutionId(), authUserDto.getId())
-        weeklyScoreService.updateWeeklyScores(dashboardDto.getId())
     }
 
-    def "demo student gets weekly scores"() {
-        given: 'a demo student with a weekly score'
+    def "demo student gets its weekly scores"() {
+        given: 'a demo student'
         demoStudentLogin()
 
         when: 'the web service is invoked'
-        response = restClient.get(
+        response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
@@ -47,7 +46,6 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         response.data.get(0).id == weeklyScoreService.getWeeklyScores(dashboardDto.getId()).get(0).getId()
         and: 'it is in the database'
         weeklyScoreRepository.findAll().size() == 1
-
     }
 
     def "demo teacher does not have access"() {
@@ -55,7 +53,7 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         demoTeacherLogin()
 
         when: 'the web service is invoked'
-        response = restClient.get(
+        response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
@@ -63,15 +61,15 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         then: "the server understands the request but refuses to authorize it"
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-
     }
 
-    def "new demo student does not have access"() {
+    def "student cant update another students failed answers"() {
         given: 'a demo student with a weekly score'
+        weeklyScoreService.updateWeeklyScores(dashboardDto.getId())
         newDemoStudentLogin()
 
         when: 'the web service is invoked'
-        response = restClient.get(
+        response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
@@ -79,7 +77,6 @@ class GetWeeklyScoreWebServiceIT extends SpockTest {
         then: "the server understands the request but refuses to authorize it"
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-
     }
 
     def cleanup() {
