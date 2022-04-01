@@ -64,7 +64,19 @@ class UpdateWeeklyScoreWebServiceIT extends SpockTest {
     }
 
     def "student cant update another students failed answers"() {
+        given: 'a demo student with a weekly score'
+        weeklyScoreService.updateWeeklyScores(dashboardDto.getId())
+        newDemoStudentLogin()
 
+        when: 'the web service is invoked'
+        response = restClient.put(
+                path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
+                requestContentType: 'application/json'
+        )
+
+        then: "the server understands the request but refuses to authorize it"
+        def error = thrown(HttpResponseException)
+        error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
     def cleanup() {
