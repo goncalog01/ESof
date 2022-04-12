@@ -42,9 +42,6 @@ public class Dashboard implements DomainEntity {
     @ManyToOne
     private CourseExecution courseExecution;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
-    private final List<FailedAnswer> failedAnswers = new ArrayList<>();
-
     @ManyToOne
     private Student student;
 
@@ -53,6 +50,9 @@ public class Dashboard implements DomainEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
     private Set<DifficultQuestion> difficultQuestions = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dashboard", orphanRemoval = true)
+    private Set<FailedAnswer> failedAnswers = new HashSet<>();
 
     public Dashboard() {
     }
@@ -112,7 +112,7 @@ public class Dashboard implements DomainEntity {
     }
 
 
-    public List<FailedAnswer> getFailedAnswers() {
+    public Set<FailedAnswer> getFailedAnswers() {
         return failedAnswers;
     }
   
