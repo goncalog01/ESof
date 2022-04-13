@@ -25,8 +25,8 @@ import router from '@/router';
 import QuestionQuery from '@/models/management/QuestionQuery';
 import { FraudScores } from '@/models/management/fraud/FraudScores';
 import { QuizFraudInformation } from '@/models/management/fraud/QuizFraudInformation';
-import Dashboard from "@/models/dashboard/Dashboard";
-import FailedAnswer from "@/models/dashboard/FailedAnswer";
+import Dashboard from '@/models/dashboard/Dashboard';
+import FailedAnswer from '@/models/dashboard/FailedAnswer';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 100000;
@@ -62,7 +62,6 @@ httpClient.interceptors.response.use(
 );
 
 export default class RemoteServices {
-
   // FailedAnswer Controller
   
   static async getFailedAnswers(dashboardId: number): Promise<FailedAnswer[]> {
