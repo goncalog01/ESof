@@ -1,12 +1,12 @@
 import {QuestionAnswer} from "@/models/management/QuestionAnswer";
 
-export default class Dashboard {
+export default class FailedAnswer {
     id!: number;
     collected!: string;
     answered!: boolean;
     questionAnswerDto!: QuestionAnswer;
 
-    constructor(jsonObj?: Dashboard) {
+    constructor(jsonObj?: FailedAnswer) {
         if (jsonObj) {
             this.id = jsonObj.id;
             if (jsonObj.collected)
@@ -18,6 +18,3 @@ export default class Dashboard {
         }
     }
 }
-
-
-
