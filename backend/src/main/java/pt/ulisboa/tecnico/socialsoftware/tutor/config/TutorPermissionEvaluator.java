@@ -183,7 +183,7 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                 case "DASHBOARD.ACCESS":
                     Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
                     return dashboard != null && userHasThisDashboard(authUser, dashboard);
-                case "FAILED_ANSWER.ACCESS":
+                case "FAILEDANSWER.ACCESS":
                     FailedAnswer failedAnswer = failedAnswerRepository.findById(id).orElse(null);
                     return failedAnswer != null && userHasThisFailedAnswer(authUser, failedAnswer);
                 case "DIFFICULT.QUESTION.ACCESS":

@@ -21,7 +21,6 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     def courseExecution
     def quiz
     def quizQuestion
-    def questionAnswer
     def failedAnswer
 
     def setup() {
@@ -40,72 +39,67 @@ class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         and:
         quiz = createQuiz(1)
         quizQuestion = createQuestion(1, quiz)
-        questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
         failedAnswer = createFailedAnswer(questionAnswer, LocalDateTime.now().minusDays(8))
     }
 
     def "student gets failed answers from dashboard then removes it"() {
-        given: "student is logged in"
-        createdUserLogin(USER_1_USERNAME, USER_1_PASSWORD)
+        given:
+        createdUserLogin(USER_1_EMAIL, USER_1_PASSWORD)
 
-        when: "the web service is invoked"
+        when:
         response = restClient.delete(
                 path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
-        then: "the request returns 200"
+        then:
         response != null
         response.status == 200
 
-        and: "there should not be any failed answers in the repository"
+        and:
         failedAnswerRepository.findAll().size() == 0
-        
     }
 
     def "teacher can't get remove student's failed answers from dashboard"() {
-        given: "demo teacher"
+        given:
         demoTeacherLogin()
 
-        when: "the web service is invoked"
+        when:
         response = restClient.delete(
                 path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
-        then: "the request returns 403"
+        then:
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
     def "student can't get another student's failed answers from dashboard"() {
-        given: "another student"
-        def student2 = new Student(USER_2_NAME, USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.EXTERNAL)
-        student2.authUser.setPassword(passwordEncoder.encode(USER_2_PASSWORD))
-        student2.addCourse(externalCourseExecution)
-        userRepository.save(student2)
-        createdUserLogin(USER_2_USERNAME, USER_2_PASSWORD)
+        given:
+        def newStudent = new Student(USER_2_NAME, USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.EXTERNAL)
+        newStudent.authUser.setPassword(passwordEncoder.encode(USER_2_PASSWORD))
+        userRepository.save(newStudent)
+        createdUserLogin(USER_2_EMAIL, USER_2_PASSWORD)
 
-        when: "the web service is invoked"
-        response = restClient.put(
-                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers',
+        when:
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
-        then: "the request returns 403"
+        then:
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-
-        cleanup:
-        userRepository.deleteById(student2.getId())
     }
 
-    def cleanup () {
+    def cleanup(){
         failedAnswerRepository.deleteAll()
-        questionAnswerRepository.deleteById(questionAnswer.getId())
-        userRepository.deleteById(student.getId())
-        courseExecutionRepository.deleteById(externalCourseExecution.getId())
-        courseRepository.deleteById(externalCourseExecution.getCourse().getId())
+        dashboardRepository.deleteAll()
+        userRepository.deleteAll()
+        courseRepository.deleteAll()
     }
+
 
 }

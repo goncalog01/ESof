@@ -11,7 +11,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepositor
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameQuestionRepository
+
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SamePercentageRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
@@ -65,9 +65,9 @@ class SpockTest extends Specification {
     public static final String DEMO_TEACHER_NAME = "Demo Teacher"
     public static final String DEMO_ADMIN_NAME = "Demo Admin"
 
-    public static final String USER_1_USERNAME = "a@a.a"
-    public static final String USER_2_USERNAME = "a@a.b"
-    public static final String USER_3_USERNAME = "user3username"
+    public static final String USER_1_USERNAME = "user1@mail.com"
+    public static final String USER_2_USERNAME = "user2@mail.com"
+    public static final String USER_3_USERNAME = "user3@mail.com"
     public static final String USER_1_EMAIL = "user1@mail.com"
     public static final String USER_2_EMAIL = "user2@mail.com"
     public static final String USER_3_EMAIL = "user3@mail.com"
@@ -178,9 +178,6 @@ class SpockTest extends Specification {
 
     @Autowired
     FailedAnswerRepository failedAnswerRepository
-
-    @Autowired
-    SameQuestionRepository sameQuestionRepository
 
     @Autowired
     WeeklyScoreService weeklyScoreService
