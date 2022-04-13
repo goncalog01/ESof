@@ -1,5 +1,4 @@
-import {QuestionAnswer} from "@/models/management/QuestionAnswer";
-
+import { QuestionAnswer } from '@/models/management/QuestionAnswer';
 export default class FailedAnswer {
     id!: number;
     collected!: string;
