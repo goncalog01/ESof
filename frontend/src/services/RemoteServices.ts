@@ -64,7 +64,7 @@ httpClient.interceptors.response.use(
 export default class RemoteServices {
 
   // FailedAnswer Controller
-  
+
   static async getFailedAnswers(dashboardId: number): Promise<FailedAnswer[]> {
     return httpClient
         .get(
@@ -78,6 +78,14 @@ export default class RemoteServices {
         .catch(async (error) => {
           throw Error(await this.errorMessage(error));
         });
+  }
+
+  static async refreshFailedAnswers(dashboardId: number) {
+    return httpClient
+      .put(`/students/dashboards/${dashboardId}/failedanswers`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   // AuthUser Controller
