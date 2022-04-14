@@ -41,6 +41,20 @@
             </template>
             <span>Student View</span>
           </v-tooltip>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                  class="mr-2 action-button"
+                  v-on="on"
+                  data-cy="deleteQuestionButton"
+                  @click="deleteFailedAnswer(item)"
+                  color="red"
+              >delete</v-icon
+              >
+            </template>
+            <span>Delete Question</span>
+          </v-tooltip>
         </template>
 
       </v-data-table>
@@ -54,7 +68,7 @@ import {Component, Vue, Watch} from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import StatementQuestion from '@/models/statement/StatementQuestion';
 import RemoteServices from '@/services/RemoteServices';
-import FailedAnswer from "@/models/dashboard/FailedAnswer";
+import FailedAnswer from '@/models/dashboard/FailedAnswer';
 
 @Component({
   components: {
@@ -62,7 +76,7 @@ import FailedAnswer from "@/models/dashboard/FailedAnswer";
 })
 export default class FailedAnswersView extends Vue {
   dashboardId: number | null = null;
-  failedAnswers: FailedAnswer[] = [new FailedAnswer({"id":377,"collected":"2022-04-14T20:57:25.891775","answered":true,"questionAnswerDto":{"question":{"id":586,"key":null,"title":"Question Title 1","content":"Question Content 1","difficulty":null,"numberOfClarifications":0,"numberOfAnswers":0,"numberOfGeneratedQuizzes":0,"numberOfNonGeneratedQuizzes":1,"numberOfCorrect":0,"creationDate":"2022-04-14T20:57:23.776584Z","status":"AVAILABLE","image":null,"topics":[],"sequence":null,"questionDetailsDto":{"type":"multiple_choice","options":[{"id":1585,"sequence":0,"correct":true,"content":"Option A"},{"id":1586,"sequence":1,"correct":false,"content":"Option B"},{"id":1587,"sequence":2,"correct":false,"content":"Option C"},{"id":1588,"sequence":3,"correct":false,"content":"Option D"}]}},"answerDetails":{"type":"multiple_choice","option":{"id":1587,"sequence":2,"correct":false,"content":"Option C"}}}})];
+  failedAnswers: FailedAnswer[] = [new FailedAnswer()];
   statementQuestion: StatementQuestion | null = null;
   studentViewDialog: boolean = false;
 
@@ -100,8 +114,8 @@ export default class FailedAnswersView extends Vue {
   }
 
   convertDate (date : string) {
-    var y = date.replaceAll("T", " ")
-    var i = y.indexOf(":", date.indexOf(":") + 1)
+    var y = date.replaceAll('T', ' ')
+    var i = y.indexOf(':', date.indexOf(':') + 1)
     return y.substring(0, i)
   }
 }
