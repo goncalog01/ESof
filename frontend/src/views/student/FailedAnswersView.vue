@@ -76,7 +76,7 @@ import FailedAnswer from '@/models/dashboard/FailedAnswer';
 })
 export default class FailedAnswersView extends Vue {
   dashboardId: number | null = null;
-  failedAnswers: FailedAnswer[] = [new FailedAnswer()];
+  failedAnswers: FailedAnswer[] = [];
   statementQuestion: StatementQuestion | null = null;
   studentViewDialog: boolean = false;
 
@@ -117,6 +117,22 @@ export default class FailedAnswersView extends Vue {
     var y = date.replaceAll('T', ' ')
     var i = y.indexOf(':', date.indexOf(':') + 1)
     return y.substring(0, i)
+  }
+
+  async deleteFailedAnswer(toRemoveFailedAnswer : FailedAnswer) {
+    if (
+        toRemoveFailedAnswer.id &&
+        confirm('Are you sure you want to delete this question?')
+    ) {
+      try {
+        await RemoteServices.removeFailedAnswer(toRemoveFailedAnswer.id);
+        this.failedAnswers = this.failedAnswers.filter(
+            (failedAnswer) => failedAnswer.id != toRemoveFailedAnswer.id
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
+    }
   }
 }
 
