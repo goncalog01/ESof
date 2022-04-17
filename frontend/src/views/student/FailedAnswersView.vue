@@ -7,6 +7,12 @@
         </v-col>
       </v-row>
 
+      <v-col class="text-right">
+        <v-btn color="primary" dark v-on:click="refreshFailedAnswers">
+          Refresh</v-btn
+        >
+      </v-col>
+
       <v-data-table
         :headers="headers"
         :items="failedAnswers"
