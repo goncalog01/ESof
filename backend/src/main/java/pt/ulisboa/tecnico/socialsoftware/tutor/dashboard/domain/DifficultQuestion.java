@@ -76,7 +76,7 @@ public class DifficultQuestion implements DomainEntity {
         }
         else {
             setRemoved(true);
-            setRemovedDate(LocalDateTime.now());
+            setRemovedDate(DateHandler.now());
         }
     }
 
