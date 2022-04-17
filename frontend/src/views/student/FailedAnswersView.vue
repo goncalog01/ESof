@@ -7,6 +7,12 @@
         </v-col>
       </v-row>
 
+      <v-col class="text-right">
+        <v-btn color="primary" dark v-on:click="refreshFailedAnswers">
+          Refresh</v-btn
+        >
+      </v-col>
+
       <v-data-table
         :headers="headers"
         :items="failedAnswers"
@@ -137,6 +143,20 @@ export default class FailedAnswersView extends Vue {
   onCloseStudentViewDialog() {
     this.statementQuestion = null;
     this.studentViewDialog = false;
+  }
+
+  @Emit('onFailedAnswersRefresh')
+  async refreshFailedAnswers() {
+    await this.$store.dispatch('loading');
+    try {
+      await RemoteServices.updateFailedAnswers(this.dashboardId);
+      this.failedAnswers = await RemoteServices.getFailedAnswers(
+        this.dashboardId
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
   }
 }
 </script>
