@@ -71,7 +71,7 @@ public class FailedAnswerService {
                 .sorted(Comparator.comparing(FailedAnswerDto::getCollected, Comparator.nullsLast(Comparator.reverseOrder())))
                 .collect(Collectors.toList());
     }
-    
+
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void updateFailedAnswers(int dashboardId, String startDate, String endDate) {
 
