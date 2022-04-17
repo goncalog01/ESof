@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import RemoteServices from '@/services/RemoteServices';
 import GlobalStatsView from '@/views/student/GlobalStatsView.vue';
 import Dashboard from '@/models/dashboard/Dashboard';
@@ -82,6 +82,10 @@ export default class StatsView extends Vue {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  async onFailedAnswersRefresh() {
+    this.lastCheckFailedAnswers = this.dashboard!.lastCheckFailedAnswers;
   }
   
 }

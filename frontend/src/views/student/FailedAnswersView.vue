@@ -144,6 +144,20 @@ export default class FailedAnswersView extends Vue {
     this.statementQuestion = null;
     this.studentViewDialog = false;
   }
+
+  @Emit('onFailedAnswersRefresh')
+  async refreshFailedAnswers() {
+    await this.$store.dispatch('loading');
+    try {
+      await RemoteServices.updateFailedAnswers(this.dashboardId);
+      this.failedAnswers = await RemoteServices.getFailedAnswers(
+        this.dashboardId
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
+  }
 }
 </script>
 

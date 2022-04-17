@@ -77,7 +77,7 @@ export default class RemoteServices {
       });
   }
 
-  static async refreshFailedAnswers(dashboardId: number) {
+  static async updateFailedAnswers(dashboardId: number) {
     return httpClient
       .put(`/students/dashboards/${dashboardId}/failedanswers`)
       .catch(async (error) => {
