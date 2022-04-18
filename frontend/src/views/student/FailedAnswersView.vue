@@ -34,6 +34,7 @@
         </template>
 
         <template v-slot:[`item.action`]="{ item }">
+        
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
@@ -45,8 +46,24 @@
             </template>
             <span>Student View</span>
           </v-tooltip>
+          
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                  class="mr-2 action-button"
+                  v-on="on"
+                  data-cy="deleteQuestionButton"
+                  @click="deleteFailedAnswer(item)"
+                  color="red"
+              >delete</v-icon
+              >
+            </template>
+            <span>Delete Question</span>
+          </v-tooltip>
+          
         </template>
       </v-data-table>
+      
       <student-view-dialog
         v-if="statementQuestion && studentViewDialog"
         v-model="studentViewDialog"
@@ -143,6 +160,22 @@ export default class FailedAnswersView extends Vue {
   onCloseStudentViewDialog() {
     this.statementQuestion = null;
     this.studentViewDialog = false;
+  }
+  
+  async deleteFailedAnswer(toRemoveFailedAnswer : FailedAnswer) {
+    if (
+        toRemoveFailedAnswer.id &&
+        confirm('Are you sure you want to delete this question?')
+    ) {
+      try {
+        await RemoteServices.removeFailedAnswer(toRemoveFailedAnswer.id);
+        this.failedAnswers = this.failedAnswers.filter(
+            (failedAnswer) => failedAnswer.id != toRemoveFailedAnswer.id
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
+    }
   }
 
   @Emit('onFailedAnswersRefresh')
