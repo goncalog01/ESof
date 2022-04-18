@@ -1,24 +1,19 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard;
 
-import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DashboardDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.DifficultQuestionDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameDifficultyRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.repository.QuestionRepository;
-import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -38,8 +33,6 @@ public class DifficultQuestionService {
     @Autowired
     private DifficultQuestionRepository difficultQuestionRepository;
 
-    @Autowired
-    private SameDifficultyRepository sameDifficultyRepository;
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public DifficultQuestionDto createDifficultQuestion(int dashboardId, int questionId, int percentage) {
@@ -48,7 +41,6 @@ public class DifficultQuestionService {
 
         DifficultQuestion difficultQuestion = new DifficultQuestion(dashboard, question, percentage);
         difficultQuestionRepository.save(difficultQuestion);
-        sameDifficultyRepository.save(difficultQuestion.getSameDifficulty());
 
         return new DifficultQuestionDto(difficultQuestion);
     }
