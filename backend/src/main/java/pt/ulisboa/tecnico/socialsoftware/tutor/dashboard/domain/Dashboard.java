@@ -152,7 +152,7 @@ public class Dashboard implements DomainEntity {
 
         // add difficult questions back if 7 days have passed sinced they were removed
         difficultQuestions.stream()
-                .forEach(dq -> { if(dq.isRemoved() && dq.getRemovedDate().isBefore(LocalDateTime.now().minusDays(7)))
+                .forEach(dq -> { if(dq.isRemoved() && dq.getRemovedDate().isBefore(DateHandler.now().minusDays(7)))
                                     dq.setRemoved(false); });
 
         // remove existing difficult questions whose difficulty has changed
@@ -167,7 +167,7 @@ public class Dashboard implements DomainEntity {
                 .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
 
         for (QuizAnswer qa : getStudent().getQuizAnswers()
-                .stream().filter(q -> q.getAnswerDate().isAfter(LocalDateTime.now().minusDays(7))
+                .stream().filter(q -> q.getAnswerDate().isAfter(DateHandler.now().minusDays(7))
                                     && q.getQuiz().getCourseExecution() == courseExecution)
                 .collect(Collectors.toSet())) {
             answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
@@ -186,7 +186,7 @@ public class Dashboard implements DomainEntity {
         difficultQuestions.addAll(questionsToAdd.stream()
                 .map(qta -> new DifficultQuestion(this, qta, questionDifficulties.get(qta))).collect(Collectors.toSet()));
 
-        setLastCheckDifficultQuestions(LocalDateTime.now());
+        setLastCheckDifficultQuestions(DateHandler.now());
     }
   
     public Set<WeeklyScore> getWeeklyScores() {

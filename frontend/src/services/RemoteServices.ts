@@ -63,20 +63,26 @@ httpClient.interceptors.response.use(
 
 export default class RemoteServices {
   // FailedAnswer Controller
-  
+
   static async getFailedAnswers(dashboardId: number): Promise<FailedAnswer[]> {
     return httpClient
-        .get(
-            `/students/dashboards/${dashboardId}/failedanswers`
-        )
-        .then((response) => {
-          return response.data.map((failedAnswer: any) => {
-            return new FailedAnswer(failedAnswer);
-          });
-        })
-        .catch(async (error) => {
-          throw Error(await this.errorMessage(error));
+      .get(`/students/dashboards/${dashboardId}/failedanswers`)
+      .then((response) => {
+        return response.data.map((failedAnswer: any) => {
+          return new FailedAnswer(failedAnswer);
         });
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async updateFailedAnswers(dashboardId: number) {
+    return httpClient
+      .put(`/students/dashboards/${dashboardId}/failedanswers`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async removeFailedAnswer(failedAnswerId: number) {
@@ -223,7 +229,6 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
-
 
   // Questions Controller
 
