@@ -7,7 +7,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.DifficultQuestion
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameDifficulty
+
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
@@ -112,10 +112,12 @@ class RemoveDifficultQuestionTest extends SpockTest {
 
         then: "an exception is thrown"
         def exception = thrown(TutorException)
-        exception.getErrorMessage() == DIFFICULT_QUESTION_NOT_FOUND
+        exception.getErrorMessage() == errorMessage
 
         where:
-        id  << [0, 100]
+        id  ||  errorMessage
+        0   ||  DIFFICULT_QUESTION_NOT_FOUND
+        100 ||  DIFFICULT_QUESTION_NOT_FOUND
     }
 
     @Unroll
@@ -127,7 +129,6 @@ class RemoveDifficultQuestionTest extends SpockTest {
         difficultQuestion.setPercentage(24)
         difficultQuestion.setRemovedDate(DateHandler.now().minusDays(daysSince))
         difficultQuestion.setRemoved(removed)
-        difficultQuestion.setSameDifficulty(new SameDifficulty(difficultQuestion))
         difficultQuestionRepository.save(difficultQuestion)
 
         when:
@@ -143,61 +144,6 @@ class RemoveDifficultQuestionTest extends SpockTest {
         removed | daysSince || errorMessage
         true    | 7         || CANNOT_REMOVE_DIFFICULT_QUESTION
         true    | 8         || CANNOT_REMOVE_DIFFICULT_QUESTION
-    }
-
-    @Unroll
-    def "delete a question from a set of #numQuestions difficult questions with the same percentage"(){
-
-        given:
-        def difficultQuestions = []
-        for (int i in 0..numQuestions - 1){
-            def question = new Question()
-            question.setTitle(QUESTION_1_TITLE)
-            question.setContent(QUESTION_1_CONTENT)
-            question.setStatus(Question.Status.AVAILABLE)
-            question.setNumberOfAnswers(2 * (i + 1))
-            question.setNumberOfCorrect(i + 1)
-            question.setCourse(externalCourse)
-            question.setQuestionDetails(new MultipleChoiceQuestion())
-            questionRepository.save(question)
-
-            difficultQuestions[i] = new DifficultQuestion()
-            difficultQuestions[i].setQuestion(question)
-            difficultQuestions[i].setDashboard(dashboard)
-            difficultQuestions[i].setPercentage(24)
-            difficultQuestions[i].setSameDifficulty(new SameDifficulty(difficultQuestions[i]))
-            difficultQuestionRepository.save(difficultQuestions[i])
-        }
-        for (int i in 0..numQuestions - 1) {
-            for (int j in 0..numQuestions - 1) {
-                if (i != j) {
-                    difficultQuestions[i].getSameDifficulty().addSameDifficultyQuestion(difficultQuestions[j])
-                }
-            }
-        }
-
-        when:
-        difficultQuestionService.removeDifficultQuestion(difficultQuestions[0].getId())
-
-        then:
-        def results = []
-        for (int i in 0..numQuestions - 2){
-            results.add(difficultQuestionRepository.findAll().get(i))
-        }
-
-        for (int i in 0..numQuestions - 2){
-            results[i].getSameDifficulty().getDifficultQuestions().size() == (long) (numQuestions - 2)
-            for (int j in 0..numQuestions - 2) {
-                if (i != j) {
-                    results[j] in results[i].getSameDifficulty().getDifficultQuestions()
-                }
-            }
-            !(difficultQuestions[0] in results[i].getSameDifficulty().getDifficultQuestions())
-        }
-
-        where:
-        numQuestions << [2, 10]
-
     }
 
     @TestConfiguration
