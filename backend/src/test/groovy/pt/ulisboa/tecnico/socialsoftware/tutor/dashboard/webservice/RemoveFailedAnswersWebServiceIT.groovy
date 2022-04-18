@@ -5,7 +5,6 @@ import groovyx.net.http.RESTClient
 import org.apache.http.HttpStatus
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
-
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.service.FailedAnswersSpockTest
@@ -15,13 +14,15 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler
 import java.time.LocalDateTime
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
+class RemoveFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     @LocalServerPort
     private int port
 
     def response
+    def courseExecution
     def quiz
     def quizQuestion
+    def failedAnswer
 
     def setup() {
         given:
@@ -36,43 +37,38 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         and:
         dashboard = new Dashboard(externalCourseExecution, student)
         dashboardRepository.save(dashboard)
-
         and:
         quiz = createQuiz(1)
         quizQuestion = createQuestion(1, quiz)
+        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
+        failedAnswer = createFailedAnswer(questionAnswer, DateHandler.now().minusDays(8))
     }
 
-    def "student gets failed answers"() {
+    def "student gets failed answers from dashboard then removes it"() {
         given:
         createdUserLogin(USER_1_EMAIL, USER_1_PASSWORD)
-        and:
-        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
-        def answer = createFailedAnswer(questionAnswer, DateHandler.now())
 
         when:
-        response = restClient.get(
-                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers/',
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
         then:
         response != null
         response.status == 200
-        response.data.id != null
+
         and:
-        failedAnswerRepository.findAll().size() == 1
-        and:
-        def failedAnswer = response.data.get(0)
-        failedAnswer.id == answer.getId()
+        failedAnswerRepository.findAll().size() == 0
     }
 
-    def "teacher can't get student's failed answers"() {
+    def "teacher can't get remove student's failed answers from dashboard"() {
         given:
         demoTeacherLogin()
 
         when:
-        response = restClient.get(
-                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers/',
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
@@ -81,19 +77,16 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
         error.response.status == HttpStatus.SC_FORBIDDEN
     }
 
-    def "student can't get another student's failed answers"() {
+    def "student can't get another student's failed answers from dashboard"() {
         given:
         def newStudent = new Student(USER_2_NAME, USER_2_USERNAME, USER_2_EMAIL, false, AuthUser.Type.EXTERNAL)
         newStudent.authUser.setPassword(passwordEncoder.encode(USER_2_PASSWORD))
         userRepository.save(newStudent)
         createdUserLogin(USER_2_EMAIL, USER_2_PASSWORD)
-        and:
-        def questionAnswer = answerQuiz(true, false, true, quizQuestion, quiz)
-        createFailedAnswer(questionAnswer, DateHandler.now())
 
         when:
-        response = restClient.get(
-                path: '/students/dashboards/' + dashboard.getId() + '/failedanswers/',
+        response = restClient.delete(
+                path: '/students/failedanswers/' + failedAnswer.getId(),
                 requestContentType: 'application/json'
         )
 
@@ -103,8 +96,11 @@ class GetFailedAnswersWebServiceIT extends FailedAnswersSpockTest {
     }
 
     def cleanup(){
+        failedAnswerRepository.deleteAll()
         dashboardRepository.deleteAll()
         userRepository.deleteAll()
         courseRepository.deleteAll()
     }
+
+
 }

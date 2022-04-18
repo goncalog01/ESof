@@ -22,6 +22,7 @@ public class FailedAnswerDto implements Serializable {
     }
 
     public FailedAnswerDto(FailedAnswer failedAnswer){
+        setId(failedAnswer.getId());
         setCollected(failedAnswer.getCollected());
         setAnswered(failedAnswer.getAnswered());
         setQuestionAnswerDto(new QuestionAnswerDto(failedAnswer.getQuestionAnswer()));
@@ -30,6 +31,8 @@ public class FailedAnswerDto implements Serializable {
     public Integer getId() {
         return id;
     }
+
+    public void setId(Integer id) { this.id = id; }
 
     public String getCollected() { return collected; }
 

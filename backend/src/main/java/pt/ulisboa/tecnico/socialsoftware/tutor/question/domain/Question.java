@@ -340,7 +340,7 @@ public class Question implements DomainEntity {
 
         for (QuizQuestion qq: getQuizQuestions()) {
             correctAnswers += qq.getQuestionAnswers().stream()
-                    .filter(qa -> qa.getQuizAnswer().getAnswerDate().isAfter(LocalDateTime.now().minusDays(7)))
+                    .filter(qa -> qa.getQuizAnswer().getAnswerDate().isAfter(DateHandler.now().minusDays(7)))
                     .map(qa -> qa.isCorrect() ? 1 : 0)
                     .reduce(0, (a, b) -> (a + b));
             totalAnswers += qq.getQuestionAnswers().size();
