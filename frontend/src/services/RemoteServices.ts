@@ -27,6 +27,7 @@ import { FraudScores } from '@/models/management/fraud/FraudScores';
 import { QuizFraudInformation } from '@/models/management/fraud/QuizFraudInformation';
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswer from '@/models/dashboard/FailedAnswer';
+import DifficultQuestion from '@/models/dashboard/DifficultQuestion';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 100000;
@@ -88,6 +89,23 @@ export default class RemoteServices {
   static async removeFailedAnswer(failedAnswerId: number) {
     return httpClient
       .delete(`/students/failedanswers/${failedAnswerId}`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  // Difficult Question Controller
+
+  static async getDifficultQuestions(
+    dashboardId: number
+  ): Promise<DifficultQuestion[]> {
+    return httpClient
+      .get('/students/dashboards/{dashboardId}/difficultquestions')
+      .then((response) => {
+        return response.data.map((difficultQuestion: any) => {
+          return new DifficultQuestion(difficultQuestion);
+        });
+      })
       .catch(async (error) => {
         throw Error(await this.errorMessage(error));
       });
