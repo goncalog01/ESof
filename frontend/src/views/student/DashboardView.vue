@@ -48,6 +48,14 @@
       >
       </failed-answers-view>
     </div>
+
+    <div v-if="show === 'Difficult'" class="stats-container">
+      <difficult-questions-view
+        :dashboardId="dashboardId"
+        v-on:refresh="onDifficultQuestionsRefresh"
+      >
+      </difficult-questions-view>
+    </div>
   </div>
 </template>
 
@@ -57,11 +65,13 @@ import RemoteServices from '@/services/RemoteServices';
 import GlobalStatsView from '@/views/student/GlobalStatsView.vue';
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswersView from '@/views/student/FailedAnswersView.vue';
+import DifficultQuestionsView from '@/views/student/DifficultQuestionsView.vue';
 
 @Component({
   components: {
     'global-stats-view': GlobalStatsView,
     'failed-answers-view': FailedAnswersView,
+    'difficult-questions-view': DifficultQuestionsView,
   },
 })
 export default class StatsView extends Vue {
@@ -87,6 +97,5 @@ export default class StatsView extends Vue {
   async onFailedAnswersRefresh() {
     this.lastCheckFailedAnswers = this.dashboard!.lastCheckFailedAnswers;
   }
-  
 }
 </script>
