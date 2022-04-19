@@ -476,6 +476,23 @@ Cypress.Commands.add('solveQuizz', (quizTitle, numberOfQuizQuestions) => {
   cy.get('[data-cy="confirmationButton"]').click();
 });
 
+Cypress.Commands.add('solveQuizzWrong', (quizTitle, numberOfQuizQuestions, answer) => {
+    cy.get('[data-cy="quizzesStudentMenuButton"]').click();
+    cy.contains('Available').click();
+
+    cy.contains(quizTitle).click();
+
+    for (let i = 1; i < numberOfQuizQuestions; i++) {
+        cy.get('[data-cy="optionList"]').children().contains(answer).click();
+        cy.get('[data-cy="nextQuestionButton"]').click();
+    }
+
+    cy.get('[data-cy="optionList"]').children().contains(answer).click();
+
+    cy.get('[data-cy="endQuizButton"]').click();
+    cy.get('[data-cy="confirmationButton"]').click();
+});
+
 Cypress.Commands.add('createDiscussion', (discussionContent) => {
   cy.get('[data-cy="quizzesStudentMenuButton"]').click();
   cy.contains('Solved').click();
@@ -537,4 +554,27 @@ Cypress.Commands.add('deleteQuestion', (questionTitle) => {
     .should('have.length', 10)
     .find('[data-cy="deleteQuestionButton"]')
     .click();
+});
+
+Cypress.Commands.add('accessFailedAnswerDashboard', () => {
+    cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.get('[data-cy="failedAnswersMenuButton"]').click();
+});
+
+Cypress.Commands.add('refreshFailedAnswers', () => {
+    cy.get('[data-cy="refreshFailedAnswersMenuButton"]').click();
+});
+
+Cypress.Commands.add('showStudentViewDialog', () => {
+    cy.get('[data-cy="showStudentViewDialog"]').eq(0).click();
+    cy.get('[data-cy="closeButton"]').click();
+});
+
+Cypress.Commands.add('deleteFailedAnswerFromDashboardError', (failedAnswerIndex) => {
+    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
+    cy.contains('Error').parent().find("button").click();
+});
+
+Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
+    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
 });
