@@ -100,7 +100,7 @@ export default class RemoteServices {
     dashboardId: number
   ): Promise<DifficultQuestion[]> {
     return httpClient
-      .get('/students/dashboards/{dashboardId}/difficultquestions')
+      .get(`/students/dashboards/${dashboardId}/difficultquestions`)
       .then((response) => {
         return response.data.map((difficultQuestion: any) => {
           return new DifficultQuestion(difficultQuestion);

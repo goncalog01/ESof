@@ -21,16 +21,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator';
 import Question from '@/models/management/Question';
 import DifficultQuestion from '@/models/dashboard/DifficultQuestion';
+import RemoteServices from '@/services/RemoteServices';
 
 @Component({
   components: {},
 })
 export default class DifficultQuestionsView extends Vue {
-  dashboardId: number | null = null;
   difficultQuestions: DifficultQuestion[] = [];
+
+  @Prop({ type: Number, required: true })
+  readonly dashboardId!: number;
 
   headers: object = [
     {
@@ -54,6 +57,18 @@ export default class DifficultQuestionsView extends Vue {
       align: 'center',
     },
   ];
+
+  async created() {
+    await this.$store.dispatch('loading');
+    try {
+      this.difficultQuestions = await RemoteServices.getDifficultQuestions(
+        this.dashboardId
+      );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
+  }
 }
 </script>
 
