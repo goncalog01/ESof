@@ -9,14 +9,14 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.repository.*
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.AuthUserService
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameQuestionRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SamePercentageRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameDifficultyRepository
+
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SameQuestionRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
+import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
@@ -49,7 +49,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DemoUtils
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.Mailer
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.mock.AutoAttach
 
 import java.time.LocalDateTime
 
@@ -65,14 +64,14 @@ class SpockTest extends Specification {
     public static final String DEMO_TEACHER_NAME = "Demo Teacher"
     public static final String DEMO_ADMIN_NAME = "Demo Admin"
 
-    public static final String USER_1_USERNAME = "a@a.a"
-    public static final String USER_2_USERNAME = "a@a.b"
-    public static final String USER_3_USERNAME = "user3username"
+    public static final String USER_1_USERNAME = "user1@mail.com"
+    public static final String USER_2_USERNAME = "user2@mail.com"
+    public static final String USER_3_USERNAME = "user3@mail.com"
     public static final String USER_1_EMAIL = "user1@mail.com"
     public static final String USER_2_EMAIL = "user2@mail.com"
     public static final String USER_3_EMAIL = "user3@mail.com"
-    public final static String USER_1_PASSWORD = "1234"
-    public final static String USER_2_PASSWORD = "4321"
+    public final static String USER_1_PASSWORD = "1234@WS4544"
+    public final static String USER_2_PASSWORD = "4321@7877578"
     public static final String USER_1_TOKEN = "1a2b3c"
     public static final String USER_2_TOKEN = "c3b2a1"
 
@@ -174,23 +173,17 @@ class SpockTest extends Specification {
     DashboardRepository dashboardRepository
 
     @Autowired
-    FailedAnswerService failedAnswerService
-
-    @Autowired
-    FailedAnswerRepository failedAnswerRepository
-
-    @Autowired
-    SameQuestionRepository sameQuestionRepository
-
-    @Autowired
     WeeklyScoreService weeklyScoreService
 
     @Autowired
     WeeklyScoreRepository weeklyScoreRepository
 
     @Autowired
-    SamePercentageRepository samePercentageRepository
-    
+    SameQuestionRepository sameQuestionRepository
+
+    @Autowired
+    SameDifficultyRepository sameDifficultyRepository
+
     @Autowired
     DifficultQuestionService difficultQuestionService
 
@@ -198,7 +191,10 @@ class SpockTest extends Specification {
     DifficultQuestionRepository difficultQuestionRepository
 
     @Autowired
-    SameDifficultyRepository sameDifficultyRepository
+    FailedAnswerService failedAnswerService
+
+    @Autowired
+    FailedAnswerRepository failedAnswerRepository
 
     @Autowired
     ImageRepository imageRepository
@@ -311,20 +307,12 @@ class SpockTest extends Specification {
         restClient.headers['Authorization']  = "Bearer " + loginResponse.data.token
     }
 
-    def auxDemoStudentLogin(createNew) {
+    def demoStudentLogin(create = false) {
         def loginResponse = restClient.get(
                 path: '/auth/demo/student',
-                query: ['createNew': createNew]
+                query: ['createNew': create]
         )
         restClient.headers['Authorization']  = "Bearer " + loginResponse.data.token
-    }
-
-    def demoStudentLogin() {
-        auxDemoStudentLogin(false)
-    }
-
-    def newDemoStudentLogin() {
-        auxDemoStudentLogin(true)
     }
 
     def demoTeacherLogin() {

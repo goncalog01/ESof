@@ -58,10 +58,6 @@ public class Dashboard implements DomainEntity {
     }
 
     public Dashboard(CourseExecution courseExecution, Student student) {
-        LocalDateTime currentDate = DateHandler.now();
-        setLastCheckFailedAnswers(currentDate);
-        setLastCheckDifficultQuestions(currentDate);
-        setLastCheckWeeklyScores(currentDate);
         setCourseExecution(courseExecution);
         setStudent(student);
     }
@@ -115,7 +111,7 @@ public class Dashboard implements DomainEntity {
     public List<FailedAnswer> getFailedAnswers() {
         return failedAnswers;
     }
-  
+
     public Set<DifficultQuestion> getDifficultQuestions() {
         return difficultQuestions;
     }
@@ -136,7 +132,7 @@ public class Dashboard implements DomainEntity {
         }
         failedAnswers.add(failedAnswer);
     }
-  
+
     public void addDifficultQuestion(DifficultQuestion difficultQuestion) {
         if (difficultQuestions.stream()
                 .anyMatch(difficultQuestion1 -> difficultQuestion1.getQuestion() == difficultQuestion.getQuestion())) {
@@ -188,7 +184,7 @@ public class Dashboard implements DomainEntity {
 
         setLastCheckDifficultQuestions(LocalDateTime.now());
     }
-  
+
     public Set<WeeklyScore> getWeeklyScores() {
         return weeklyScores;
     }
