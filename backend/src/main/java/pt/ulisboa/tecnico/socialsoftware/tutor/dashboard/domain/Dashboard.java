@@ -33,9 +33,9 @@ public class Dashboard implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private LocalDateTime lastCheckFailedAnswers;
+    private LocalDateTime lastCheckFailedAnswers = null;
 
-    private LocalDateTime lastCheckDifficultQuestions;
+    private LocalDateTime lastCheckDifficultQuestions = null;
 
     private LocalDateTime lastCheckWeeklyScores = null;
 
@@ -58,6 +58,9 @@ public class Dashboard implements DomainEntity {
     }
 
     public Dashboard(CourseExecution courseExecution, Student student) {
+        LocalDateTime currentDate = DateHandler.now();
+        setLastCheckFailedAnswers(currentDate);
+        setLastCheckWeeklyScores(currentDate);
         setCourseExecution(courseExecution);
         setStudent(student);
     }

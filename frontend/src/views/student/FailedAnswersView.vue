@@ -8,11 +8,7 @@
       </v-row>
 
       <v-col class="text-right">
-        <v-btn
-          color="primary"
-          dark v-on:click="refreshFailedAnswers"
-          data-cy="refreshFailedAnswersMenuButton"
-        >
+        <v-btn color="primary" dark @click="refreshFailedAnswers">
           Refresh</v-btn
         >
       </v-col>
@@ -38,37 +34,34 @@
         </template>
 
         <template v-slot:[`item.action`]="{ item }">
-        
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
                 class="mr-2 action-button"
                 v-on="on"
-                data-cy="showStudentViewDialog"
                 @click="showStudentViewDialog(item)"
                 >school</v-icon
               >
             </template>
             <span>Student View</span>
           </v-tooltip>
-          
+
           <v-tooltip bottom>
             <template v-slot:activator="{ on }">
               <v-icon
-                  class="mr-2 action-button"
-                  v-on="on"
-                  data-cy="deleteFailedAnswerButton"
-                  @click="deleteFailedAnswer(item)"
-                  color="red"
-              >delete</v-icon
+                class="mr-2 action-button"
+                v-on="on"
+                data-cy="deleteQuestionButton"
+                @click="deleteFailedAnswer(item)"
+                color="red"
+                >delete</v-icon
               >
             </template>
             <span>Delete Question</span>
           </v-tooltip>
-          
         </template>
       </v-data-table>
-      
+
       <student-view-dialog
         v-if="statementQuestion && studentViewDialog"
         v-model="studentViewDialog"
@@ -97,9 +90,6 @@ export default class FailedAnswersView extends Vue {
 
   @Prop({ type: Number, required: true })
   readonly dashboardId!: number;
-
-  @Prop({ type: String, required: true })
-  readonly lastCheckFailedAnswers!: string;
 
   headers: object = [
     {
@@ -144,8 +134,8 @@ export default class FailedAnswersView extends Vue {
   }
 
   convertDate(date: string) {
-    var y = date.replaceAll('T', ' ');
-    var i = y.indexOf(':', date.indexOf(':') + 1);
+    const y = date.replaceAll('T', ' ');
+    const i = y.indexOf(':', date.indexOf(':') + 1);
     return y.substring(0, i);
   }
 
@@ -166,16 +156,16 @@ export default class FailedAnswersView extends Vue {
     this.statementQuestion = null;
     this.studentViewDialog = false;
   }
-  
-  async deleteFailedAnswer(toRemoveFailedAnswer : FailedAnswer) {
+
+  async deleteFailedAnswer(toRemoveFailedAnswer: FailedAnswer) {
     if (
-        toRemoveFailedAnswer.id &&
-        confirm('Are you sure you want to delete this question?')
+      toRemoveFailedAnswer.id &&
+      confirm('Are you sure you want to delete this question?')
     ) {
       try {
         await RemoteServices.removeFailedAnswer(toRemoveFailedAnswer.id);
         this.failedAnswers = this.failedAnswers.filter(
-            (failedAnswer) => failedAnswer.id != toRemoveFailedAnswer.id
+          (failedAnswer) => failedAnswer.id != toRemoveFailedAnswer.id
         );
       } catch (error) {
         await this.$store.dispatch('error', error);
@@ -183,7 +173,6 @@ export default class FailedAnswersView extends Vue {
     }
   }
 
-  @Emit('onFailedAnswersRefresh')
   async refreshFailedAnswers() {
     await this.$store.dispatch('loading');
     try {
@@ -191,6 +180,7 @@ export default class FailedAnswersView extends Vue {
       this.failedAnswers = await RemoteServices.getFailedAnswers(
         this.dashboardId
       );
+      this.$emit('refresh');
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
