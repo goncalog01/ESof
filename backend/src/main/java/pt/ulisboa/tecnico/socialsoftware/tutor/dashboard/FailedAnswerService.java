@@ -87,6 +87,7 @@ public class FailedAnswerService {
 
         List<QuizAnswer> studentAnswers = dashboard.getStudent().getQuizAnswers().stream()
                 .filter(quizAnswer -> quizAnswer.getQuiz().getCourseExecution() == dashboard.getCourseExecution()
+                        && (quizAnswer.isCompleted())
                         && (quizAnswer.getAnswerDate().isAfter(start) && quizAnswer.getAnswerDate().isBefore(end)))
                 .collect(Collectors.toList());
 

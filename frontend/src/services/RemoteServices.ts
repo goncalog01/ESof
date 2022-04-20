@@ -112,6 +112,14 @@ export default class RemoteServices {
       });
   }
 
+  static async updateDifficultQuestions(dashboardId: number) {
+    return httpClient
+        .put(`/students/dashboards/${dashboardId}/difficultquestions`)
+        .catch(async (error) => {
+          throw Error(await this.errorMessage(error));
+        });
+  }
+
   static async getWeeklyScores(dashboardId: string): Promise<WeeklyScore[]> {
     return httpClient
       .get(`/students/dashboards/${dashboardId}/weeklyscores`)
@@ -794,6 +802,7 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
+
   static async getQuizTimeFraudScores(quizId: number): Promise<FraudScores> {
     return httpClient
       .get(`/fraud/time/quiz/${quizId}`)
