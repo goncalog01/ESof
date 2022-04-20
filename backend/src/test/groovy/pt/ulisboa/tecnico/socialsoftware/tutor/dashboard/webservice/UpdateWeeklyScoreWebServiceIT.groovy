@@ -28,59 +28,65 @@ class UpdateWeeklyScoreWebServiceIT extends SpockTest {
     }
 
     def "demo student gets its weekly scores"() {
-        given: 'a demo student'
+        given:
         demoStudentLogin()
 
-        when: 'the web service is invoked'
+        when:
         response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
 
-        then: "the request returns 200"
+        then:
         response.status == 200
-        and: "has value"
-        response.data.id != null
-        and: 'only has one weeklyScore and the id matches with the weeklyScore created'
-        response.data.size() == 1
-        response.data.get(0).id == weeklyScoreService.getWeeklyScores(dashboardDto.getId()).get(0).getId()
-        and: 'it is in the database'
+        and:
         weeklyScoreRepository.findAll().size() == 1
+
+        cleanup:
+        weeklyScoreRepository.deleteAll()
+        dashboardRepository.deleteAll()
     }
 
     def "demo teacher does not have access"() {
-        given: 'demo teacher'
+        given:
         demoTeacherLogin()
 
-        when: 'the web service is invoked'
+        when:
         response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
 
-        then: "the server understands the request but refuses to authorize it"
+        then:
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
+        and:
+        weeklyScoreRepository.findAll().size() == 0
+
+        cleanup:
+        weeklyScoreRepository.deleteAll()
+        dashboardRepository.deleteAll()
     }
 
     def "student cant update another students failed answers"() {
-        given: 'a demo student with a weekly score'
-        weeklyScoreService.updateWeeklyScores(dashboardDto.getId())
-        newDemoStudentLogin()
+        given:
+        demoStudentLogin(true)
 
-        when: 'the web service is invoked'
+        when:
         response = restClient.put(
                 path: '/students/dashboards/' + dashboardDto.getId() + '/weeklyscores',
                 requestContentType: 'application/json'
         )
 
-        then: "the server understands the request but refuses to authorize it"
+        then:
         def error = thrown(HttpResponseException)
         error.response.status == HttpStatus.SC_FORBIDDEN
-    }
+        and:
+        weeklyScoreRepository.findAll().size() == 0
 
-    def cleanup() {
-        userRepository.deleteAll()
+        cleanup:
+        weeklyScoreRepository.deleteAll()
+        dashboardRepository.deleteAll()
     }
 
 }
