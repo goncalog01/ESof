@@ -29,7 +29,11 @@
           <v-btn color="primary" dark v-on:click="show = 'Difficult'"
             >Difficult Questions <br />
             {{
-              dashboard ? (dashboard.lastCheckDifficultQuestions ? dashboard.lastCheckDifficultQuestions : '-') : '-'
+              dashboard
+                ? dashboard.lastCheckDifficultQuestions
+                  ? dashboard.lastCheckDifficultQuestions
+                  : '-'
+                : '-'
             }}</v-btn
           ></v-col
         >
@@ -89,7 +93,8 @@ export default class StatsView extends Vue {
       this.dashboard = await RemoteServices.getUserDashboard();
       this.dashboardId = this.dashboard.id;
       this.lastCheckFailedAnswers = this.dashboard.lastCheckFailedAnswers;
-      this.lastCheckDifficultQuestions = this.dashboard.lastCheckDifficultQuestions
+      this.lastCheckDifficultQuestions =
+        this.dashboard.lastCheckDifficultQuestions;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -102,7 +107,8 @@ export default class StatsView extends Vue {
 
   async onDifficultQuestionsRefresh() {
     this.dashboard = await RemoteServices.getUserDashboard();
-    this.lastCheckDifficultQuestions = this.dashboard!.lastCheckDifficultQuestions;
+    this.lastCheckDifficultQuestions =
+      this.dashboard!.lastCheckDifficultQuestions;
   }
 }
 </script>
