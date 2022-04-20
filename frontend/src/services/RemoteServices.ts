@@ -111,6 +111,14 @@ export default class RemoteServices {
       });
   }
 
+  static async updateDifficultQuestions(dashboardId: number) {
+    return httpClient
+      .put(`/students/dashboards/${dashboardId}/difficultquestions`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   // AuthUser Controller
 
   static async fenixLogin(code: string): Promise<AuthDto> {
