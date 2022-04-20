@@ -11,12 +11,9 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.auth.repository.AuthUserRepositor
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DashboardService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.FailedAnswerService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.WeeklyScoreService
-
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.SamePercentageRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.DifficultQuestionService
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DifficultQuestionRepository
-
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.FailedAnswerRepository
 import pt.ulisboa.tecnico.socialsoftware.tutor.discussion.DiscussionService
@@ -49,7 +46,6 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DemoUtils
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.Mailer
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.mock.AutoAttach
 
 import java.time.LocalDateTime
 
@@ -71,8 +67,8 @@ class SpockTest extends Specification {
     public static final String USER_1_EMAIL = "user1@mail.com"
     public static final String USER_2_EMAIL = "user2@mail.com"
     public static final String USER_3_EMAIL = "user3@mail.com"
-    public final static String USER_1_PASSWORD = "1234"
-    public final static String USER_2_PASSWORD = "4321"
+    public final static String USER_1_PASSWORD = "1234@WS4544"
+    public final static String USER_2_PASSWORD = "4321@7877578"
     public static final String USER_1_TOKEN = "1a2b3c"
     public static final String USER_2_TOKEN = "c3b2a1"
 
@@ -174,26 +170,22 @@ class SpockTest extends Specification {
     DashboardRepository dashboardRepository
 
     @Autowired
-    FailedAnswerService failedAnswerService
-
-    @Autowired
-    FailedAnswerRepository failedAnswerRepository
-
-    @Autowired
     WeeklyScoreService weeklyScoreService
 
     @Autowired
     WeeklyScoreRepository weeklyScoreRepository
 
     @Autowired
-    SamePercentageRepository samePercentageRepository
-    
-    @Autowired
     DifficultQuestionService difficultQuestionService
 
     @Autowired
     DifficultQuestionRepository difficultQuestionRepository
 
+    @Autowired
+    FailedAnswerService failedAnswerService
+
+    @Autowired
+    FailedAnswerRepository failedAnswerRepository
 
     @Autowired
     ImageRepository imageRepository
@@ -312,14 +304,6 @@ class SpockTest extends Specification {
                 query: ['createNew': createNew]
         )
         restClient.headers['Authorization']  = "Bearer " + loginResponse.data.token
-    }
-
-    def demoStudentLogin() {
-        auxDemoStudentLogin(false)
-    }
-
-    def newDemoStudentLogin() {
-        auxDemoStudentLogin(true)
     }
 
     def demoTeacherLogin() {

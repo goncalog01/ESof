@@ -4,20 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.dto.WeeklyScoreDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.DashboardRepository;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.repository.WeeklyScoreRepository;
-
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage.*;
@@ -37,16 +41,51 @@ public class WeeklyScoreService {
             throw new TutorException(DASHBOARD_NOT_FOUND);
         }
 
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        Dashboard dashboard = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
 
         TemporalAdjuster weekSunday = TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY);
         LocalDate week = DateHandler.now().with(weekSunday).toLocalDate();
 
         WeeklyScore weeklyScore = new WeeklyScore(dashboard, week);
-
         weeklyScoreRepository.save(weeklyScore);
 
         return new WeeklyScoreDto(weeklyScore);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<WeeklyScoreDto> getWeeklyScores(Integer dashboardId) {
+        if (dashboardId == null) {
+            throw new TutorException(DASHBOARD_NOT_FOUND);
+        }
+
+        Dashboard dashboard = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+
+        return dashboard.getWeeklyScores().stream()
+                .sorted(Comparator.comparing(WeeklyScore::getWeek, Comparator.reverseOrder()))
+                .map(WeeklyScoreDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void updateWeeklyScore(Integer dashboardId) {
+        if (dashboardId == null) {
+            throw new TutorException(DASHBOARD_NOT_FOUND);
+        }
+
+        Dashboard dashboard = dashboardRepository.findById(dashboardId)
+                .orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+
+        LocalDateTime now = DateHandler.now();
+
+        createMissingWeeklyScores(dashboard, now);
+
+        computeStatistics(dashboard);
+
+        removeEmptyClosedWeeklyScores(dashboard);
+
+        dashboard.setLastCheckWeeklyScores(now);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -55,7 +94,8 @@ public class WeeklyScoreService {
             throw new TutorException(WEEKLY_SCORE_NOT_FOUND);
         }
 
-        WeeklyScore weeklyScore = weeklyScoreRepository.findById(weeklyScoreId).orElseThrow(() -> new TutorException(WEEKLY_SCORE_NOT_FOUND, weeklyScoreId));
+        WeeklyScore weeklyScore = weeklyScoreRepository.findById(weeklyScoreId)
+                .orElseThrow(() -> new TutorException(WEEKLY_SCORE_NOT_FOUND, weeklyScoreId));
 
         TemporalAdjuster weekSunday = TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY);
         LocalDate currentWeek = DateHandler.now().with(weekSunday).toLocalDate();
@@ -68,57 +108,58 @@ public class WeeklyScoreService {
         weeklyScoreRepository.delete(weeklyScore);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<WeeklyScoreDto> getWeeklyScores(Integer dashboardId) {
-        if (dashboardId == null) {
-            throw new TutorException(DASHBOARD_NOT_FOUND);
+    private void createMissingWeeklyScores(Dashboard dashboard, LocalDateTime now) {
+        TemporalAdjuster weekSunday = TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY);
+        LocalDate currentWeek = now.with(weekSunday).toLocalDate();
+
+        if (dashboard.getLastCheckWeeklyScores() == null) {
+            WeeklyScore weeklyScore = new WeeklyScore(dashboard, currentWeek);
+            weeklyScoreRepository.save(weeklyScore);
         }
 
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        LocalDateTime lastCheckDate = getLastCheckDate(dashboard, now);
 
-        List<WeeklyScoreDto> res = dashboard.getWeeklyScores().stream().map(WeeklyScoreDto::new).sorted(Comparator.comparing(WeeklyScoreDto::getWeek)).collect(Collectors.toList());
-        Collections.reverse(res);
-        return res;
+        while (lastCheckDate.isBefore(currentWeek.atStartOfDay())) {
+
+            LocalDate week = lastCheckDate.with(weekSunday).toLocalDate();
+
+            WeeklyScore weeklyScore = new WeeklyScore(dashboard, week);
+            weeklyScoreRepository.save(weeklyScore);
+
+            lastCheckDate = lastCheckDate.plusDays(7);
+        }
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<WeeklyScoreDto> updateWeeklyScores(Integer dashboardId) {
-        if (dashboardId == null) {
-            throw new TutorException(DASHBOARD_NOT_FOUND);
+    private LocalDateTime getLastCheckDate(Dashboard dashboard, LocalDateTime now) {
+        LocalDateTime startCheckDate;
+        if (dashboard.getLastCheckWeeklyScores() == null) {
+            startCheckDate = dashboard.getStudent().getQuizAnswers().stream()
+                    .filter(quizAnswer -> quizAnswer.getQuiz().getCourseExecution() == dashboard.getCourseExecution())
+                    .map(QuizAnswer::getCreationDate)
+                    .sorted()
+                    .findFirst()
+                    .orElse(now);
+        } else {
+            startCheckDate = dashboard.getLastCheckWeeklyScores();
         }
 
-        Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
+        return startCheckDate;
+    }
 
-        TemporalAdjuster weekSunday = TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY);
-        LocalDate week = DateHandler.now().with(weekSunday).toLocalDate();
-
+    private void computeStatistics(Dashboard dashboard) {
         dashboard.getWeeklyScores().stream()
-                .filter(WeeklyScore::isClosed)
-                .forEach(weeklyScore -> {
+                .filter(Predicate.not(WeeklyScore::isClosed))
+                .forEach(weeklyScore -> weeklyScore.computeStatistics());
+    }
+
+    private void removeEmptyClosedWeeklyScores(Dashboard dashboard) {
+        Set<WeeklyScore> weeklyScoresToDelete = dashboard.getWeeklyScores().stream()
+                .filter(weeklyScore -> weeklyScore.isClosed() && weeklyScore.getNumberAnswered() == 0)
+                .collect(Collectors.toSet());
+
+        weeklyScoresToDelete.forEach(weeklyScore -> {
             weeklyScore.remove();
             weeklyScoreRepository.delete(weeklyScore);
         });
-
-        Set<LocalDate> weeks = dashboard.getStudent().getQuizAnswers().stream().map(student -> student.getAnswerDate().toLocalDate()).collect(Collectors.toSet());
-
-        dashboard.getWeeklyScores().forEach(ws -> weeks.remove(ws.getWeek()));
-
-        weeks.forEach(answerWeek -> weeklyScoreRepository.save(new WeeklyScore(dashboard, answerWeek)));
-
-        dashboard.getWeeklyScores().forEach(weeklyScore -> {
-            weeklyScore.computeStatistics();
-            weeklyScoreRepository.save(weeklyScore);
-        });
-
-        Optional<WeeklyScore> weeklyScore = dashboard.getWeeklyScores().stream().filter(ws -> ws.getWeek()
-                .isEqual(week)).findFirst();
-
-        if (weeklyScore.isEmpty()) {
-            WeeklyScore ws = new WeeklyScore(dashboard, week);
-            ws.computeStatistics();
-            weeklyScoreRepository.save(ws);
-        }
-
-        return dashboard.getWeeklyScores().stream().map(WeeklyScoreDto::new).collect(Collectors.toList());
     }
 }
