@@ -4,11 +4,8 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.SpockTest
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.MultipleChoiceAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.dto.MultipleChoiceStatementAnswerDetailsDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.dto.StatementAnswerDto
-import pt.ulisboa.tecnico.socialsoftware.tutor.answer.dto.StatementQuizDto
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameQuestion
+
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question
@@ -71,7 +68,7 @@ class FailedAnswersSpockTest extends SpockTest {
         return quizQuestion
     }
 
-    def answerQuiz(answered, correct, completed, question, quiz, date = LocalDateTime.now()) {
+    def answerQuiz(answered, correct, completed, question, quiz, date = DateHandler.now()) {
         def quizAnswer = new QuizAnswer()
         quizAnswer.setCompleted(completed)
         quizAnswer.setCreationDate(date)

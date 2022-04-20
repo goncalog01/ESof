@@ -25,7 +25,9 @@ import router from '@/router';
 import QuestionQuery from '@/models/management/QuestionQuery';
 import { FraudScores } from '@/models/management/fraud/FraudScores';
 import { QuizFraudInformation } from '@/models/management/fraud/QuizFraudInformation';
-import Dashboard from "@/models/dashboard/Dashboard";
+import Dashboard from '@/models/dashboard/Dashboard';
+import FailedAnswer from '@/models/dashboard/FailedAnswer';
+import DifficultQuestion from '@/models/dashboard/DifficultQuestion';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 100000;
@@ -61,6 +63,54 @@ httpClient.interceptors.response.use(
 );
 
 export default class RemoteServices {
+  // FailedAnswer Controller
+
+  static async getFailedAnswers(dashboardId: number): Promise<FailedAnswer[]> {
+    return httpClient
+      .get(`/students/dashboards/${dashboardId}/failedanswers`)
+      .then((response) => {
+        return response.data.map((failedAnswer: any) => {
+          return new FailedAnswer(failedAnswer);
+        });
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async updateFailedAnswers(dashboardId: number) {
+    return httpClient
+      .put(`/students/dashboards/${dashboardId}/failedanswers`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async removeFailedAnswer(failedAnswerId: number) {
+    return httpClient
+      .delete(`/students/failedanswers/${failedAnswerId}`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  // Difficult Question Controller
+
+  static async getDifficultQuestions(
+    dashboardId: number
+  ): Promise<DifficultQuestion[]> {
+    return httpClient
+      .get(`/students/dashboards/${dashboardId}/difficultquestions`)
+      .then((response) => {
+        return response.data.map((difficultQuestion: any) => {
+          return new DifficultQuestion(difficultQuestion);
+        });
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   // AuthUser Controller
 
   static async fenixLogin(code: string): Promise<AuthDto> {
@@ -197,7 +247,6 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
-
 
   // Questions Controller
 

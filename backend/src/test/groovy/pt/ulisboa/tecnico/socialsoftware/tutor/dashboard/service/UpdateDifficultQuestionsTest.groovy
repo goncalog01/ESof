@@ -339,7 +339,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         dashboardId << [0, 100]
     }
 
-    def answerQuiz(correct, date = LocalDateTime.now()) {
+    def answerQuiz(correct, date = DateHandler.now()) {
         def quiz = new Quiz()
         quiz.setCourseExecution(externalCourseExecution)
         quiz.setAvailableDate(now.minusHours(1))

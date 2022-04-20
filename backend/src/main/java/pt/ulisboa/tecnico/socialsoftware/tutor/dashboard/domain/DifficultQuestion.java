@@ -1,18 +1,14 @@
 package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain;
 
-import org.apache.commons.lang3.builder.Diff;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage;
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException;
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Question;
-import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.SameDifficulty;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.DomainEntity;
 import pt.ulisboa.tecnico.socialsoftware.tutor.impexp.domain.Visitor;
 import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.*;
 
@@ -35,9 +31,6 @@ public class DifficultQuestion implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne(cascade=CascadeType.ALL, mappedBy="difficultQuestion", orphanRemoval=true)
-    private SameDifficulty sameDifficulty;
-
     public DifficultQuestion(){
     }
 
@@ -51,16 +44,6 @@ public class DifficultQuestion implements DomainEntity {
             throw new TutorException(ErrorMessage.CANNOT_CREATE_DIFFICULT_QUESTION);
 
         }
-
-        Set<DifficultQuestion> sameDifficultyQuestions = new HashSet<>();
-        for (DifficultQuestion dq : dashboard.getDifficultQuestions()){
-            if (dq.getPercentage() == percentage){
-                sameDifficultyQuestions.add(dq);
-                dq.sameDifficulty.addSameDifficultyQuestion(this);
-            }
-        }
-
-        setSameDifficulty(new SameDifficulty(this, sameDifficultyQuestions));
 
         setPercentage(percentage);
         setRemovedDate(null);
@@ -76,7 +59,7 @@ public class DifficultQuestion implements DomainEntity {
         }
         else {
             setRemoved(true);
-            setRemovedDate(LocalDateTime.now());
+            setRemovedDate(DateHandler.now());
         }
     }
 
@@ -88,12 +71,6 @@ public class DifficultQuestion implements DomainEntity {
         this.dashboard = dashboard;
         this.dashboard.addDifficultQuestion(this);
     }
-
-    public void setSameDifficulty(SameDifficulty sameDifficulty) {
-        this.sameDifficulty = sameDifficulty;
-    }
-
-    public SameDifficulty getSameDifficulty() { return sameDifficulty; }
 
     public Integer getId() {
         return id;

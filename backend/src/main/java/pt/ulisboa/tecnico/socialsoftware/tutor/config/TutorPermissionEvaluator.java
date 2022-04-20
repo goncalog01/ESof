@@ -180,16 +180,16 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
                     return reply != null && userHasThisExecution(authUser, reply.getDiscussion().getCourseExecution().getId());
                 case "DASHBOARD.ACCESS":
                     Dashboard dashboard = dashboardRepository.findById(id).orElse(null);
-                    return dashboard != null && dashboard.getStudent().getId().equals(userId);
+                    return dashboard != null && userHasThisDashboard(authUser, dashboard);
+                case "FAILEDANSWER.ACCESS":
+                    FailedAnswer failedAnswer = failedAnswerRepository.findById(id).orElse(null);
+                    return failedAnswer != null && userHasThisFailedAnswer(authUser, failedAnswer);
+                case "DIFFICULT.QUESTION.ACCESS":
+                    DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(id).orElse(null);
+                    return difficultQuestion != null && userHasThisDifficultQuestion(authUser, difficultQuestion);
                 case "WEEKLYSCORE.ACCESS":
                     WeeklyScore weeklyScore = weeklyScoreRepository.findById(id).orElse(null);
                     return weeklyScore != null && weeklyScore.getDashboard().getStudent().getId().equals(userId);
-                case "FAILEDANSWER.ACCESS":
-                    FailedAnswer failedAnswer = failedAnswerRepository.findById(id).orElse(null);
-                    return failedAnswer != null && failedAnswer.getDashboard().getStudent().getId().equals(userId);
-                case "DIFFICULTQUESTION.ACCESS":
-                    DifficultQuestion difficultQuestion = difficultQuestionRepository.findById(id).orElse(null);
-                    return difficultQuestion != null && difficultQuestion.getDashboard().getStudent().getId().equals(userId);
                 default: return false;
             }
         }
@@ -203,6 +203,18 @@ public class TutorPermissionEvaluator implements PermissionEvaluator {
 
     private boolean userParticipatesInTournament(int userId, int tournamentId) {
         return userRepository.countUserTournamentPairById(userId, tournamentId) == 1;
+    }
+
+    private boolean userHasThisDashboard(AuthUser authUser, Dashboard dashboard) {
+        return authUser.getUser().isStudent() && authUser.getUser().getId().equals(dashboard.getStudent().getId());
+    }
+
+    private boolean userHasThisFailedAnswer(AuthUser authUser, FailedAnswer failedAnswer) {
+        return userHasThisDashboard(authUser, failedAnswer.getDashboard());
+    }
+
+    private boolean userHasThisDifficultQuestion(AuthUser authUser, DifficultQuestion difficultQuestion) {
+        return userHasThisDashboard(authUser, difficultQuestion.getDashboard());
     }
 
     @Override
