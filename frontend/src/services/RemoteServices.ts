@@ -119,6 +119,14 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteDifficultQuestion(difficultQuestionId: number) {
+    return httpClient
+      .delete(`/students/difficultquestions/${difficultQuestionId}`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
   // AuthUser Controller
 
   static async fenixLogin(code: string): Promise<AuthDto> {
