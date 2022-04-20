@@ -33,7 +33,7 @@ public class Dashboard implements DomainEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private LocalDateTime lastCheckFailedAnswers;
+    private LocalDateTime lastCheckFailedAnswers = null;
 
     private LocalDateTime lastCheckDifficultQuestions = null;
 
