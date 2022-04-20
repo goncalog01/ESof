@@ -18,8 +18,11 @@
           >
         </v-col>
         <v-col>
-          <v-btn color="primary" dark v-on:click="show = 'Failed'"
-            >Failed Answers <br />
+          <v-btn
+            color="primary"
+            dark v-on:click="show = 'Failed'"
+            data-cy="failedAnswersMenuButton"
+          >Failed Answers <br />
             {{
               dashboard != null ? dashboard.lastCheckFailedAnswers : '-'
             }}</v-btn

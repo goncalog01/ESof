@@ -8,7 +8,11 @@
       </v-row>
 
       <v-col class="text-right">
-        <v-btn color="primary" dark v-on:click="refreshFailedAnswers">
+        <v-btn
+          color="primary"
+          dark v-on:click="refreshFailedAnswers"
+          data-cy="refreshFailedAnswersMenuButton"
+        >
           Refresh</v-btn
         >
       </v-col>
@@ -40,6 +44,7 @@
               <v-icon
                 class="mr-2 action-button"
                 v-on="on"
+                data-cy="showStudentViewDialog"
                 @click="showStudentViewDialog(item)"
                 >school</v-icon
               >
@@ -52,7 +57,7 @@
               <v-icon
                   class="mr-2 action-button"
                   v-on="on"
-                  data-cy="deleteQuestionButton"
+                  data-cy="deleteFailedAnswerButton"
                   @click="deleteFailedAnswer(item)"
                   color="red"
               >delete</v-icon
