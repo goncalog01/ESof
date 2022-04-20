@@ -35,7 +35,7 @@ public class Dashboard implements DomainEntity {
 
     private LocalDateTime lastCheckFailedAnswers;
 
-    private LocalDateTime lastCheckDifficultQuestions;
+    private LocalDateTime lastCheckDifficultQuestions = null;
 
     private LocalDateTime lastCheckWeeklyScores = null;
 
@@ -60,7 +60,6 @@ public class Dashboard implements DomainEntity {
     public Dashboard(CourseExecution courseExecution, Student student) {
         LocalDateTime currentDate = DateHandler.now();
         setLastCheckFailedAnswers(currentDate);
-        setLastCheckDifficultQuestions(currentDate);
         setLastCheckWeeklyScores(currentDate);
         setCourseExecution(courseExecution);
         setStudent(student);
