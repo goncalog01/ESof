@@ -20,9 +20,10 @@
         <v-col>
           <v-btn
             color="primary"
-            dark v-on:click="show = 'Failed'"
+            dark
+            v-on:click="show = 'Failed'"
             data-cy="failedAnswersMenuButton"
-          >Failed Answers <br />
+            >Failed Answers <br />
             {{
               dashboard
                 ? dashboard.lastCheckFailedAnswers
@@ -45,6 +46,10 @@
 
     <div v-if="show === 'Global'" class="stats-container">
       <global-stats-view></global-stats-view>
+    </div>
+
+    <div v-if="show === 'Weekly'" class="stats-container">
+      <weekly-score-view :dashboard-id="dashboardId"></weekly-score-view>
     </div>
 
     <div v-if="show === 'Failed'" class="stats-container">
@@ -72,9 +77,11 @@ import GlobalStatsView from '@/views/student/GlobalStatsView.vue';
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswersView from '@/views/student/FailedAnswersView.vue';
 import DifficultQuestionsView from '@/views/student/DifficultQuestionsView.vue';
+import WeeklyScoreView from '@/views/student/WeeklyScoreView.vue';
 
 @Component({
   components: {
+    'weekly-score-view': WeeklyScoreView,
     'global-stats-view': GlobalStatsView,
     'failed-answers-view': FailedAnswersView,
     'difficult-questions-view': DifficultQuestionsView,

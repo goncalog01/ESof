@@ -28,6 +28,7 @@ import { QuizFraudInformation } from '@/models/management/fraud/QuizFraudInforma
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswer from '@/models/dashboard/FailedAnswer';
 import DifficultQuestion from '@/models/dashboard/DifficultQuestion';
+import WeeklyScore from '@/models/dashboard/WeeklyScore';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 100000;
@@ -104,6 +105,19 @@ export default class RemoteServices {
       .then((response) => {
         return response.data.map((difficultQuestion: any) => {
           return new DifficultQuestion(difficultQuestion);
+        });
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async getWeeklyScores(dashboardId: string): Promise<WeeklyScore[]> {
+    return httpClient
+      .get(`/students/dashboards/${dashboardId}/weeklyscores`)
+      .then((response) => {
+        return response.data.map((weeklyScore: any) => {
+          return new WeeklyScore(weeklyScore);
         });
       })
       .catch(async (error) => {
@@ -791,6 +805,7 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
+
   static async getQuizCommunicationFraudScores(
     quizId: number
   ): Promise<FraudScores[]> {
