@@ -21,7 +21,11 @@
           <v-btn color="primary" dark v-on:click="show = 'Failed'"
             >Failed Answers <br />
             {{
-              dashboard != null ? dashboard.lastCheckFailedAnswers : '-'
+              dashboard
+                ? dashboard.lastCheckFailedAnswers
+                  ? dashboard.lastCheckFailedAnswers
+                  : '-'
+                : '-'
             }}</v-btn
           ></v-col
         >
@@ -43,7 +47,6 @@
     <div v-if="show === 'Failed'" class="stats-container">
       <failed-answers-view
         :dashboardId="dashboardId"
-        :lastCheckFailedAnswers="lastCheckFailedAnswers"
         v-on:refresh="onFailedAnswersRefresh"
       >
       </failed-answers-view>
@@ -85,8 +88,8 @@ export default class StatsView extends Vue {
   }
 
   async onFailedAnswersRefresh() {
+    this.dashboard = await RemoteServices.getUserDashboard();
     this.lastCheckFailedAnswers = this.dashboard!.lastCheckFailedAnswers;
   }
-  
 }
 </script>
