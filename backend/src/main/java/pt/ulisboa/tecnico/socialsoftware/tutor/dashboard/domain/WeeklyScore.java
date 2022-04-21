@@ -14,7 +14,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,85 +41,15 @@ public class WeeklyScore implements DomainEntity {
     @ManyToOne
     private Dashboard dashboard;
 
-    @OneToOne(cascade=CascadeType.ALL, orphanRemoval = true)
-    private SamePercentage samePercentage;
-
-    public WeeklyScore() {
-    }
+    public WeeklyScore() {}
 
     public WeeklyScore(Dashboard dashboard, LocalDate week) {
         setWeek(week);
+        setClosed(false);
         setDashboard(dashboard);
-        setSamePercentage(new SamePercentage(this, new HashSet<>()));
-        dashboard.getWeeklyScores().forEach(weeklyScore -> {
-            if (weeklyScore.getPercentageCorrect() == this.getPercentageCorrect() && weeklyScore != this) {
-                samePercentage.getWeeklyScores().add(weeklyScore);
-                weeklyScore.getSamePercentage().getWeeklyScores().add(this);
-            }
-        });
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public int getNumberAnswered() {
-        return numberAnswered;
-    }
-
-    public void setNumberAnswered(int numberAnswered) {
-        this.numberAnswered = numberAnswered;
-    }
-
-    public int getUniquelyAnswered() {
-        return uniquelyAnswered;
-    }
-
-    public void setUniquelyAnswered(int uniquelyAnswered) {
-        this.uniquelyAnswered = uniquelyAnswered;
-    }
-
-    public int getPercentageCorrect() {
-        return percentageCorrect;
-    }
-
-    public void setPercentageCorrect(int percentageCorrect) {
-        this.percentageCorrect = percentageCorrect;
-    }
-
-    public LocalDate getWeek() {
-        return week;
-    }
-
-    public void setWeek(LocalDate week) {
-        this.week = week;
-    }
-
-    public Dashboard getDashboard() {
-        return dashboard;
-    }
-
-    public void setDashboard(Dashboard dashboard) {
-        this.dashboard = dashboard;
-        this.dashboard.addWeeklyScore(this);
-    }
-
-    public SamePercentage getSamePercentage() {
-        return samePercentage;
-    }
-
-    public void setSamePercentage(SamePercentage samePercentage) {
-        this.samePercentage = samePercentage;
-    }
-
-    public void accept(Visitor visitor) {
     }
 
     public void remove() {
-        for (WeeklyScore ws: getSamePercentage().getWeeklyScores()) {
-            ws.getSamePercentage().getWeeklyScores().remove(this);
-        }
-        this.samePercentage = null;
         this.dashboard.getWeeklyScores().remove(this);
         this.dashboard = null;
     }
@@ -131,9 +62,9 @@ public class WeeklyScore implements DomainEntity {
                 .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
                 .collect(Collectors.toSet());
 
-        Set<Question> weeklyQuestionsAnswered = publicWeeklyQuestionAnswers.stream()
+        List<Question> weeklyQuestionsAnswered = publicWeeklyQuestionAnswers.stream()
                 .map(QuestionAnswer::getQuizQuestion)
-                .map(QuizQuestion::getQuestion).collect(Collectors.toSet());
+                .map(QuizQuestion::getQuestion).collect(Collectors.toList());
 
         setNumberAnswered((int) weeklyQuestionsAnswered.stream()
                 .map(Question::getId).count());
@@ -163,6 +94,32 @@ public class WeeklyScore implements DomainEntity {
                 (answerDate.isAfter(this.week) && answerDate.isBefore(this.week.with(weekSaturday))));
     }
 
+    public Integer getId() { return id; }
+
+    public int getNumberAnswered() { return numberAnswered; }
+
+    public void setNumberAnswered(int numberAnswered) {
+        this.numberAnswered = numberAnswered;
+    }
+
+    public int getUniquelyAnswered() { return uniquelyAnswered; }
+
+    public void setUniquelyAnswered(int uniquelyAnswered) {
+        this.uniquelyAnswered = uniquelyAnswered;
+    }
+
+    public int getPercentageCorrect() { return percentageCorrect; }
+
+    public void setPercentageCorrect(int percentageCorrect) {
+        this.percentageCorrect = percentageCorrect;
+    }
+
+    public LocalDate getWeek() { return week; }
+
+    public void setWeek(LocalDate week) {
+        this.week = week;
+    }
+
     public boolean isClosed() {
         return closed;
     }
@@ -175,6 +132,16 @@ public class WeeklyScore implements DomainEntity {
         }
 
         this.closed = close;
+    }
+
+    public Dashboard getDashboard() { return dashboard; }
+
+    public void setDashboard(Dashboard dashboard) {
+        this.dashboard = dashboard;
+        this.dashboard.addWeeklyScore(this);
+    }
+
+    public void accept(Visitor visitor) {
     }
 
     @Override

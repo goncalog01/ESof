@@ -224,7 +224,13 @@
           <v-icon>fa-user-edit</v-icon>
         </v-btn>
 
-        <v-btn to="/student/dashboard" v-if="isStudent && currentCourse" text dark>
+        <v-btn
+          to="/student/dashboard"
+          v-if="isStudent && currentCourse"
+          text
+          dark
+          data-cy="dashboardMenuButton"
+        >
           Dashboard
           <v-icon>fas fa-user</v-icon>
         </v-btn>

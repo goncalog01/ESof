@@ -10,6 +10,7 @@ import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuizAnswer
 import pt.ulisboa.tecnico.socialsoftware.tutor.auth.domain.AuthUser
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.Dashboard
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.WeeklyScore
+import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.ErrorMessage
 import pt.ulisboa.tecnico.socialsoftware.tutor.exceptions.TutorException
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.MultipleChoiceQuestion
 import pt.ulisboa.tecnico.socialsoftware.tutor.question.domain.Option
@@ -107,7 +108,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -123,7 +124,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
 
     def "update weekly score without answers in the current week"() {
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -145,7 +146,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         closedWeeklyScore.setClosed(true)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -179,7 +180,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -219,7 +220,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -259,7 +260,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 1L
@@ -299,7 +300,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 2L
@@ -345,7 +346,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
         answerDetailsRepository.save(answerDetails)
 
         when:
-        weeklyScoreService.updateWeeklyScores(dashboard.getId())
+        weeklyScoreService.updateWeeklyScore(dashboard.getId())
 
         then:
         weeklyScoreRepository.count() == 2L
@@ -368,7 +369,7 @@ class UpdateWeeklyScoreTest extends SpockTest {
     @Unroll
     def "cannot update WeeklyScore with dsahboard=#dashboardId"() {
         when:
-        weeklyScoreService.updateWeeklyScores(dashboardId)
+        weeklyScoreService.updateWeeklyScore(dashboardId)
 
         then:
         def exception = thrown(TutorException)

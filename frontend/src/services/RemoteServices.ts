@@ -28,6 +28,7 @@ import { QuizFraudInformation } from '@/models/management/fraud/QuizFraudInforma
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswer from '@/models/dashboard/FailedAnswer';
 import DifficultQuestion from '@/models/dashboard/DifficultQuestion';
+import WeeklyScore from '@/models/dashboard/WeeklyScore';
 
 const httpClient = axios.create();
 httpClient.defaults.timeout = 100000;
@@ -122,6 +123,35 @@ export default class RemoteServices {
   static async deleteDifficultQuestion(difficultQuestionId: number) {
     return httpClient
       .delete(`/students/difficultquestions/${difficultQuestionId}`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+  
+  static async getWeeklyScores(dashboardId: string): Promise<WeeklyScore[]> {
+    return httpClient
+      .get(`/students/dashboards/${dashboardId}/weeklyscores`)
+      .then((response) => {
+        return response.data.map(
+          (weeklyScore: any) => new WeeklyScore(weeklyScore)
+        );
+      })
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async updateWeeklyScores(dashboardId: string) {
+    return httpClient
+      .put(`/students/dashboards/${dashboardId}/weeklyscores`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteWeeklyScore(weeklyScoreId: number) {
+    return httpClient
+      .delete(`/students/weeklyscores/${weeklyScoreId}`)
       .catch(async (error) => {
         throw Error(await this.errorMessage(error));
       });
@@ -799,6 +829,7 @@ export default class RemoteServices {
         throw Error(await this.errorMessage(error));
       });
   }
+
   static async getQuizCommunicationFraudScores(
     quizId: number
   ): Promise<FraudScores[]> {

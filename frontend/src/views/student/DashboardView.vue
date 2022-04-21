@@ -13,15 +13,27 @@
           <v-btn color="primary" dark v-on:click="show = 'Weekly'"
             >Weekly Scores <br />
             {{
-              dashboard != null ? dashboard.lastCheckWeeklyScores : '-'
+              dashboard != null
+                ? dashboard.lastCheckWeeklyScores != null
+                  ? dashboard.lastCheckWeeklyScores
+                  : '-'
+                : '-'
             }}</v-btn
           >
         </v-col>
         <v-col>
-          <v-btn color="primary" dark v-on:click="show = 'Failed'"
+          <v-btn
+            color="primary"
+            dark
+            v-on:click="show = 'Failed'"
+            data-cy="failedAnswersMenuButton"
             >Failed Answers <br />
             {{
-              dashboard != null ? dashboard.lastCheckFailedAnswers : '-'
+              dashboard
+                ? dashboard.lastCheckFailedAnswers
+                  ? dashboard.lastCheckFailedAnswers
+                  : '-'
+                : '-'
             }}</v-btn
           ></v-col
         >
@@ -44,10 +56,17 @@
       <global-stats-view></global-stats-view>
     </div>
 
+    <div v-if="show === 'Weekly'" class="stats-container">
+      <weekly-score-view
+        :dashboard-id="dashboardId"
+        v-on:refresh="onWeeklyScoresRefresh"
+      >
+      </weekly-score-view>
+    </div>
+
     <div v-if="show === 'Failed'" class="stats-container">
       <failed-answers-view
         :dashboardId="dashboardId"
-        :lastCheckFailedAnswers="lastCheckFailedAnswers"
         v-on:refresh="onFailedAnswersRefresh"
       >
       </failed-answers-view>
@@ -70,9 +89,11 @@ import GlobalStatsView from '@/views/student/GlobalStatsView.vue';
 import Dashboard from '@/models/dashboard/Dashboard';
 import FailedAnswersView from '@/views/student/FailedAnswersView.vue';
 import DifficultQuestionsView from '@/views/student/DifficultQuestionsView.vue';
+import WeeklyScoreView from '@/views/student/WeeklyScoreView.vue';
 
 @Component({
   components: {
+    'weekly-score-view': WeeklyScoreView,
     'global-stats-view': GlobalStatsView,
     'failed-answers-view': FailedAnswersView,
     'difficult-questions-view': DifficultQuestionsView,
@@ -84,6 +105,7 @@ export default class StatsView extends Vue {
 
   lastCheckFailedAnswers: string | null = null;
   lastCheckDifficultQuestions: string | null = null;
+  lastCheckWeeklyScores: string | null = null;
 
   show: string = 'Global';
 
@@ -95,6 +117,7 @@ export default class StatsView extends Vue {
       this.lastCheckFailedAnswers = this.dashboard.lastCheckFailedAnswers;
       this.lastCheckDifficultQuestions =
         this.dashboard.lastCheckDifficultQuestions;
+      this.lastCheckWeeklyScores = this.dashboard.lastCheckWeeklyScores;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -102,6 +125,7 @@ export default class StatsView extends Vue {
   }
 
   async onFailedAnswersRefresh() {
+    this.dashboard = await RemoteServices.getUserDashboard();
     this.lastCheckFailedAnswers = this.dashboard!.lastCheckFailedAnswers;
   }
 
@@ -109,6 +133,11 @@ export default class StatsView extends Vue {
     this.dashboard = await RemoteServices.getUserDashboard();
     this.lastCheckDifficultQuestions =
       this.dashboard!.lastCheckDifficultQuestions;
+  }
+
+  async onWeeklyScoresRefresh() {
+    this.dashboard = await RemoteServices.getUserDashboard();
+    this.lastCheckWeeklyScores = this.dashboard!.lastCheckWeeklyScores;
   }
 }
 </script>
