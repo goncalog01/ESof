@@ -39,6 +39,8 @@ describe('Student Difficult Question Dashboard Access', () => {
         cy.accessDifficultQuestionsDashboard();
 
         cy.refreshDifficultQuestionsDashboard();
+        cy.showDifficultQuestionsDashboard(2);
+        cy.deleteDifficultQuestionsDashboard(2);
 
         cy.contains('Logout').click();
         Cypress.on('uncaught:exception', (err, runnable) => {

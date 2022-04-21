@@ -565,3 +565,16 @@ Cypress.Commands.add('accessDifficultQuestionsDashboard', () => {
 Cypress.Commands.add('refreshDifficultQuestionsDashboard', () => {
     cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
 });
+
+Cypress.Commands.add('showDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
+    for (let i = 0; i < numberOfDifficultQuestions; i++) {
+        cy.get('[data-cy="showDifficultQuestionButton"]').eq(i).click();
+        cy.get('[data-cy="closeButton"]').click();
+    }
+});
+
+Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').its('length')
+        .should('eq', numberOfDifficultQuestions);
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple:true});
+});
