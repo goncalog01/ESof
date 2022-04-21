@@ -101,7 +101,6 @@ public class WeeklyScoreService {
         LocalDate currentWeek = DateHandler.now().with(weekSunday).toLocalDate();
 
         if (weeklyScore.getWeek().isEqual(currentWeek)) {
-            System.out.println("Cannot remove current week");
             throw new TutorException(CANNOT_REMOVE_WEEKLY_SCORE);
         }
 
