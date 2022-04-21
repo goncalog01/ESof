@@ -10,8 +10,9 @@ export default class WeeklyScore {
   constructor(jsonObj?: WeeklyScore) {
     if (jsonObj) {
       this.id = jsonObj.id;
-      if (jsonObj.numberAnswered) this.numberAnswered = jsonObj.numberAnswered;
-      if (jsonObj.uniquelyAnswered)
+      if (jsonObj.numberAnswered != undefined)
+        this.numberAnswered = jsonObj.numberAnswered;
+      if (jsonObj.uniquelyAnswered != undefined)
         this.uniquelyAnswered = jsonObj.uniquelyAnswered;
       if (jsonObj.percentageCorrect != undefined)
         this.percentageCorrect = jsonObj.percentageCorrect;

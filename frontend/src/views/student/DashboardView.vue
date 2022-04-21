@@ -13,7 +13,11 @@
           <v-btn color="primary" dark v-on:click="show = 'Weekly'"
             >Weekly Scores <br />
             {{
-              dashboard != null ? dashboard.lastCheckWeeklyScores : '-'
+              dashboard != null
+                ? dashboard.lastCheckWeeklyScores != null
+                  ? dashboard.lastCheckWeeklyScores
+                  : '-'
+                : '-'
             }}</v-btn
           >
         </v-col>
@@ -37,7 +41,11 @@
           <v-btn color="primary" dark v-on:click="show = 'Difficult'"
             >Difficult Questions <br />
             {{
-              dashboard ? (dashboard.lastCheckDifficultQuestions ? dashboard.lastCheckDifficultQuestions : '-') : '-'
+              dashboard
+                ? dashboard.lastCheckDifficultQuestions
+                  ? dashboard.lastCheckDifficultQuestions
+                  : '-'
+                : '-'
             }}</v-btn
           ></v-col
         >
@@ -49,7 +57,11 @@
     </div>
 
     <div v-if="show === 'Weekly'" class="stats-container">
-      <weekly-score-view :dashboard-id="dashboardId"></weekly-score-view>
+      <weekly-score-view
+        :dashboard-id="dashboardId"
+        v-on:refresh="onWeeklyScoresRefresh"
+      >
+      </weekly-score-view>
     </div>
 
     <div v-if="show === 'Failed'" class="stats-container">
@@ -93,6 +105,7 @@ export default class StatsView extends Vue {
 
   lastCheckFailedAnswers: string | null = null;
   lastCheckDifficultQuestions: string | null = null;
+  lastCheckWeeklyScores: string | null = null;
 
   show: string = 'Global';
 
@@ -102,7 +115,9 @@ export default class StatsView extends Vue {
       this.dashboard = await RemoteServices.getUserDashboard();
       this.dashboardId = this.dashboard.id;
       this.lastCheckFailedAnswers = this.dashboard.lastCheckFailedAnswers;
-      this.lastCheckDifficultQuestions = this.dashboard.lastCheckDifficultQuestions
+      this.lastCheckDifficultQuestions =
+        this.dashboard.lastCheckDifficultQuestions;
+      this.lastCheckWeeklyScores = this.dashboard.lastCheckWeeklyScores;
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
@@ -116,7 +131,13 @@ export default class StatsView extends Vue {
 
   async onDifficultQuestionsRefresh() {
     this.dashboard = await RemoteServices.getUserDashboard();
-    this.lastCheckDifficultQuestions = this.dashboard!.lastCheckDifficultQuestions;
+    this.lastCheckDifficultQuestions =
+      this.dashboard!.lastCheckDifficultQuestions;
+  }
+
+  async onWeeklyScoresRefresh() {
+    this.dashboard = await RemoteServices.getUserDashboard();
+    this.lastCheckWeeklyScores = this.dashboard!.lastCheckWeeklyScores;
   }
 }
 </script>

@@ -5,11 +5,17 @@
         <v-col>
           <h1>Weekly Scores</h1>
         </v-col>
+        <v-col>
+          <v-spacer />
+          <v-btn color="primary" dark @click="refreshWeeklyScores"
+            >Refresh</v-btn
+          >
+        </v-col>
       </v-row>
       <v-data-table
         :headers="headers"
         :items="weeklyScores"
-        :items-per-page="5"
+        :items-per-page="10"
         class="elevation-1"
       ></v-data-table>
     </v-card>
@@ -26,11 +32,6 @@ interface Header {
   value: string;
 }
 
-interface Entry {
-  buttons: any;
-  dto: WeeklyScore;
-}
-
 @Component({
   components: {
     'weekly-score-view': WeeklyScoreView,
@@ -41,14 +42,13 @@ export default class WeeklyScoreView extends Vue {
   readonly dashboardId!: string;
 
   weeklyScores: WeeklyScore[] = [];
-  entries: Entry[] = [];
 
   headers: Header[] = [
     { text: 'Actions', value: 'buttons' },
-    { text: 'Week', value: 'dto.week' },
-    { text: 'Number Answered', value: 'dto.numberAnswered' },
-    { text: 'Uniquely Answered', value: 'dto.uniquelyAnswered' },
-    { text: 'Percentage Correct', value: 'dto.percentageCorrect' },
+    { text: 'Week', value: 'week' },
+    { text: 'Number Answered', value: 'numberAnswered' },
+    { text: 'Uniquely Answered', value: 'uniquelyAnswered' },
+    { text: 'Percentage Correct', value: 'percentageCorrect' },
   ];
 
   async created() {
@@ -57,6 +57,20 @@ export default class WeeklyScoreView extends Vue {
       this.weeklyScores = await RemoteServices.getWeeklyScores(
         this.dashboardId
       );
+    } catch (error) {
+      await this.$store.dispatch('error', error);
+    }
+    await this.$store.dispatch('clearLoading');
+  }
+
+  async refreshWeeklyScores() {
+    await this.$store.dispatch('loading');
+    try {
+      await RemoteServices.updateWeeklyScores(this.dashboardId);
+      this.weeklyScores = await RemoteServices.getWeeklyScores(
+        this.dashboardId
+      );
+      this.$emit('refresh');
     } catch (error) {
       await this.$store.dispatch('error', error);
     }
