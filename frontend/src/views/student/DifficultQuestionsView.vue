@@ -17,7 +17,11 @@
         <template v-slot:top>
           <v-card-title>
             <v-spacer />
-            <v-btn color="primary" dark @click="refreshDifficultQuestions"
+            <v-btn
+              color="primary"
+              dark
+              @click="refreshDifficultQuestions"
+              data-cy="refreshDifficultQuestionsMenuButton"
               >Refresh</v-btn
             >
           </v-card-title>

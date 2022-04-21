@@ -476,6 +476,24 @@ Cypress.Commands.add('solveQuizz', (quizTitle, numberOfQuizQuestions) => {
   cy.get('[data-cy="confirmationButton"]').click();
 });
 
+// Funtion created to make sure there are questions with percentage < 25% in the tests
+Cypress.Commands.add('solveQuizzWrong', (quizTitle, numberOfQuizQuestions, wrongAnswer) => {
+    cy.get('[data-cy="quizzesStudentMenuButton"]').click();
+    cy.contains('Available').click();
+
+    cy.contains(quizTitle).click();
+
+    for (let i = 1; i < numberOfQuizQuestions; i++) {
+        cy.get('[data-cy="optionList"]').children().contains(wrongAnswer).click();
+        cy.get('[data-cy="nextQuestionButton"]').click();
+    }
+
+    cy.get('[data-cy="optionList"]').children().contains(wrongAnswer).click();
+
+    cy.get('[data-cy="endQuizButton"]').click();
+    cy.get('[data-cy="confirmationButton"]').click();
+});
+
 Cypress.Commands.add('createDiscussion', (discussionContent) => {
   cy.get('[data-cy="quizzesStudentMenuButton"]').click();
   cy.contains('Solved').click();
@@ -537,4 +555,13 @@ Cypress.Commands.add('deleteQuestion', (questionTitle) => {
     .should('have.length', 10)
     .find('[data-cy="deleteQuestionButton"]')
     .click();
+});
+
+Cypress.Commands.add('accessDifficultQuestionsDashboard', () => {
+    cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
+})
+
+Cypress.Commands.add('refreshDifficultQuestionsDashboard', () => {
+    cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
 });

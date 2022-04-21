@@ -5,19 +5,19 @@ describe('Student Difficult Question Dashboard Access', () => {
         cy.demoTeacherLogin();
         cy.createQuestion(
             'Question 1',
-            'How many legs does a spider have?',
-            '1',
-            '2',
-            '6',
-            '8'
+            'Which of these answers is "Correct"?',
+            'correct',
+            'Wrong',
+            'Corrrrrrrrect',
+            'Correct'
         );
         cy.createQuestion(
             'Question 2',
-            'What is the capital of Portugal?',
-            'Tomar',
-            'Santa Comba Dão',
-            'África',
-            'Lisboa'
+            'Which of these answers is "wrong"?',
+            'Wrong',
+            'Correct',
+            'Corrrrrrrrect',
+            'wrong'
         );
         cy.createQuizzWith2Questions(
             'Quiz Title',
@@ -28,13 +28,18 @@ describe('Student Difficult Question Dashboard Access', () => {
     });
 
     afterEach(() => {
-        cy.deleteFailedAnswers();
+        cy.deleteDifficultQuestions();
         cy.deleteQuestionsAndAnswers();
     })
 
     it('student answers quizz', () => {
         cy.demoStudentLogin();
-        cy.solveQuizz('Quiz Title', 2);
+        cy.solveQuizzWrong('Quiz Title', 2, 'Wrong');
+
+        cy.accessDifficultQuestionsDashboard();
+
+        cy.refreshDifficultQuestionsDashboard();
+
         cy.contains('Logout').click();
         Cypress.on('uncaught:exception', (err, runnable) => {
             // returning false here prevents Cypress from
