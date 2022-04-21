@@ -32,6 +32,7 @@
                 v-on="on"
                 color="red"
                 @click="deleteWeeklyScore(item.id)"
+                data-cy="deleteWeeklyScoreMenuButton"
                 >delete</v-icon
               >
             </template>

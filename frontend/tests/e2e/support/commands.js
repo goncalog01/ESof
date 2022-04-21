@@ -593,3 +593,19 @@ Cypress.Commands.add('refreshWeeklyScores', () => {
     cy.get('[data-cy="refreshWeeklyScoresMenuButton"]').click();
     cy.wait('@updateWeeklyScores')
 });
+
+Cypress.Commands.add('deleteWeeklyScoreFromDashboard', () => {
+    cy.intercept('DELETE', '/students/weeklyscores/*').as('deleteWeeklyScore');
+    cy.get('[data-cy="deleteWeeklyScoreMenuButton"]')
+        .should('have.length.gte', 1)
+        .eq(0)
+        .click();
+    cy.wait('@deleteWeeklyScore');
+    cy.contains('Error').parent().find("button").click();
+    cy.intercept('DELETE', '/students/dashboards/*/weeklyscores').as('deleteWeeklyScore');
+    cy.get('[data-cy="deleteWeeklyScoreMenuButton"]')
+        .should('have.length.gte', 1)
+        .eq(1)
+        .click();
+    cy.wait('@deleteWeeklyScore');
+});
