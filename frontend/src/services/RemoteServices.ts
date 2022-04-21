@@ -120,6 +120,14 @@ export default class RemoteServices {
       });
   }
 
+  static async deleteDifficultQuestion(difficultQuestionId: number) {
+    return httpClient
+      .delete(`/students/difficultquestions/${difficultQuestionId}`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+  
   static async getWeeklyScores(dashboardId: string): Promise<WeeklyScore[]> {
     return httpClient
       .get(`/students/dashboards/${dashboardId}/weeklyscores`)
