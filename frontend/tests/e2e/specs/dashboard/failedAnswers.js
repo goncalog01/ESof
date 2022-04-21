@@ -4,7 +4,7 @@ describe('Student Walkthrough', () => {
         // 1st sequence part - teacher creates quiz
         cy.demoTeacherLogin();
         cy.createQuestion(
-            'Question Title',
+            'Question Failed Answer 1',
             'Question',
             'Option',
             'Option',
@@ -12,17 +12,17 @@ describe('Student Walkthrough', () => {
             'Correct'
         );
         cy.createQuestion(
-            'Question Title2',
+            'Question Failed Answer 2',
             'Question',
+            'Option',
+            'Option',
             'ChooseThisWrong',
-            'Option',
-            'Option',
             'Correct'
         );
         cy.createQuizzWith2Questions(
             'Quiz Title',
-            'Question Title',
-            'Question Title2'
+            'Question Failed Answer 1',
+            'Question Failed Answer 2'
         );
         cy.contains('Logout').click();
     });
@@ -32,25 +32,17 @@ describe('Student Walkthrough', () => {
         cy.deleteQuestionsAndAnswers();
     });
 
-    it('student access his failed answers dashboard', () => {
+    it('student access its failed answers dashboard', () => {
         cy.demoStudentLogin();
         cy.solveQuizzWrong('Quiz Title', 2, "ChooseThisWrong");
 
         cy.accessFailedAnswerDashboard();
-
         cy.refreshFailedAnswers();
         cy.showStudentViewDialog();
-        cy.deleteFailedAnswerFromDashboardError(0);
-
-        cy.refreshFailedAnswers();
-        cy.setFailedAnswersAsOld();
-        cy.deleteFailedAnswerFromDashboard(0);
-
+        cy.deleteFailedAnswerFromDashboard();
 
         cy.contains('Logout').click();
         Cypress.on('uncaught:exception', (err, runnable) => {
-            // returning false here prevents Cypress from
-            // failing the test
             return false;
         });
     });

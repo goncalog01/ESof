@@ -140,7 +140,7 @@ Cypress.Commands.add('cleanCodeFillInQuestionsByName', (questionName) => {
 });
 
 Cypress.Commands.add('createWeeklyScore', () => {
-  dbCommand(`WITH courseExecutionId as (SELECT ce.id as course_execution_id FROM course_executions ce WHERE acronym = 'DemoCourse')
+    dbCommand(`WITH courseExecutionId as (SELECT ce.id as course_execution_id FROM course_executions ce WHERE acronym = 'DemoCourse')
         , demoStudentId as (SELECT u.id as users_id FROM users u WHERE name = 'Demo Student')
         , dashboardId as (SELECT d.id as dashboard_id FROM dashboard d WHERE student_id = (select users_id from demoStudentId) AND course_execution_id = (select course_execution_id from courseExecutionId))
        INSERT INTO weekly_score(closed, number_answered, percentage_correct, uniquely_answered, week, dashboard_id) VALUES (true, 10, 50, 9, '2022-02-02', (select dashboard_id from dashboardId))
@@ -148,18 +148,18 @@ Cypress.Commands.add('createWeeklyScore', () => {
 });
 
 Cypress.Commands.add('deleteWeeklyScores', () => {
-  dbCommand(`
+    dbCommand(`
          UPDATE dashboard SET last_check_weekly_scores = NULL;
          DELETE FROM weekly_score;
     `);
 });
 
 Cypress.Commands.add('setFailedAnswersAsOld', () => {
-  dbCommand(`WITH courseExecutionId as (SELECT ce.id as course_execution_id FROM course_executions ce WHERE acronym = 'DemoCourse')
-                , demoStudentId as (SELECT u.id as users_id FROM users u WHERE name = 'Demo Student')
-                , dashboardId as (SELECT d.id as dashboard_id FROM dashboard d WHERE student_id = (select users_id from demoStudentId) AND course_execution_id = (select course_execution_id from courseExecutionId))
-  UPDATE failed_answer SET collected='2022-02-02'
-  `);
+    dbCommand(`WITH courseExecutionId as (SELECT ce.id as course_execution_id FROM course_executions ce WHERE acronym = 'DemoCourse')
+        , demoStudentId as (SELECT u.id as users_id FROM users u WHERE name = 'Demo Student')
+        , dashboardId as (SELECT d.id as dashboard_id FROM dashboard d WHERE student_id = (select users_id from demoStudentId) AND course_execution_id = (select course_execution_id from courseExecutionId))
+        UPDATE failed_answer SET collected='2022-02-02' 
+    `);
 });
 
 Cypress.Commands.add('deleteFailedAnswers', () => {
@@ -170,7 +170,7 @@ Cypress.Commands.add('deleteFailedAnswers', () => {
 });
 
 Cypress.Commands.add('deleteDifficultQuestions', () => {
-  dbCommand(`
+    dbCommand(`
          UPDATE dashboard SET last_check_difficult_questions = NULL;
          DELETE FROM difficult_question;
     `);

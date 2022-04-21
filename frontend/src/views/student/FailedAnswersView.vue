@@ -8,7 +8,11 @@
       </v-row>
 
       <v-col class="text-right">
-        <v-btn color="primary" dark @click="refreshFailedAnswers">
+        <v-btn color="primary"
+               dark
+               @click="refreshFailedAnswers"
+               data-cy="refreshFailedAnswersMenuButton"
+        >
           Refresh</v-btn
         >
       </v-col>
@@ -40,6 +44,7 @@
                 class="mr-2 action-button"
                 v-on="on"
                 @click="showStudentViewDialog(item)"
+                data-cy="showStudentViewDialog"
                 >school</v-icon
               >
             </template>
@@ -51,13 +56,13 @@
               <v-icon
                 class="mr-2 action-button"
                 v-on="on"
-                data-cy="deleteQuestionButton"
+                data-cy="deleteFailedAnswerButton"
                 @click="deleteFailedAnswer(item)"
                 color="red"
                 >delete</v-icon
               >
             </template>
-            <span>Delete Question</span>
+            <span>Delete Failed Answer</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -101,7 +106,7 @@ export default class FailedAnswersView extends Vue {
     },
     {
       text: 'Question',
-      value: 'questionAnswerDto.question.title',
+      value: 'questionAnswerDto.question.content',
       width: '80%',
       align: 'left',
       sortable: false,
@@ -160,7 +165,7 @@ export default class FailedAnswersView extends Vue {
   async deleteFailedAnswer(toRemoveFailedAnswer: FailedAnswer) {
     if (
       toRemoveFailedAnswer.id &&
-      confirm('Are you sure you want to delete this question?')
+      confirm('Are you sure you want to delete this Failed Answer?')
     ) {
       try {
         await RemoteServices.removeFailedAnswer(toRemoveFailedAnswer.id);
@@ -173,6 +178,7 @@ export default class FailedAnswersView extends Vue {
     }
   }
 
+  @Emit('refresh')
   async refreshFailedAnswers() {
     await this.$store.dispatch('loading');
     try {
@@ -180,7 +186,6 @@ export default class FailedAnswersView extends Vue {
       this.failedAnswers = await RemoteServices.getFailedAnswers(
         this.dashboardId
       );
-      this.$emit('refresh');
     } catch (error) {
       await this.$store.dispatch('error', error);
     }

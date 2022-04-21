@@ -58,7 +58,6 @@ public class Dashboard implements DomainEntity {
     }
 
     public Dashboard(CourseExecution courseExecution, Student student) {
-        LocalDateTime currentDate = DateHandler.now();
         setCourseExecution(courseExecution);
         setStudent(student);
     }
@@ -164,7 +163,7 @@ public class Dashboard implements DomainEntity {
                 .map(dq -> dq.getQuestion()).collect(Collectors.toSet());
 
         for (QuizAnswer qa : getStudent().getQuizAnswers()
-                .stream().filter(q -> q.getAnswerDate().isAfter(DateHandler.now().minusDays(7))
+                .stream().filter(q -> q.isCompleted() && q.getAnswerDate().isAfter(DateHandler.now().minusDays(7))
                                     && q.getQuiz().getCourseExecution() == courseExecution)
                 .collect(Collectors.toSet())) {
             answeredQuestions.addAll(qa.getQuiz().getQuizQuestions().stream()
