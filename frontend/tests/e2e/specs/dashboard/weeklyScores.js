@@ -28,13 +28,14 @@ describe('Student Walkthrough', () => {
     });
 
     afterEach(() => {
-        cy.deleteFailedAnswers();
+        cy.deleteWeeklyScores();
         cy.deleteQuestionsAndAnswers();
     });
 
     it('student answers quiz', () => {
         cy.demoStudentLogin();
         cy.solveQuizz('Quiz Title', 2);
+        cy.accessWeeklyScoreDashboard();
         cy.contains('Logout').click();
         Cypress.on('uncaught:exception', (err, runnable) => {
             // returning false here prevents Cypress from

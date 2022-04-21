@@ -7,7 +7,10 @@
         </v-col>
         <v-col>
           <v-spacer />
-          <v-btn color="primary" dark @click="refreshWeeklyScores"
+          <v-btn
+            color="primary"
+            dark
+            @click="refreshWeeklyScores"
             >Refresh</v-btn
           >
         </v-col>
