@@ -7,7 +7,11 @@
         </v-col>
         <v-col>
           <v-spacer />
-          <v-btn color="primary" dark @click="refreshWeeklyScores"
+          <v-btn
+            color="primary"
+            dark
+            @click="refreshWeeklyScores"
+            data-cy="refreshWeeklyScoresMenuButton"
             >Refresh</v-btn
           >
         </v-col>
@@ -15,6 +19,8 @@
       <v-data-table
         :headers="headers"
         :items="weeklyScores"
+        :sort-by="['week']"
+        sort-desc
         :items-per-page="10"
         class="elevation-1"
       >
@@ -26,6 +32,7 @@
                 v-on="on"
                 color="red"
                 @click="deleteWeeklyScore(item.id)"
+                data-cy="deleteWeeklyScoreMenuButton"
                 >delete</v-icon
               >
             </template>
