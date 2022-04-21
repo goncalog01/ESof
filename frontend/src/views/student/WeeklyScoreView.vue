@@ -19,6 +19,8 @@
       <v-data-table
         :headers="headers"
         :items="weeklyScores"
+        :sort-by="['week']"
+        sort-desc
         :items-per-page="10"
         class="elevation-1"
       >
