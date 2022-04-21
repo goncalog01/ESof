@@ -587,3 +587,9 @@ Cypress.Commands.add('accessWeeklyScoreDashboard', () => {
     cy.get('[data-cy="weeklyScoresMenuButton"]').click();
     cy.wait('@getWeeklyScores')
 });
+
+Cypress.Commands.add('refreshWeeklyScores', () => {
+    cy.intercept('PUT', '/students/dashboards/*/weeklyscores').as('updateWeeklyScores');
+    cy.get('[data-cy="refreshWeeklyScoresMenuButton"]').click();
+    cy.wait('@updateWeeklyScores')
+});

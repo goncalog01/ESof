@@ -36,6 +36,7 @@ describe('Student Walkthrough', () => {
         cy.demoStudentLogin();
         cy.solveQuizz('Quiz Title', 2);
         cy.accessWeeklyScoreDashboard();
+        cy.refreshWeeklyScores();
         cy.contains('Logout').click();
         Cypress.on('uncaught:exception', (err, runnable) => {
             // returning false here prevents Cypress from

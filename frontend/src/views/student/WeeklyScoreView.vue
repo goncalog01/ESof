@@ -11,6 +11,7 @@
             color="primary"
             dark
             @click="refreshWeeklyScores"
+            data-cy="refreshWeeklyScoresMenuButton"
             >Refresh</v-btn
           >
         </v-col>
