@@ -92,6 +92,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         given:
         def quizAnswer = new QuizAnswer()
         quizAnswer.setAnswerDate(now.minusMinutes(1))
+        quizAnswer.setCompleted(true)
         quizAnswer.setQuiz(quiz)
         quizAnswer.setStudent(student)
         quizAnswerRepository.save(quizAnswer)
@@ -125,6 +126,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         quizAnswer.setAnswerDate(now.minusMinutes(1))
         quizAnswer.setQuiz(quiz)
         quizAnswer.setStudent(student)
+        quizAnswer.setCompleted(true)
         quizAnswerRepository.save(quizAnswer)
         and:
         def questionAnswer = new QuestionAnswer()
@@ -185,6 +187,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         quizAnswer.setAnswerDate(now.minusMinutes(1))
         quizAnswer.setQuiz(quiz)
         quizAnswer.setStudent(student)
+        quizAnswer.setCompleted(true)
         quizAnswerRepository.save(quizAnswer)
         and:
         def questionAnswer = new QuestionAnswer()
@@ -216,6 +219,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         quizAnswer.setAnswerDate(now.minusMinutes(1))
         quizAnswer.setQuiz(quiz)
         quizAnswer.setStudent(student)
+        quizAnswer.setCompleted(true)
         quizAnswerRepository.save(quizAnswer)
         and:
         def questionAnswer = new QuestionAnswer()
@@ -268,6 +272,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         quizAnswer.setAnswerDate(now.minusMinutes(1))
         quizAnswer.setQuiz(quiz)
         quizAnswer.setStudent(student)
+        quizAnswer.setCompleted(true)
         quizAnswerRepository.save(quizAnswer)
         and:
         def questionAnswer = new QuestionAnswer()
@@ -357,6 +362,7 @@ class UpdateDifficultQuestionsTest extends SpockTest {
         quizAnswer.setAnswerDate(date)
         quizAnswer.setStudent(student)
         quizAnswer.setQuiz(quiz)
+        quizAnswer.setCompleted(true)
         quizAnswerRepository.save(quizAnswer)
 
         def questionAnswer = new QuestionAnswer()
