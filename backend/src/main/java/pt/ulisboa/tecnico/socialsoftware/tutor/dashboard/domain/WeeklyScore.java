@@ -14,6 +14,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,9 +62,9 @@ public class WeeklyScore implements DomainEntity {
                 .flatMap(quizAnswer -> quizAnswer.getQuestionAnswers().stream())
                 .collect(Collectors.toSet());
 
-        Set<Question> weeklyQuestionsAnswered = publicWeeklyQuestionAnswers.stream()
+        List<Question> weeklyQuestionsAnswered = publicWeeklyQuestionAnswers.stream()
                 .map(QuestionAnswer::getQuizQuestion)
-                .map(QuizQuestion::getQuestion).collect(Collectors.toSet());
+                .map(QuizQuestion::getQuestion).collect(Collectors.toList());
 
         setNumberAnswered((int) weeklyQuestionsAnswered.stream()
                 .map(Question::getId).count());
