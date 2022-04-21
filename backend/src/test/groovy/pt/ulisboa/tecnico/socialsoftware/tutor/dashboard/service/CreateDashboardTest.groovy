@@ -1,4 +1,4 @@
-package pt.ulisboa.tecnico.socialsoftware.tutor.question.service
+package pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.service
 
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -31,10 +31,9 @@ class CreateDashboardTest extends SpockTest {
         dashboardRepository.count() == 1L
         def result = dashboardRepository.findAll().get(0)
         result.getId() != 0
-        result.getLastCheckFailedAnswers() != null
-        result.getLastCheckDifficultQuestions() != null
-        result.getLastCheckFailedAnswers() == result.getLastCheckDifficultQuestions()
-        result.getLastCheckWeeklyScores() != null
+        result.getLastCheckFailedAnswers() == null
+        result.getLastCheckDifficultQuestions() == null
+        result.getLastCheckWeeklyScores() == null
         result.getCourseExecution().getId() == externalCourseExecution.getId()
         result.getStudent().getId() == student.getId()
 
@@ -53,7 +52,7 @@ class CreateDashboardTest extends SpockTest {
         when: "a second dashboard is created"
         dashboardService.createDashboard(externalCourseExecution.getId(), student.getId())
 
-        then: "exception is thrown"        
+        then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.STUDENT_ALREADY_HAS_DASHBOARD
     }
@@ -62,7 +61,7 @@ class CreateDashboardTest extends SpockTest {
         when: "a dashboard is created"
         dashboardService.createDashboard(externalCourseExecution.getId(), student.getId())
 
-        then: "exception is thrown"        
+        then: "exception is thrown"
         def exception = thrown(TutorException)
         exception.getErrorMessage() == ErrorMessage.STUDENT_NO_COURSE_EXECUTION
     }
