@@ -17,7 +17,22 @@
         :items="weeklyScores"
         :items-per-page="10"
         class="elevation-1"
-      ></v-data-table>
+      >
+        <template v-slot:[`item.buttons`]="{ item }">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                class="mr-2 action-button"
+                v-on="on"
+                color="red"
+                @click="deleteWeeklyScore(item.id)"
+                >delete</v-icon
+              >
+            </template>
+            <span>Delete Weekly Score</span>
+          </v-tooltip>
+        </template>
+      </v-data-table>
     </v-card>
   </v-container>
 </template>
@@ -75,6 +90,18 @@ export default class WeeklyScoreView extends Vue {
       await this.$store.dispatch('error', error);
     }
     await this.$store.dispatch('clearLoading');
+  }
+
+  async deleteWeeklyScore(weeklyScoreId: number) {
+    if (confirm('Are you sure you want to delete this weekly score?'))
+      try {
+        await RemoteServices.deleteWeeklyScore(weeklyScoreId);
+        this.weeklyScores = await RemoteServices.getWeeklyScores(
+          this.dashboardId
+        );
+      } catch (error) {
+        await this.$store.dispatch('error', error);
+      }
   }
 }
 </script>

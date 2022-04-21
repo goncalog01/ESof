@@ -114,19 +114,19 @@ export default class RemoteServices {
 
   static async updateDifficultQuestions(dashboardId: number) {
     return httpClient
-        .put(`/students/dashboards/${dashboardId}/difficultquestions`)
-        .catch(async (error) => {
-          throw Error(await this.errorMessage(error));
-        });
+      .put(`/students/dashboards/${dashboardId}/difficultquestions`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
   }
 
   static async getWeeklyScores(dashboardId: string): Promise<WeeklyScore[]> {
     return httpClient
       .get(`/students/dashboards/${dashboardId}/weeklyscores`)
       .then((response) => {
-        return response.data.map((weeklyScore: any) => {
-          return new WeeklyScore(weeklyScore);
-        });
+        return response.data.map(
+          (weeklyScore: any) => new WeeklyScore(weeklyScore)
+        );
       })
       .catch(async (error) => {
         throw Error(await this.errorMessage(error));
@@ -134,8 +134,16 @@ export default class RemoteServices {
   }
 
   static async updateWeeklyScores(dashboardId: string) {
-    httpClient
+    return httpClient
       .put(`/students/dashboards/${dashboardId}/weeklyscores`)
+      .catch(async (error) => {
+        throw Error(await this.errorMessage(error));
+      });
+  }
+
+  static async deleteWeeklyScore(weeklyScoreId: number) {
+    return httpClient
+      .delete(`/students/weeklyscores/${weeklyScoreId}`)
       .catch(async (error) => {
         throw Error(await this.errorMessage(error));
       });
