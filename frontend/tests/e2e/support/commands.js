@@ -424,7 +424,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   'createQuizzWith2Questions',
-  (quizTitle, questionTitle, questionTitle2) => {
+  (quizTitle, firstQuestion, secondQuestion) => {
     cy.get('[data-cy="managementMenuButton"]').click();
     cy.get('[data-cy="quizzesTeacherMenuButton"]').click();
 
@@ -437,7 +437,8 @@ Cypress.Commands.add(
       '.datetimepicker > .datepicker > .datepicker-buttons-container > .datepicker-button > .datepicker-button-content'
     ).first().click();
 
-    cy.contains(questionTitle)
+    cy.get('[data-cy="searchField"]').type(firstQuestion)
+    cy.contains(firstQuestion)
       .parent()
       .should('have.length', 1)
       .parent()
@@ -446,7 +447,10 @@ Cypress.Commands.add(
       .find('[data-cy="addToQuizButton"]')
       .click();
 
-    cy.contains(questionTitle2)
+    cy.get('[data-cy="searchField"]').clear();
+
+    cy.get('[data-cy="searchField"]').type(secondQuestion)
+    cy.contains(secondQuestion)
       .parent()
       .should('have.length', 1)
       .parent()
@@ -580,24 +584,42 @@ Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQues
     cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple:true});
 
 Cypress.Commands.add('accessFailedAnswerDashboard', () => {
+    cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
     cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.wait('@getDashboard');
+    cy.intercept('GET', '/students/dashboards/*/failedanswers').as('getFailedAnswers');
     cy.get('[data-cy="failedAnswersMenuButton"]').click();
+    cy.wait('@getFailedAnswers')
 });
 
 Cypress.Commands.add('refreshFailedAnswers', () => {
+    cy.intercept('PUT', '/students/dashboards/*/failedanswers').as('updateFailedAnswers');
     cy.get('[data-cy="refreshFailedAnswersMenuButton"]').click();
+    cy.wait('@updateFailedAnswers')
 });
 
 Cypress.Commands.add('showStudentViewDialog', () => {
-    cy.get('[data-cy="showStudentViewDialog"]').eq(0).click();
+    cy.get('[data-cy="showStudentViewDialog"]')
+      .should('have.length.gte', 1)
+      .eq(0)
+      .click();
     cy.get('[data-cy="closeButton"]').click();
 });
 
-Cypress.Commands.add('deleteFailedAnswerFromDashboardError', (failedAnswerIndex) => {
-    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
+Cypress.Commands.add('deleteFailedAnswerFromDashboard', () => {
+    cy.intercept('DELETE', '/students/failedanswers/*').as('deleteFailedAnswer');
+    cy.get('[data-cy="deleteFailedAnswerButton"]')
+      .should('have.length.gte', 1)
+      .eq(0)
+      .click();
+    cy.wait('@deleteFailedAnswer');
     cy.contains('Error').parent().find("button").click();
-});
-
-Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
-    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
+    cy.setFailedAnswersAsOld();
+    cy.refreshFailedAnswers();
+    cy.intercept('DELETE', '/students/dashboards/*/failedanswers').as('deleteFailedAnswer');
+    cy.get('[data-cy="deleteFailedAnswerButton"]')
+        .should('have.length.gte', 1)
+        .eq(0)
+        .click();
+    cy.wait('@deleteFailedAnswer');
 });
