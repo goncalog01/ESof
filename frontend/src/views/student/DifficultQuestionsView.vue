@@ -17,7 +17,11 @@
         <template v-slot:top>
           <v-card-title>
             <v-spacer />
-            <v-btn color="primary" dark @click="refreshDifficultQuestions"
+            <v-btn
+              color="primary"
+              dark
+              @click="refreshDifficultQuestions"
+              data-cy="refreshDifficultQuestionsMenuButton"
               >Refresh</v-btn
             >
           </v-card-title>
@@ -29,6 +33,7 @@
               <v-icon
                 class="mr-2 action-button"
                 v-on="on"
+                data-cy="showDifficultQuestionButton"
                 @click="showStudentViewDialog(item)"
                 >school</v-icon
               >
@@ -41,7 +46,7 @@
               <v-icon
                 class="mr-2 action-button"
                 v-on="on"
-                data-cy="deleteQuestionButton"
+                data-cy="deleteDifficultQuestionButton"
                 @click="deleteDifficultQuestion(item)"
                 color="red"
                 >delete</v-icon

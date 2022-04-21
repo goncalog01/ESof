@@ -38,7 +38,11 @@
           ></v-col
         >
         <v-col>
-          <v-btn color="primary" dark v-on:click="show = 'Difficult'"
+          <v-btn
+            color="primary"
+            dark
+            v-on:click="show = 'Difficult'"
+            data-cy="difficultQuestionsMenuButton"
             >Difficult Questions <br />
             {{
               dashboard
