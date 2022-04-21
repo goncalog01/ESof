@@ -476,6 +476,7 @@ Cypress.Commands.add('solveQuizz', (quizTitle, numberOfQuizQuestions) => {
   cy.get('[data-cy="confirmationButton"]').click();
 });
 
+
 // Funtion created to make sure there are questions with percentage < 25% in the tests
 Cypress.Commands.add('solveQuizzWrong', (quizTitle, numberOfQuizQuestions, wrongAnswer) => {
     cy.get('[data-cy="quizzesStudentMenuButton"]').click();
@@ -577,4 +578,26 @@ Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQues
     cy.get('[data-cy="deleteDifficultQuestionButton"]').its('length')
         .should('eq', numberOfDifficultQuestions);
     cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple:true});
+
+Cypress.Commands.add('accessFailedAnswerDashboard', () => {
+    cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.get('[data-cy="failedAnswersMenuButton"]').click();
+});
+
+Cypress.Commands.add('refreshFailedAnswers', () => {
+    cy.get('[data-cy="refreshFailedAnswersMenuButton"]').click();
+});
+
+Cypress.Commands.add('showStudentViewDialog', () => {
+    cy.get('[data-cy="showStudentViewDialog"]').eq(0).click();
+    cy.get('[data-cy="closeButton"]').click();
+});
+
+Cypress.Commands.add('deleteFailedAnswerFromDashboardError', (failedAnswerIndex) => {
+    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
+    cy.contains('Error').parent().find("button").click();
+});
+
+Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
+    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
 });

@@ -163,7 +163,7 @@ Cypress.Commands.add('setFailedAnswersAsOld', () => {
 });
 
 Cypress.Commands.add('deleteFailedAnswers', () => {
-    dbCommand(`
+  dbCommand(`
          UPDATE dashboard SET last_check_failed_answers = NULL;
          DELETE FROM failed_answer;
     `);
@@ -177,7 +177,7 @@ Cypress.Commands.add('deleteDifficultQuestions', () => {
 });
 
 Cypress.Commands.add('deleteQuestionsAndAnswers', () => {
-    dbCommand(`
+  dbCommand(`
          DELETE FROM replies;
          DELETE FROM discussions;
          DELETE FROM answer_details;
