@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.domain.QuestionAnswer;
 import pt.ulisboa.tecnico.socialsoftware.tutor.answer.dto.QuestionAnswerDto;
 import pt.ulisboa.tecnico.socialsoftware.tutor.dashboard.domain.FailedAnswer;
+import pt.ulisboa.tecnico.socialsoftware.tutor.utils.DateHandler;
 
 public class FailedAnswerDto implements Serializable {
 
@@ -23,8 +24,8 @@ public class FailedAnswerDto implements Serializable {
 
     public FailedAnswerDto(FailedAnswer failedAnswer){
         setId(failedAnswer.getId());
-        setCollected(failedAnswer.getCollected());
         setAnswered(failedAnswer.getAnswered());
+        setCollected(DateHandler.toISOString(failedAnswer.getCollected()));
         setQuestionAnswerDto(new QuestionAnswerDto(failedAnswer.getQuestionAnswer()));
     }
 
@@ -36,7 +37,7 @@ public class FailedAnswerDto implements Serializable {
 
     public String getCollected() { return collected; }
 
-    public void setCollected(LocalDateTime collected) { this.collected = collected.format(DateTimeFormatter.ISO_DATE_TIME); }
+    public void setCollected(String collected) { this.collected = collected; }
 
     public boolean getAnswered() {
         return answered;
@@ -58,7 +59,6 @@ public class FailedAnswerDto implements Serializable {
     public String toString() {
         return "FailedAnswerDto{" +
             "id=" + id +
-            ", collected=" + collected +
             ", answered=" + answered +
             "}";
     }

@@ -10,7 +10,11 @@
           >
         </v-col>
         <v-col>
-          <v-btn color="primary" dark v-on:click="show = 'Weekly'"
+          <v-btn
+            color="primary"
+            dark
+            v-on:click="show = 'Weekly'"
+            data-cy="weeklyScoresMenuButton"
             >Weekly Scores <br />
             {{
               dashboard != null
