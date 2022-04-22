@@ -567,35 +567,37 @@ Cypress.Commands.add('deleteQuestion', (questionTitle) => {
 });
 
 Cypress.Commands.add('accessDifficultQuestionsDashboard', () => {
-  cy.get('[data-cy="dashboardMenuButton"]').click();
-  cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
+    // Get Dashboard
+    cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
+    cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.wait('@getDashboard');
+
+    // Get Difficult Questions
+    cy.intercept('GET', '/students/dashboards/*/difficultquestions').as('getDifficultQuestions');
+    cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
+    cy.wait('@getDifficultQuestions');
 });
 
 Cypress.Commands.add('refreshDifficultQuestionsDashboard', () => {
-  cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
+    cy.intercept('PUT', '/students/dashboards/*/difficultquestions').as('refreshDifficultQuestions');
+    cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
+    cy.wait('@refreshDifficultQuestions');
 });
 
-Cypress.Commands.add(
-  'showDifficultQuestionsDashboard',
-  (numberOfDifficultQuestions) => {
+Cypress.Commands.add('showDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
     for (let i = 0; i < numberOfDifficultQuestions; i++) {
       cy.get('[data-cy="showDifficultQuestionButton"]').eq(i).click();
       cy.get('[data-cy="closeButton"]').click();
     }
-  }
-);
+});
 
-Cypress.Commands.add(
-  'deleteDifficultQuestionsDashboard',
-  (numberOfDifficultQuestions) => {
-    cy.get('[data-cy="deleteDifficultQuestionButton"]')
-      .its('length')
-      .should('eq', numberOfDifficultQuestions);
-    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({
-      multiple: true,
-    });
-  }
-);
+Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
+    cy.intercept('DELETE', '/students/difficultquestions/*').as('deleteDifficultQuestions');
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').its('length')
+        .should('eq', numberOfDifficultQuestions);
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple: true});
+    cy.wait('@deleteDifficultQuestions');
+});
 
 Cypress.Commands.add('accessFailedAnswerDashboard', () => {
   cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
@@ -659,6 +661,11 @@ Cypress.Commands.add('refreshWeeklyScores', () => {
   );
   cy.get('[data-cy="refreshWeeklyScoresMenuButton"]').click();
   cy.wait('@updateWeeklyScores');
+});
+
+
+Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
+    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
 });
 
 Cypress.Commands.add('deleteWeeklyScoreFromDashboard', () => {
