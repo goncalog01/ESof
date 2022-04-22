@@ -559,12 +559,21 @@ Cypress.Commands.add('deleteQuestion', (questionTitle) => {
 });
 
 Cypress.Commands.add('accessDifficultQuestionsDashboard', () => {
+    // Get Dashboard
+    cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
     cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.wait('@getDashboard');
+
+    // Get Difficult Questions
+    cy.intercept('GET', '/students/dashboards/*/difficultquestions').as('getDifficultQuestions');
     cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
+    cy.wait('@getDifficultQuestions');
 })
 
 Cypress.Commands.add('refreshDifficultQuestionsDashboard', () => {
+    cy.intercept('PUT', '/students/dashboards/*/difficultquestions').as('refreshDifficultQuestions');
     cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
+    cy.wait('@refreshDifficultQuestions');
 });
 
 Cypress.Commands.add('showDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
@@ -575,9 +584,12 @@ Cypress.Commands.add('showDifficultQuestionsDashboard', (numberOfDifficultQuesti
 });
 
 Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
+    cy.intercept('DELETE', '/students/difficultquestions/*').as('deleteDifficultQuestions');
     cy.get('[data-cy="deleteDifficultQuestionButton"]').its('length')
         .should('eq', numberOfDifficultQuestions);
-    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple:true});
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple: true});
+    cy.wait('@deleteDifficultQuestions');
+});
 
 Cypress.Commands.add('accessFailedAnswerDashboard', () => {
     cy.get('[data-cy="dashboardMenuButton"]').click();
