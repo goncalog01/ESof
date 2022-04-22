@@ -424,7 +424,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   'createQuizzWith2Questions',
-  (quizTitle, questionTitle, questionTitle2) => {
+  (quizTitle, firstQuestion, secondQuestion) => {
     cy.get('[data-cy="managementMenuButton"]').click();
     cy.get('[data-cy="quizzesTeacherMenuButton"]').click();
 
@@ -435,9 +435,12 @@ Cypress.Commands.add(
     cy.get('#availableDateInput-input').click();
     cy.get(
       '.datetimepicker > .datepicker > .datepicker-buttons-container > .datepicker-button > .datepicker-button-content'
-    ).first().click();
+    )
+      .first()
+      .click();
 
-    cy.contains(questionTitle)
+    cy.get('[data-cy="searchField"]').type(firstQuestion);
+    cy.contains(firstQuestion)
       .parent()
       .should('have.length', 1)
       .parent()
@@ -446,7 +449,10 @@ Cypress.Commands.add(
       .find('[data-cy="addToQuizButton"]')
       .click();
 
-    cy.contains(questionTitle2)
+    cy.get('[data-cy="searchField"]').clear();
+
+    cy.get('[data-cy="searchField"]').type(secondQuestion);
+    cy.contains(secondQuestion)
       .parent()
       .should('have.length', 1)
       .parent()
@@ -476,24 +482,26 @@ Cypress.Commands.add('solveQuizz', (quizTitle, numberOfQuizQuestions) => {
   cy.get('[data-cy="confirmationButton"]').click();
 });
 
-
 // Funtion created to make sure there are questions with percentage < 25% in the tests
-Cypress.Commands.add('solveQuizzWrong', (quizTitle, numberOfQuizQuestions, wrongAnswer) => {
+Cypress.Commands.add(
+  'solveQuizzWrong',
+  (quizTitle, numberOfQuizQuestions, wrongAnswer) => {
     cy.get('[data-cy="quizzesStudentMenuButton"]').click();
     cy.contains('Available').click();
 
     cy.contains(quizTitle).click();
 
     for (let i = 1; i < numberOfQuizQuestions; i++) {
-        cy.get('[data-cy="optionList"]').children().contains(wrongAnswer).click();
-        cy.get('[data-cy="nextQuestionButton"]').click();
+      cy.get('[data-cy="optionList"]').children().contains(wrongAnswer).click();
+      cy.get('[data-cy="nextQuestionButton"]').click();
     }
 
     cy.get('[data-cy="optionList"]').children().contains(wrongAnswer).click();
 
     cy.get('[data-cy="endQuizButton"]').click();
     cy.get('[data-cy="confirmationButton"]').click();
-});
+  }
+);
 
 Cypress.Commands.add('createDiscussion', (discussionContent) => {
   cy.get('[data-cy="quizzesStudentMenuButton"]').click();
@@ -559,45 +567,119 @@ Cypress.Commands.add('deleteQuestion', (questionTitle) => {
 });
 
 Cypress.Commands.add('accessDifficultQuestionsDashboard', () => {
+    // Get Dashboard
+    cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
     cy.get('[data-cy="dashboardMenuButton"]').click();
+    cy.wait('@getDashboard');
+
+    // Get Difficult Questions
+    cy.intercept('GET', '/students/dashboards/*/difficultquestions').as('getDifficultQuestions');
     cy.get('[data-cy="difficultQuestionsMenuButton"]').click();
-})
+    cy.wait('@getDifficultQuestions');
+});
 
 Cypress.Commands.add('refreshDifficultQuestionsDashboard', () => {
+    cy.intercept('PUT', '/students/dashboards/*/difficultquestions').as('refreshDifficultQuestions');
     cy.get('[data-cy="refreshDifficultQuestionsMenuButton"]').click();
+    cy.wait('@refreshDifficultQuestions');
 });
 
 Cypress.Commands.add('showDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
     for (let i = 0; i < numberOfDifficultQuestions; i++) {
-        cy.get('[data-cy="showDifficultQuestionButton"]').eq(i).click();
-        cy.get('[data-cy="closeButton"]').click();
+      cy.get('[data-cy="showDifficultQuestionButton"]').eq(i).click();
+      cy.get('[data-cy="closeButton"]').click();
     }
 });
 
 Cypress.Commands.add('deleteDifficultQuestionsDashboard', (numberOfDifficultQuestions) => {
+    cy.intercept('DELETE', '/students/difficultquestions/*').as('deleteDifficultQuestions');
     cy.get('[data-cy="deleteDifficultQuestionButton"]').its('length')
         .should('eq', numberOfDifficultQuestions);
-    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple:true});
+    cy.get('[data-cy="deleteDifficultQuestionButton"]').click({multiple: true});
+    cy.wait('@deleteDifficultQuestions');
+});
 
 Cypress.Commands.add('accessFailedAnswerDashboard', () => {
-    cy.get('[data-cy="dashboardMenuButton"]').click();
-    cy.get('[data-cy="failedAnswersMenuButton"]').click();
+  cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
+  cy.get('[data-cy="dashboardMenuButton"]').click();
+  cy.wait('@getDashboard');
+  cy.intercept('GET', '/students/dashboards/*/failedanswers').as(
+    'getFailedAnswers'
+  );
+  cy.get('[data-cy="failedAnswersMenuButton"]').click();
+  cy.wait('@getFailedAnswers');
 });
 
 Cypress.Commands.add('refreshFailedAnswers', () => {
-    cy.get('[data-cy="refreshFailedAnswersMenuButton"]').click();
+  cy.intercept('PUT', '/students/dashboards/*/failedanswers').as(
+    'updateFailedAnswers'
+  );
+  cy.get('[data-cy="refreshFailedAnswersMenuButton"]').click();
+  cy.wait('@updateFailedAnswers');
 });
 
 Cypress.Commands.add('showStudentViewDialog', () => {
-    cy.get('[data-cy="showStudentViewDialog"]').eq(0).click();
-    cy.get('[data-cy="closeButton"]').click();
+  cy.get('[data-cy="showStudentViewDialog"]')
+    .should('have.length.gte', 1)
+    .eq(0)
+    .click();
+  cy.get('[data-cy="closeButton"]').click();
 });
 
-Cypress.Commands.add('deleteFailedAnswerFromDashboardError', (failedAnswerIndex) => {
-    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
-    cy.contains('Error').parent().find("button").click();
+Cypress.Commands.add('deleteFailedAnswerFromDashboard', () => {
+  cy.intercept('DELETE', '/students/failedanswers/*').as('deleteFailedAnswer');
+  cy.get('[data-cy="deleteFailedAnswerButton"]')
+    .should('have.length.gte', 1)
+    .eq(0)
+    .click();
+  cy.wait('@deleteFailedAnswer');
+  cy.contains('Error').parent().find('button').click();
+  cy.setFailedAnswersAsOld();
+  cy.refreshFailedAnswers();
+  cy.intercept('DELETE', '/students/failedanswers/*').as('deleteFailedAnswer');
+  cy.get('[data-cy="deleteFailedAnswerButton"]')
+    .should('have.length.gte', 1)
+    .eq(0)
+    .click();
+  cy.wait('@deleteFailedAnswer');
 });
+
+Cypress.Commands.add('accessWeeklyScoreDashboard', () => {
+  cy.intercept('GET', '/students/dashboards/executions/*').as('getDashboard');
+  cy.get('[data-cy="dashboardMenuButton"]').click();
+  cy.wait('@getDashboard');
+  cy.intercept('GET', '/students/dashboards/*/weeklyscores').as(
+    'getWeeklyScores'
+  );
+  cy.get('[data-cy="weeklyScoresMenuButton"]').click();
+  cy.wait('@getWeeklyScores');
+});
+
+Cypress.Commands.add('refreshWeeklyScores', () => {
+  cy.intercept('PUT', '/students/dashboards/*/weeklyscores').as(
+    'updateWeeklyScores'
+  );
+  cy.get('[data-cy="refreshWeeklyScoresMenuButton"]').click();
+  cy.wait('@updateWeeklyScores');
+});
+
 
 Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
     cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
+});
+
+Cypress.Commands.add('deleteWeeklyScoreFromDashboard', () => {
+  cy.intercept('DELETE', '/students/weeklyscores/*').as('deleteWeeklyScore');
+  cy.get('[data-cy="deleteWeeklyScoreMenuButton"]')
+    .should('have.length.gte', 1)
+    .eq(0)
+    .click();
+  cy.wait('@deleteWeeklyScore');
+  cy.contains('Error').parent().find('button').click();
+  cy.intercept('DELETE', '/students/weeklyscores/*').as('deleteWeeklyScore');
+  cy.get('[data-cy="deleteWeeklyScoreMenuButton"]')
+    .should('have.length.gte', 1)
+    .eq(1)
+    .click();
+  cy.wait('@deleteWeeklyScore');
 });

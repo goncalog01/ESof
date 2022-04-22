@@ -243,6 +243,7 @@
           Available Questions
           <v-spacer></v-spacer>
           <v-text-field
+            data-cy="searchField"
             v-show="questions.length != 0"
             v-model="search"
             append-icon="mdi-magnify"
