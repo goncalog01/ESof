@@ -663,11 +663,6 @@ Cypress.Commands.add('refreshWeeklyScores', () => {
   cy.wait('@updateWeeklyScores');
 });
 
-
-Cypress.Commands.add('deleteFailedAnswerFromDashboard', (failedAnswerIndex) => {
-    cy.get('[data-cy="deleteFailedAnswerButton"]').eq(0).click();
-});
-
 Cypress.Commands.add('deleteWeeklyScoreFromDashboard', () => {
   cy.intercept('DELETE', '/students/weeklyscores/*').as('deleteWeeklyScore');
   cy.get('[data-cy="deleteWeeklyScoreMenuButton"]')
