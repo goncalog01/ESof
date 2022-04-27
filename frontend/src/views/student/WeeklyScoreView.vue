@@ -69,7 +69,7 @@ export default class WeeklyScoreView extends Vue {
     { text: 'Actions', value: 'buttons' },
     { text: 'Week', value: 'week' },
     { text: 'Number Answered', value: 'numberAnswered' },
-    { text: 'Uniquely Answered', value: 'uniquelyAnswered' },
+    { text: 'Uniquely Answered', value: 'percentageCorrect' },
     { text: 'Percentage Correct', value: 'percentageCorrect' },
   ];
 

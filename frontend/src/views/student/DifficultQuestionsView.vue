@@ -97,7 +97,7 @@ export default class DifficultQuestionsView extends Vue {
     },
     {
       text: 'Question',
-      value: 'questionDto.title',
+      value: 'percentage',
       width: '80%',
       align: 'left',
       sortable: false,

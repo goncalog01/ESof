@@ -120,7 +120,7 @@ export default class FailedAnswersView extends Vue {
     },
     {
       text: 'Collected',
-      value: 'collected',
+      value: 'answered',
       width: '10%',
       align: 'center',
     },

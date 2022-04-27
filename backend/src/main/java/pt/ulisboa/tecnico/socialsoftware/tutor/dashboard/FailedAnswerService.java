@@ -65,7 +65,7 @@ public class FailedAnswerService {
     public List<FailedAnswerDto> getFailedAnswers(int dashboardId) {
         Dashboard dashboard = dashboardRepository.findById(dashboardId).orElseThrow(() -> new TutorException(DASHBOARD_NOT_FOUND, dashboardId));
         Set<FailedAnswer> failedAnswers = dashboard.getFailedAnswers();
-
+        
         return failedAnswers.stream()
                 .map(FailedAnswerDto::new)
                 .sorted(Comparator.comparing(FailedAnswerDto::getCollected, Comparator.nullsLast(Comparator.reverseOrder())))
